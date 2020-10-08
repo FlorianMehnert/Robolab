@@ -9,6 +9,7 @@ class Follow:
         self.m2 = m2
         self.cs = cs
         self.ts = ts
+        self.kp = 2
 
     def rgbToRefl(self, r, g, b ):
         return (r + g + b) / 3
@@ -25,6 +26,7 @@ class Follow:
         rgbWhite = self.cs.bin_data("hhh")
         ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.BLACK)
         ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.BLACK)
+        print("white set")
 
         while not self.ts.is_pressed:
             sleep(0.1)
@@ -35,6 +37,7 @@ class Follow:
         rgbBlack = self.cs.bin_data("hhh")
         ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
         ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
+        print("black set")
 
         while not self.ts.is_pressed:
             sleep(0.1)
@@ -45,6 +48,7 @@ class Follow:
         rgbRed = self.cs.bin_data("hhh")
         ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
         ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
+        print("red set")
 
         while not self.ts.is_pressed:
             sleep(0.1)
@@ -55,6 +59,7 @@ class Follow:
         rgbBlue = self.cs.bin_data("hhh")
         ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.GREEN)
         ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.GREEN)
+        print("blue set")
 
         reflWhite = self.rgbToRefl(*rgbWhite)
         reflBlack = self.rgbToRefl(*rgbBlack)
@@ -80,6 +85,7 @@ class Follow:
         return rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal
 
     def follow(self, optimal, baseSpeed):
-        self.m1.run_forever(speed_sp = baseSpeed)
-        self.m2.run_forever(speed_sp = baseSpeed)
-
+        error = optimal - self.cs.value()
+        output = self.kp * error
+        self.m1.run_forever(speed_sp=baseSpeed + output)
+        self.m2.run_forever(speed_sp=baseSpeed - output)

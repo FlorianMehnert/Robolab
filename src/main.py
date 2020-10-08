@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import signal
 
 import ev3dev.ev3 as ev3
 import logging
@@ -9,6 +10,7 @@ import uuid
 from communication import Communication
 from odometry import Odometry
 from planet import Direction, Planet
+from follow import *
 
 client = None  # DO NOT EDIT
 
@@ -41,11 +43,25 @@ def run():
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
     m1 = ev3.LargeMotor('outB')
     m2 = ev3.LargeMotor('outC')
+    cs = ev3.ColorSensor()
+    ts = ev3.TouchSensor()
+
+    print("starting")
+    follow = Follow(m1, m2, cs, ts)
+    rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
     while True:
-        if ts.is_pressed:
-            m1.run_to_rel_pos(speed_sp=1000, position_sp=360)
-        else:
-            m1.stop()
+        follow.follow(optimal, 100)
+
+def CtrlCHandler(signm, frame):
+    print("\nCtrl-C pressed")
+    m1.stop()
+    m2.stop()
+
+    print("(both Motors) noone can stop ME!")
+    exit(0)
+
+
+signal.signal(signal.SIGINT, CtrlCHandler)
 
 
 # DO NOT EDIT
