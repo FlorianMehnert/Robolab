@@ -12,6 +12,11 @@ from planet import Direction, Planet
 
 client = None  # DO NOT EDIT
 
+m1: ev3.LargeMotor
+m2: ev3.LargeMotor
+us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
+ts: ev3.TouchSensor = ev3.TouchSensor()
+
 
 def run():
     # DO NOT CHANGE THESE VARIABLES
@@ -34,8 +39,13 @@ def run():
 
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
-
-    print("Hello World!")
+    m1 = ev3.LargeMotor('outB')
+    m2 = ev3.LargeMotor('outC')
+    while True:
+        if ts.is_pressed:
+            m1.run_to_rel_pos(speed_sp=1000, position_sp=360)
+        else:
+            m1.stop()
 
 
 # DO NOT EDIT
