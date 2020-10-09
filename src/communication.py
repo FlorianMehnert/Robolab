@@ -127,3 +127,14 @@ class Communication:
         topic = "planet/" + self.planetname + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
 
+    def sendTargetReached(self):
+        payload = {
+                  "from": "client",
+                  "type": "targetReached",
+                  "payload": {
+                      "message": "Finish",
+                  }
+        }
+        payload = json.dumps(payload)
+        topic = "planet/" + self.planetname + "/" + self.group
+        self.client.publish(topic, payload=payload, qos=1)
