@@ -3,6 +3,7 @@
 import logging
 import os
 import uuid
+from time import sleep
 
 import ev3dev.ev3 as ev3
 import paho.mqtt.client as mqtt
@@ -11,6 +12,7 @@ from ev3dev.core import PowerSupply
 from follow import Follow
 from follow import isColor
 from follow import wasd
+from specials import blink
 
 client = None  # DO NOT EDIT
 
@@ -21,9 +23,11 @@ ts: ev3.TouchSensor = ev3.TouchSensor()
 gy: ev3.GyroSensor = ev3.GyroSensor()
 ps: PowerSupply = PowerSupply()
 rc: ev3.RemoteControl = ev3.RemoteControl()
+us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
 
 follow = Follow(m1, m2, cs, ts, gy, rc)
 
+print(f"current battery is {ps.measured_volts}")
 
 def run():
     # DO NOT CHANGE THESE VARIABLES
@@ -39,7 +43,7 @@ def run():
                          )
     log_file = os.path.realpath(__file__) + '/../../logs/project.log'
     logging.basicConfig(filename=log_file,  # Define log file
-                        level=logging.DEBUG,  # Define default mode
+                        level=logging.INFO,  # Define default mode
                         format='%(asctime)s: %(message)s'  # Define default logging format
                         )
     logger = logging.getLogger('RoboLab')
@@ -54,14 +58,19 @@ def run():
         print("starting")
 
         mode = input("mode?")
+
         if mode == "wasd":
             wasd(m1, m2)
         elif mode == "paths":
             follow.findAttachedPaths()
-        elif mode == "battery":
-            print(ps.measured_volts)
         elif mode == "ir":
             follow.remoteControl()
+        elif mode == "test":
+            for i in range(4):
+                follow.turnRightXTimes(1)
+                m1.stop()
+                m2.stop()
+                sleep(2)
 
         # rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
         rgbRed = (160, 61, 27)
@@ -69,7 +78,6 @@ def run():
         rgbBlack = (34, 78, 33)
         rgbWhite = (245, 392, 258)
         optimal = 171.5
-
         while run:
             cs.mode = "RGB-RAW"
             currentColor = cs.bin_data("hhh")
@@ -77,7 +85,8 @@ def run():
                 print("red detected")
                 ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
-                follow.findAttachedPaths()
+                dirDict = follow.findAttachedPaths()
+                # do some calculation stuff
 
             elif isColor(currentColor, rgbBlue, dist):
                 print("blue detected")
@@ -87,6 +96,16 @@ def run():
 
             else:
                 follow.follow(optimal, 250)
+                if us.value() < 200:
+                    m1.run_forever(speed_sp=200)
+                    m2.run_forever(speed_sp=-200)
+                    m1.position = 0
+                    blink()
+                    while m1.position < 550:
+                        sleep(.2)
+                    m1.stop()
+                    m2.stop()
+
     except Exception as exc:
         print(exc)
         try:
@@ -106,4 +125,5 @@ def CtrlCHandler(signm, frame):
 
 # DO NOT EDIT
 if __name__ == '__main__':
+    #
     run()

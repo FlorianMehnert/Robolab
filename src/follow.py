@@ -18,6 +18,7 @@ def stop(m1: ev3.LargeMotor, m2: ev3.LargeMotor):
     m1.stop()
     m2.stop()
 
+
 def wasd(m1: ev3.LargeMotor, m2: ev3.LargeMotor):
     while True:
         direction = input("")
@@ -43,7 +44,8 @@ def wasd(m1: ev3.LargeMotor, m2: ev3.LargeMotor):
 
 
 class Follow:
-    def __init__(self, m1: ev3.LargeMotor, m2: ev3.LargeMotor, cs: ev3.ColorSensor, ts: ev3.TouchSensor, gy: ev3.GyroSensor, rc: ev3.RemoteControl = None):
+    def __init__(self, m1: ev3.LargeMotor, m2: ev3.LargeMotor, cs: ev3.ColorSensor, ts: ev3.TouchSensor,
+                 gy: ev3.GyroSensor, rc: ev3.RemoteControl = None):
         self.m1 = m1
         self.m2 = m2
         self.cs = cs
@@ -52,7 +54,6 @@ class Follow:
         self.kp = .8
         self.rgbBlack = (34, 78, 33)
         self.rc = rc
-
 
     def rgbToRefl(self, r, g, b):
         return (r + g + b) / 3
@@ -133,12 +134,19 @@ class Follow:
         self.m1.run_forever(speed_sp=baseSpeed + output)
         self.m2.run_forever(speed_sp=baseSpeed - output)
 
-    def isBlack(self, rgb:(int,int,int)):
-        val = (rgb[0] + rgb[1] + rgb[2])/3
+    def isBlack(self, rgb: (int, int, int)):
+        val = (rgb[0] + rgb[1] + rgb[2]) / 3
         if val > 100:
             return False
         else:
             return True
+
+    def turnRightXTimes(self, x):
+        self.m1.run_forever(speed_sp=200)
+        self.m2.run_forever(speed_sp=-200)
+        self.m1.position = 0
+        while self.m1.position < x*272:
+            sleep(.1)
 
     def findAttachedPaths(self):
         dirDict = {"North": False, "East": False, "South": False, "West": False}
@@ -150,25 +158,24 @@ class Follow:
 
         self.m1.wait_until_not_moving()
 
-        self.m1.run_forever(speed_sp=150)
-        self.m2.run_forever(speed_sp=-150)
-
-
-        startingAngle = self.gy.angle
-        currentAngle = 0
-        while currentAngle < 370:
-            if (currentAngle in range(316, 360) or currentAngle in range(0, 45)) and self.isBlack(self.cs.bin_data("hhh")):
+        self.m1.run_forever(speed_sp=250)
+        self.m2.run_forever(speed_sp=-250)
+        self.m1.position = 0
+        self.m2.position = 0
+        while self.m1.position < 1115:
+            binData = self.cs.bin_data("hhh")
+            if (self.m1.position in range(0, 135) or self.m1.position in range(980, 1200)) and self.isBlack(binData):
                 dirDict["North"] = True
-            elif currentAngle in range(46, 135) and self.isBlack(self.cs.bin_data("hhh")):
+            elif self.m1.position in range(143, 413) and self.isBlack(binData):
                 dirDict["East"] = True
-            elif (currentAngle in range(136, 225)) and self.isBlack(self.cs.bin_data("hhh")):
+            elif self.m1.position in range(422, 692) and self.isBlack(binData):
                 dirDict["South"] = True
-            elif (currentAngle in range(226, 315)) and self.isBlack(self.cs.bin_data("hhh")):
+            elif self.m1.position in range(701, 971) and self.isBlack(binData):
                 dirDict["West"] = True
-            sleep(0.15)
-            currentAngle = abs(self.gy.angle - startingAngle)
+            sleep(0.05)
 
         print(dirDict)
+        return dirDict
 
     def roll(self, motor, direction):
         def on_press(state):
@@ -190,5 +197,3 @@ class Follow:
         while True:  # replaces previous line so use Ctrl-C to exit
             self.rc.process()
             sleep(0.01)
-
-        # Press Ctrl-C to exit

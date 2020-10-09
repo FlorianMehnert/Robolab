@@ -15,7 +15,6 @@ class Odometry:
         self.movement = movement
 
     def calculatePart(self, dR: float, dL: float):
-
         alpha: float = ((dR - dL) / self.distBtwWheels)
         beta: float = alpha / 2
         straightDistance: float = ((dR + dL) / alpha) * sin(beta)
@@ -25,7 +24,6 @@ class Odometry:
 
         self.posX += dX
         self.posY += dY
-
 
     def calculatePosition(self, startingGamma):
         self.gamma = startingGamma
