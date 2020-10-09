@@ -10,7 +10,11 @@ import uuid
 from communication import Communication
 from odometry import Odometry
 from planet import Direction, Planet
-from follow import *
+from follow import Follow
+from follow import isColor
+from follow import stop
+from follow import findAttachedPaths
+from follow import wasd
 
 client = None  # DO NOT EDIT
 
@@ -46,11 +50,41 @@ def run():
     cs = ev3.ColorSensor()
     ts = ev3.TouchSensor()
 
+    dist = 15
+
+    run = True
+
     print("starting")
+    mode = input("mode?")
+
+    if mode == 0:
+        run = False
+
+    distance = input("distance?")
+
     follow = Follow(m1, m2, cs, ts)
+
     rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
-    while True:
-        follow.follow(optimal, 100)
+
+    while run:
+        cs.mode = "RGB-RAW"
+        currentColor = cs.bin_data("hhh")
+        if isColor(currentColor, rgbRed, dist):
+            print("red detected")
+            ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
+            ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
+            findAttachedPaths(m1, m2, 200, int(distance))
+
+        elif isColor(currentColor, rgbBlue, dist):
+            print("blue detected")
+            ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
+            ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
+            findAttachedPaths(m1, m2, 200, int(distance))
+
+
+        else:
+            follow.follow(optimal, 200)
+
 
 def CtrlCHandler(signm, frame):
     print("\nCtrl-C pressed")
@@ -62,7 +96,6 @@ def CtrlCHandler(signm, frame):
 
 
 signal.signal(signal.SIGINT, CtrlCHandler)
-
 
 # DO NOT EDIT
 if __name__ == '__main__':

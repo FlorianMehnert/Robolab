@@ -1,17 +1,71 @@
+import math
 from time import sleep
 
 import ev3dev.ev3 as ev3
 
 
+def isColor(currentColor, matchingColor, distance):
+    match = True
+    for i in range(3):
+        if abs(currentColor[i] - matchingColor[i]) > distance:
+            match = False
+            break
+    return match
+
+
+def stop(m1: ev3.LargeMotor, m2: ev3.LargeMotor):
+    m1.stop_action = "brake"
+    m2.stop_action = "brake"
+    m1.stop()
+    m2.stop()
+
+
+def findAttachedPaths(m1: ev3.LargeMotor, m2: ev3.LargeMotor, speed: int, pos: int, distBtwWheels: float = 7.5,
+                      wheelSize: float = 3.0, distBtwCsWheels: float = 4.2):
+    m1.stop(stop_action="brake")
+    m2.stop(stop_action="brake")
+
+    m1.run_to_rel_pos(speed_sp=speed, position_sp=pos)
+    m2.run_to_rel_pos(speed_sp=speed, position_sp=pos)
+
+    m1.wait_until_not_moving()
+    m2.wait_until_not_moving()
+
+    m1.run_to_rel_pos(speed_sp=speed, position_sp=900)
+    m2.run_to_rel_pos(speed_sp=speed, position_sp=-900)
+
+    m1.wait_until_not_moving()
+    m2.wait_until_not_moving()
+
+
+def wasd(m1: ev3.LargeMotor, m2: ev3.LargeMotor):
+    direction = input("")
+    if direction == "w":
+        m1.run_forever(speed_sp=200)
+        m2.run_forever(speed_sp=200)
+    elif direction == "s":
+        m1.run_forever(speed_sp=-200)
+        m2.run_forever(speed_sp=-200)
+    elif direction == "a":
+        m1.run_forever(speed_sp=-200)
+        m2.run_forever(speed_sp=200)
+    elif direction == "d":
+        m1.run_forever(speed_sp=200)
+        m2.run_forever(speed_sp=-200)
+    else:
+        m1.stop()
+        m2.stop()
+
+
 class Follow:
-    def __init__(self, m1:ev3.LargeMotor, m2:ev3.LargeMotor, cs:ev3.ColorSensor, ts:ev3.TouchSensor):
+    def __init__(self, m1: ev3.LargeMotor, m2: ev3.LargeMotor, cs: ev3.ColorSensor, ts: ev3.TouchSensor):
         self.m1 = m1
         self.m2 = m2
         self.cs = cs
         self.ts = ts
-        self.kp = 2
+        self.kp = 1.6
 
-    def rgbToRefl(self, r, g, b ):
+    def rgbToRefl(self, r, g, b):
         return (r + g + b) / 3
 
     def calibrate(self):
