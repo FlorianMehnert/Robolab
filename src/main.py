@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
-import signal
-from time import sleep
 
-import ev3dev.ev3 as ev3
 import logging
 import os
-import paho.mqtt.client as mqtt
 import uuid
 
-from communication import Communication
-from odometry import Odometry
-from planet import Direction, Planet
+import ev3dev.ev3 as ev3
+import paho.mqtt.client as mqtt
+from ev3dev.core import PowerSupply
+
 from follow import Follow
 from follow import isColor
-from follow import stop
-from follow import findAttachedPaths
 from follow import wasd
-from gyro import Gyro
 
 client = None  # DO NOT EDIT
 
@@ -24,9 +18,10 @@ m1: ev3.LargeMotor = ev3.LargeMotor('outB')
 m2: ev3.LargeMotor = ev3.LargeMotor('outC')
 cs: ev3.ColorSensor = ev3.ColorSensor()
 ts: ev3.TouchSensor = ev3.TouchSensor()
-ev3GY: ev3.GyroSensor = ev3.GyroSensor()
-gy: Gyro = Gyro(ev3GY)
+gy: ev3.GyroSensor = ev3.GyroSensor()
+ps: PowerSupply = PowerSupply()
 
+follow = Follow(m1, m2, cs, ts, gy)
 
 def run():
     # DO NOT CHANGE THESE VARIABLES
@@ -50,19 +45,23 @@ def run():
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
-
     dist = 25
     try:
         run = True
 
         print("starting")
-        mode = input("mode?")
 
+        mode = input("mode?")
         if mode == "wasd":
-            wasd(m1,m2)
-        elif mode == "gyro":
-            gy.turnDegree(m1,m2,360)
-        follow = Follow(m1, m2, cs, ts)
+            wasd(m1, m2)
+        elif mode == "paths":
+            follow.findAttachedPaths()
+        elif mode == "battery":
+            print(ps.measured_volts)
+        elif mode == "ir":
+            print("ir")
+
+
 
         # rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
         rgbRed = (160, 61, 27)
@@ -78,14 +77,13 @@ def run():
                 print("red detected")
                 ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
-                findAttachedPaths(m1, m2, pos=220, speed=200, gyro=gy)
+                follow.findAttachedPaths()
 
             elif isColor(currentColor, rgbBlue, dist):
                 print("blue detected")
                 ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
-                findAttachedPaths(m1, m2, pos=200, speed=100, gyro=gy)
-
+                follow.findAttachedPaths()
 
             else:
                 follow.follow(optimal, 250)
@@ -100,17 +98,11 @@ def run():
             return
 
 
-
-
-
 def CtrlCHandler(signm, frame):
     print("\nCtrl-C pressed")
     m1.stop()
     m2.stop()
 
-
-
-# signal.signal(signal.SIGINT, CtrlCHandler)
 
 # DO NOT EDIT
 if __name__ == '__main__':
