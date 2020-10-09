@@ -113,4 +113,17 @@ class Communication:
         topic = "planet/" + self.planetname + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
 
+    def sendPathSelect(self, path: Tuple[Tuple[int, int], Direction]):
+        payload = {
+                  "from": "client",
+                  "type": "pathSelect",
+                  "payload": {
+                      "startX": path[0][0],
+                      "startY": path[0][1],
+                      "startDirection": path[1]
+                  }
+        }
+        payload = json.dumps(payload)
+        topic = "planet/" + self.planetname + "/" + self.group
+        self.client.publish(topic, payload=payload, qos=1)
 
