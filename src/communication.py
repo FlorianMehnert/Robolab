@@ -4,6 +4,8 @@
 import json
 import platform
 import ssl
+from planet import Direction
+from typing import List, Tuple, Dict, Union
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -92,3 +94,23 @@ class Communication:
         payload = {"from" : "client", "type" : "ready"}
         payload = json.dumps(payload)
         self.client.publish("explorer/" + self.group, payload=payload, qos=1)
+
+    def sendPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
+                 status: str):
+        payload = { "from": "client",
+                    "type": "path",
+                    "payload": {
+                        "startX": start[0][0],
+                        "startY": start[0][1],
+                        "startDirection": start[1],
+                        "endX": target[0][0],
+                        "endY": target[0][1],
+                        "endDirection": target[1],
+                        "pathStatus": status
+                    }
+        }
+        payload = json.dumps(payload)
+        topic = "planet/" + self.planetname + "/" + self.group
+        self.client.publish(topic, payload=payload, qos=1)
+
+
