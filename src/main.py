@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import signal
+from time import sleep
 
 import ev3dev.ev3 as ev3
 import logging
@@ -15,13 +16,16 @@ from follow import isColor
 from follow import stop
 from follow import findAttachedPaths
 from follow import wasd
+from gyro import Gyro
 
 client = None  # DO NOT EDIT
 
-m1: ev3.LargeMotor
-m2: ev3.LargeMotor
-us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
+m1: ev3.LargeMotor = ev3.LargeMotor('outB')
+m2: ev3.LargeMotor = ev3.LargeMotor('outC')
+cs: ev3.ColorSensor = ev3.ColorSensor()
 ts: ev3.TouchSensor = ev3.TouchSensor()
+ev3GY: ev3.GyroSensor = ev3.GyroSensor()
+gy: Gyro = Gyro(ev3GY)
 
 
 def run():
@@ -45,45 +49,58 @@ def run():
 
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
-    m1 = ev3.LargeMotor('outB')
-    m2 = ev3.LargeMotor('outC')
-    cs = ev3.ColorSensor()
-    ts = ev3.TouchSensor()
-
-    dist = 15
-
-    run = True
-
-    print("starting")
-    mode = input("mode?")
-
-    if mode == 0:
-        run = False
-
-    distance = input("distance?")
-
-    follow = Follow(m1, m2, cs, ts)
-
-    rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
-
-    while run:
-        cs.mode = "RGB-RAW"
-        currentColor = cs.bin_data("hhh")
-        if isColor(currentColor, rgbRed, dist):
-            print("red detected")
-            ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
-            ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
-            findAttachedPaths(m1, m2, 200, int(distance))
-
-        elif isColor(currentColor, rgbBlue, dist):
-            print("blue detected")
-            ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
-            ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
-            findAttachedPaths(m1, m2, 200, int(distance))
 
 
-        else:
-            follow.follow(optimal, 200)
+    dist = 25
+    try:
+        run = True
+
+        print("starting")
+        mode = input("mode?")
+
+        if mode == "wasd":
+            wasd(m1,m2)
+        elif mode == "gyro":
+            gy.turnDegree(m1,m2,360)
+        follow = Follow(m1, m2, cs, ts)
+
+        # rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
+        rgbRed = (160, 61, 27)
+        rgbBlue = (40, 152, 142)
+        rgbBlack = (34, 78, 33)
+        rgbWhite = (245, 392, 258)
+        optimal = 171.5
+
+        while run:
+            cs.mode = "RGB-RAW"
+            currentColor = cs.bin_data("hhh")
+            if isColor(currentColor, rgbRed, dist):
+                print("red detected")
+                ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
+                ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
+                findAttachedPaths(m1, m2, pos=220, speed=200, gyro=gy)
+
+            elif isColor(currentColor, rgbBlue, dist):
+                print("blue detected")
+                ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
+                ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
+                findAttachedPaths(m1, m2, pos=200, speed=100, gyro=gy)
+
+
+            else:
+                follow.follow(optimal, 250)
+    except Exception as exc:
+        print(exc)
+        try:
+            m1.stop()
+            m2.stop()
+            return
+        except OSError:
+            print("some part is missing")
+            return
+
+
+
 
 
 def CtrlCHandler(signm, frame):
@@ -91,11 +108,9 @@ def CtrlCHandler(signm, frame):
     m1.stop()
     m2.stop()
 
-    print("(both Motors) noone can stop ME!")
-    exit(0)
 
 
-signal.signal(signal.SIGINT, CtrlCHandler)
+# signal.signal(signal.SIGINT, CtrlCHandler)
 
 # DO NOT EDIT
 if __name__ == '__main__':

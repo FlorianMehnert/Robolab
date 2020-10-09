@@ -3,6 +3,8 @@ from time import sleep
 
 import ev3dev.ev3 as ev3
 
+from gyro import Gyro
+
 
 def isColor(currentColor, matchingColor, distance):
     match = True
@@ -20,8 +22,8 @@ def stop(m1: ev3.LargeMotor, m2: ev3.LargeMotor):
     m2.stop()
 
 
-def findAttachedPaths(m1: ev3.LargeMotor, m2: ev3.LargeMotor, speed: int, pos: int, distBtwWheels: float = 7.5,
-                      wheelSize: float = 3.0, distBtwCsWheels: float = 4.2):
+def findAttachedPaths(m1: ev3.LargeMotor, m2: ev3.LargeMotor, speed: int, pos: int, gyro: Gyro):
+
     m1.stop(stop_action="brake")
     m2.stop(stop_action="brake")
 
@@ -31,30 +33,31 @@ def findAttachedPaths(m1: ev3.LargeMotor, m2: ev3.LargeMotor, speed: int, pos: i
     m1.wait_until_not_moving()
     m2.wait_until_not_moving()
 
-    m1.run_to_rel_pos(speed_sp=speed, position_sp=900)
-    m2.run_to_rel_pos(speed_sp=speed, position_sp=-900)
-
-    m1.wait_until_not_moving()
-    m2.wait_until_not_moving()
+    gyro.turnDegree(m1,m2,360)
 
 
 def wasd(m1: ev3.LargeMotor, m2: ev3.LargeMotor):
-    direction = input("")
-    if direction == "w":
-        m1.run_forever(speed_sp=200)
-        m2.run_forever(speed_sp=200)
-    elif direction == "s":
-        m1.run_forever(speed_sp=-200)
-        m2.run_forever(speed_sp=-200)
-    elif direction == "a":
-        m1.run_forever(speed_sp=-200)
-        m2.run_forever(speed_sp=200)
-    elif direction == "d":
-        m1.run_forever(speed_sp=200)
-        m2.run_forever(speed_sp=-200)
-    else:
-        m1.stop()
-        m2.stop()
+    while True:
+        direction = input("")
+        if direction == "w":
+            m1.run_forever(speed_sp=400)
+            m2.run_forever(speed_sp=400)
+        elif direction == "s":
+            m1.run_forever(speed_sp=-400)
+            m2.run_forever(speed_sp=-400)
+        elif direction == "a":
+            m1.run_forever(speed_sp=-100)
+            m2.run_forever(speed_sp=100)
+        elif direction == "d":
+            m1.run_forever(speed_sp=100)
+            m2.run_forever(speed_sp=-100)
+        elif direction == "exit":
+            m1.stop()
+            m2.stop()
+            break
+        else:
+            m1.stop()
+            m2.stop()
 
 
 class Follow:
@@ -63,7 +66,7 @@ class Follow:
         self.m2 = m2
         self.cs = cs
         self.ts = ts
-        self.kp = 1.6
+        self.kp = .8
 
     def rgbToRefl(self, r, g, b):
         return (r + g + b) / 3
