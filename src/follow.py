@@ -2,8 +2,6 @@ from time import sleep
 
 import ev3dev.ev3 as ev3
 
-from gyro import Gyro
-
 
 def isColor(currentColor, matchingColor, distance):
     match = True
@@ -45,7 +43,7 @@ def wasd(m1: ev3.LargeMotor, m2: ev3.LargeMotor):
 
 
 class Follow:
-    def __init__(self, m1: ev3.LargeMotor, m2: ev3.LargeMotor, cs: ev3.ColorSensor, ts: ev3.TouchSensor, gy: ev3.GyroSensor):
+    def __init__(self, m1: ev3.LargeMotor, m2: ev3.LargeMotor, cs: ev3.ColorSensor, ts: ev3.TouchSensor, gy: ev3.GyroSensor, rc: ev3.RemoteControl = None):
         self.m1 = m1
         self.m2 = m2
         self.cs = cs
@@ -53,6 +51,8 @@ class Follow:
         self.gy = gy
         self.kp = .8
         self.rgbBlack = (34, 78, 33)
+        self.rc = rc
+
 
     def rgbToRefl(self, r, g, b):
         return (r + g + b) / 3
@@ -169,3 +169,26 @@ class Follow:
             currentAngle = abs(self.gy.angle - startingAngle)
 
         print(dirDict)
+
+    def roll(self, motor, direction):
+        def on_press(state):
+            if state:
+                # Roll when button is pressed
+                motor.run_forever(speed_sp=500 * direction)
+            else:
+                # Stop otherwise
+                motor.stop(stop_action='brake')
+
+        return on_press
+
+    def remoteControl(self):
+        self.rc.on_red_up = self.roll(self.m1, 1)
+        self.rc.on_red_down = self.roll(self.m1, -1)
+        self.rc.on_blue_up = self.roll(self.m2, 1)
+        self.rc.on_blue_down = self.roll(self.m2, -1)
+
+        while True:  # replaces previous line so use Ctrl-C to exit
+            self.rc.process()
+            sleep(0.01)
+
+        # Press Ctrl-C to exit

@@ -20,8 +20,10 @@ cs: ev3.ColorSensor = ev3.ColorSensor()
 ts: ev3.TouchSensor = ev3.TouchSensor()
 gy: ev3.GyroSensor = ev3.GyroSensor()
 ps: PowerSupply = PowerSupply()
+rc: ev3.RemoteControl = ev3.RemoteControl()
 
-follow = Follow(m1, m2, cs, ts, gy)
+follow = Follow(m1, m2, cs, ts, gy, rc)
+
 
 def run():
     # DO NOT CHANGE THESE VARIABLES
@@ -59,9 +61,7 @@ def run():
         elif mode == "battery":
             print(ps.measured_volts)
         elif mode == "ir":
-            print("ir")
-
-
+            follow.remoteControl()
 
         # rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
         rgbRed = (160, 61, 27)
