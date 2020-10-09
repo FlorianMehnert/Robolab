@@ -138,3 +138,15 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planetname + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
+
+    def sendExplorationCompleted(self):
+        payload = {
+                  "from": "client",
+                  "type": "explorationCompleted",
+                  "payload": {
+                      "message": "Finish",
+                  }
+        }
+        payload = json.dumps(payload)
+        topic = "planet/" + self.planetname + "/" + self.group
+        self.client.publish(topic, payload=payload, qos=1)
