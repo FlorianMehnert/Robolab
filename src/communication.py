@@ -27,6 +27,7 @@ class Communication:
         # Add your client setup here
         self.logger = logger
         self.group = self.client._client_id[0:3].decode('utf-8')
+        self.planetname = ""
         self.logger.debug(self.group)
         self.client.enable_logger(logger)
         self.client.username_pw_set(self.group, 'eYa0NxbLnI')
@@ -45,10 +46,11 @@ class Communication:
         """
         payload = json.loads(message.payload.decode('utf-8'))
         self.logger.debug(json.dumps(payload, indent=2))
-
-        # YOUR CODE FOLLOWS
-
-        
+        if payload["from"] == "server":
+            if payload["type"] == "planet":
+                self.planetname = payload["payload"]["planetName"]
+                self.client.subscribe("planet/" + self.planetname + "/" + self.group, qos=1)
+                self.logger.debug("Planet name: " + self.planetname)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
