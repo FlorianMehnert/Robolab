@@ -85,3 +85,8 @@ class Communication:
             import traceback
             traceback.print_exc()
             raise
+
+    def sendReady(self):
+        payload = {"from" : "client", "type" : "ready"}
+        payload = json.dumps(payload)
+        self.client.publish("explorer/" + self.group, payload=payload, qos=1)
