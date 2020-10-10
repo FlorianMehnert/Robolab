@@ -92,7 +92,7 @@ class Planet:
         visitedNodes = []
         paths = self.get_paths()
         countNode = len(paths)
-        table = {}# Dict[node: Tuple[int, int]: 2-Tuple(weight: int, previous: int)]
+        table = {}# Dict[node: Tuple[int, int]: 3-Tuple(weight: int, previous: int, Direction)]
         targetKnown = False
         startKnown = False
 
@@ -100,7 +100,7 @@ class Planet:
             return [start, 0]
         # Initialization of table
         for node in paths:
-            table.update(node, (0x7fffff, (int, int)))
+            table.update(node, (0x7fffff, (int, int), Direction))
             if node == target:
                 targetKnown = True
             if node == start:
@@ -124,7 +124,8 @@ class Planet:
                     if paths[currentNode[0]][dir][0] not in visitedNodes:
                         totalWeight = currentNode[1] + paths[currentNode[0]][dir][2]
                         if totalWeight < table[paths[currentNode[0]][dir][0]][1]:
-                            table[paths[currentNode[0]][dir][0]][1] = totalWeight
-                            table[paths[currentNode[0]][dir][0]][2] = currentNode[0]
+                            table[paths[currentNode[0]][dir][0]][0] = totalWeight
+                            table[paths[currentNode[0]][dir][0]][1] = currentNode[0]
+                            table[paths[currentNode[0]][dir][0]][2] = dir
             visitedNodes.append(currentNode[0])
 
