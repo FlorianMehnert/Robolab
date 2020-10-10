@@ -84,9 +84,7 @@ class Planet:
         :param target: 2-Tuple
         :return: 2-Tuple[List, Direction]
         """
-
-        # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        return self.shortest_path_dijkstra(start, target)
 
     def shortest_path_dijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         # TODO: What happens if no connection is known between start and target.
