@@ -89,6 +89,7 @@ class Planet:
         pass
 
     def shortest_path_dijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+        # TODO: What happens if no connection is known between start and target.
         visitedNodes = []
         paths = self.get_paths()
         countNode = len(paths)
