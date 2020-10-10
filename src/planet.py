@@ -87,3 +87,25 @@ class Planet:
 
         # YOUR CODE FOLLOWS (remove pass, please!)
         pass
+
+    def shortest_path_dijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+        visitedNodes = []
+        paths = self.get_paths()
+        countNode = len(paths)
+        table = {}# Dict[node: Tuple[int, int]: 2-Tuple(weight: int, previous: int)]
+        targetKnown = False
+        startKnown = False
+
+        if start == target:
+            return [start, 0]
+        # Initialization of table
+        for node in paths:
+            table.update(node, (0x7fffff, (int, int)))
+            if node == target:
+                targetKnown = True
+            if node == start:
+                startKnown = True
+        if not targetKnown or not startKnown:
+            return None
+        table[start] = (0, start)
+
