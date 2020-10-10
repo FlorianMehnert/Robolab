@@ -3,15 +3,16 @@
 import logging
 import os
 import uuid
+import signal
 from time import sleep
 
 import ev3dev.ev3 as ev3
 import paho.mqtt.client as mqtt
 from ev3dev.core import PowerSupply
 
+import specials
 from follow import Follow
 from follow import isColor
-from follow import wasd
 from specials import blink
 
 client = None  # DO NOT EDIT
@@ -28,6 +29,7 @@ us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
 follow = Follow(m1, m2, cs, ts, gy, rc)
 
 print(f"current battery is {ps.measured_volts}")
+
 
 def run():
     # DO NOT CHANGE THESE VARIABLES
@@ -60,11 +62,11 @@ def run():
         mode = input("mode?")
 
         if mode == "wasd":
-            wasd(m1, m2)
+            specials.wasd(m1, m2)
         elif mode == "paths":
             follow.findAttachedPaths()
         elif mode == "ir":
-            follow.remoteControl()
+            specials.remoteControl(rc, m1, m2)
         elif mode == "test":
             for i in range(4):
                 follow.turnRightXTimes(1)
@@ -82,6 +84,7 @@ def run():
             cs.mode = "RGB-RAW"
             currentColor = cs.bin_data("hhh")
             if isColor(currentColor, rgbRed, dist):
+                # finding a red node
                 print("red detected")
                 ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
@@ -89,12 +92,14 @@ def run():
                 # do some calculation stuff
 
             elif isColor(currentColor, rgbBlue, dist):
+                # finding a blue node
                 print("blue detected")
                 ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
                 follow.findAttachedPaths()
 
             else:
+                # default line follow
                 follow.follow(optimal, 250)
                 if us.value() < 200:
                     m1.run_forever(speed_sp=200)
@@ -122,6 +127,8 @@ def CtrlCHandler(signm, frame):
     m1.stop()
     m2.stop()
 
+
+signal.signal(signal.SIGINT, CtrlCHandler)
 
 # DO NOT EDIT
 if __name__ == '__main__':
