@@ -109,3 +109,22 @@ class Planet:
             return None
         table[start] = (0, start)
 
+        # Weight calculation
+        while countNode > len(visitedNodes):
+            currentNode = ((int, int), 0x7fffff, (int, int)) # (node, weight, previous)
+            # Select node with lowest weight
+            for node in table:
+                if node[0] in visitedNodes:
+                    continue
+                if node[1] < currentNode[1]:
+                    currentNode = node
+            # Update table
+            for dir in Direction:
+                if dir in paths[currentNode[0]]:
+                    if paths[currentNode[0]][dir][0] not in visitedNodes:
+                        totalWeight = currentNode[1] + paths[currentNode[0]][dir][2]
+                        if totalWeight < table[paths[currentNode[0]][dir][0]][1]:
+                            table[paths[currentNode[0]][dir][0]][1] = totalWeight
+                            table[paths[currentNode[0]][dir][0]][2] = currentNode[0]
+            visitedNodes.append(currentNode[0])
+
