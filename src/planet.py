@@ -129,3 +129,15 @@ class Planet:
                             table[paths[currentNode[0]][dir][0]][2] = dir
             visitedNodes.append(currentNode[0])
 
+        # Find shortest path
+        shortestPathReverse = []
+        nextNode = target
+        while nextNode == start:
+            shortestPathReverse.append((nextNode, table[nextNode][2]))
+            nextNode = table[nextNode][1]
+        shortestPathReverse.append((nextNode, table[nextNode][2]))
+        shortestPath = []
+        while len(shortestPathReverse) > 0:
+            shortestPath.append(shortestPathReverse.pop)
+        return shortestPath
+
