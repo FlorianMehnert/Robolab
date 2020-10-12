@@ -34,7 +34,7 @@ class Planet:
         """ Initializes the data structure """
         self.target = None
 
-    def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
+    def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
         """
          Adds a bidirectional path defined between the start and end coordinates to the map and assigns the weight to it
@@ -50,7 +50,7 @@ class Planet:
         # YOUR CODE FOLLOWS (remove pass, please!)
         pass
 
-    def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
+    def getPaths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
         Returns all paths
 
@@ -73,7 +73,7 @@ class Planet:
         # YOUR CODE FOLLOWS (remove pass, please!)
         pass
 
-    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+    def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
 
@@ -84,12 +84,12 @@ class Planet:
         :param target: 2-Tuple
         :return: 2-Tuple[List, Direction]
         """
-        return self.shortest_path_dijkstra(start, target)
+        return self.shortestPathDijkstra(start, target)
 
-    def shortest_path_dijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+    def shortestPathDijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         # TODO: What happens if no connection is known between start and target.
         visitedNodes = []
-        paths = self.get_paths()
+        paths = self.getPaths()
         countNode = len(paths)
         table = {}# Dict[node: Tuple[int, int]: 3-Tuple(weight: int, previous: int, Direction)]
         targetKnown = False
