@@ -31,6 +31,7 @@ class Communication:
         self.logger = logger
         self.group = self.client._client_id[0:3].decode('utf-8')
         self.planet = planet
+        self.wait = False
         self.logger.debug(self.group)
         self.client.enable_logger(logger)
         self.client.username_pw_set(self.group, 'eYa0NxbLnI')
@@ -69,6 +70,7 @@ class Communication:
         self.logger.debug('Send to: ' + topic)
         self.logger.debug(json.dumps(message, indent=2))
 
+        self.wait = True
         # YOUR CODE FOLLOWS
         
 
@@ -95,6 +97,7 @@ class Communication:
         payload = {"from" : "client", "type" : "ready"}
         payload = json.dumps(payload)
         self.client.publish("explorer/" + self.group, payload=payload, qos=1)
+        while self.wait:
 
     def sendPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  status: str):
@@ -113,6 +116,7 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
+        while self.wait:
 
     def sendPathSelect(self, path: Tuple[Tuple[int, int], Direction]):
         payload = {
@@ -127,6 +131,7 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
+        while self.wait:
 
     def sendTargetReached(self):
         payload = {
@@ -139,6 +144,7 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
+        while self.wait:
 
     def sendExplorationCompleted(self):
         payload = {
@@ -151,3 +157,4 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
+        while self.wait:
