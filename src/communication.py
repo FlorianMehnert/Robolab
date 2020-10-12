@@ -59,6 +59,24 @@ class Communication:
                 self.planet.setName(payload["planetName"])
                 self.client.subscribe("planet/" + self.planet.getName() + "/" + self.group, qos=1)
                 self.logger.debug("Planet name: " + self.planet.getName())
+                self.planet.setStart((payload["startX"], payload["startY"]), payload["startOrientation"])
+                self.wait = False
+            elif msgType == "path":
+                self.planet.addPath(((payload["startX"], payload["startY"]), payload["startDirection"]),
+                                    ((payload["endX"], payload["endY"]), payload["endDirection"]),
+                                    payload["pathWeight"])
+                self.planet.setStartNode((payload["endX"], payload["endY"]))
+                self.wait = False
+            elif msgType == "pathSelect":
+                self.planet.setStartDirection(payload["startDirection"])
+            elif msgType == "target":
+                self.planet.setTarget((payload["targetX"], payload["targetY"]))
+            elif msgType == "pathUnveiled":
+                self.planet.addPath(((payload["startX"], payload["startY"]), payload["startDirection"]),
+                                    ((payload["endX"], payload["endY"]), payload["endDirection"]),
+                                    payload["pathWeight"])
+            elif msgType == "done":
+                self.wait = False
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
@@ -73,7 +91,6 @@ class Communication:
         """
         self.logger.debug('Send to: ' + topic)
         self.logger.debug(json.dumps(message, indent=2))
-
         self.wait = True
         # YOUR CODE FOLLOWS
         
@@ -135,7 +152,6 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
-        while self.wait:
 
     def sendTargetReached(self):
         payload = {
