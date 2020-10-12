@@ -6,6 +6,7 @@ import platform
 import ssl
 from planet import Direction
 from typing import List, Tuple, Dict, Union
+import time
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -32,6 +33,7 @@ class Communication:
         self.group = self.client._client_id[0:3].decode('utf-8')
         self.planet = planet
         self.wait = False
+        self.lastConnectionTime = time.time()
         self.logger.debug(self.group)
         self.client.enable_logger(logger)
         self.client.username_pw_set(self.group, 'eYa0NxbLnI')
@@ -48,6 +50,7 @@ class Communication:
         :param message: Object
         :return: void
         """
+        self.lastConnectionTime = time.time()
         payload = json.loads(message.payload.decode('utf-8'))
         self.logger.debug(json.dumps(payload, indent=2))
         msgFrom = payload["from"]
@@ -89,6 +92,7 @@ class Communication:
         :param message: Object
         :return: void
         """
+        self.lastConnectionTime = time.time()
         self.logger.debug('Send to: ' + topic)
         self.logger.debug(json.dumps(message, indent=2))
         self.wait = True
@@ -178,3 +182,6 @@ class Communication:
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
         while self.wait:
+
+    def timeout(self):
+        while time.time() - self.lastConnectionTime < 3:
