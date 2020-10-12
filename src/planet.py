@@ -34,6 +34,7 @@ class Planet:
         """ Initializes the data structure """
         self.target = None
         self.paths = {}
+        self.planetname = ""
 
     def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
@@ -121,6 +122,27 @@ class Planet:
         : return: void
         """
         self.target = node
+
+    def getName(self) -> str:
+        """
+        Get name of planet.
+
+        Examples:
+            getName() returns: "Reis"
+            getName() returns: ""
+        : return: str
+        """
+        return self.planetname
+
+    def setName(self, name: str):
+        """
+        Set name of planet.
+
+        Examples:
+            setName("Reis")
+        : return: void
+        """
+        self.planetname = name
 
     def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """
