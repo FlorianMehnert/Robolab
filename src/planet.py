@@ -30,9 +30,13 @@ class Planet:
     it according to the specifications
     """
 
+    planetdict = {}
+
     def __init__(self):
         """ Initializes the data structure """
         self.target = None
+        planetdict = {}
+
 
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
@@ -47,8 +51,15 @@ class Planet:
         :return: void
         """
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        Planet.planetdict[start] = (target,weight)
+        Planet.planetdict[target] = (start,weight)
+        return
+
+
+    def add_unknown_path(self, start: Tuple[Tuple[int, int], Direction]):
+        Planet.planetdict[start] = ()
+        return
+
 
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
@@ -70,8 +81,23 @@ class Planet:
         :return: Dict
         """
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        for key in planetdict:
+            (coord,direction) = key
+            pathdict = {}
+            if coord in pathdict:
+                 pathdict[start] = pathdict[key].update(get_targets(direction,planetdict[key]))
+            else:
+                pathdict[coord] = get_targets(direction,planetdict[key])
+            pathdict = {coord: get_targets(direction,planetdict[key])}
+        return pathdict
+
+
+    def get_targets(self,direction,target):          #dict in dict
+        try:
+            helpdict[direction] = (target)
+        except:
+            helpdict = {direction: target}
+        return helpdict
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """
