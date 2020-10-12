@@ -38,7 +38,7 @@ class Planet:
         planetdict = {}
 
 
-    def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
+    def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
         """
          Adds a bidirectional path defined between the start and end coordinates to the map and assigns the weight to it
@@ -56,17 +56,17 @@ class Planet:
         return
 
 
-    def add_unknown_path(self, start: Tuple[Tuple[int, int], Direction]):
+    def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
         self.paths[start] = ()
         return
 
-    def add_node(self, node: Tuple[int, int]):
+    def addNode(self, node: Tuple[int, int]):
         nodepaths = {}
         for dir in Direction:
             nodepaths[dir].update(None)
         self.paths[node].update(nodepaths)
 
-    def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
+    def getPaths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
         Returns all paths
 
@@ -118,7 +118,7 @@ class Planet:
         """
         self.target = node
 
-    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+    def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
 
