@@ -87,6 +87,16 @@ class Planet:
         return self.shortestPathDijkstra(start, target)
 
     def shortestPathDijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+        """
+        Returns a shortest path between two nodes using Djikstra algorithm
+
+        Examples:
+            shortest_path((0,0), (2,2)) returns: [((0, 0), Direction.EAST), ((1, 0), Direction.NORTH)]
+            shortest_path((0,0), (1,2)) returns: None
+        :param start: 2-Tuple
+        :param target: 2-Tuple
+        :return: 2-Tuple[List, Direction]
+        """
         # TODO: What happens if no connection is known between start and target.
         visitedNodes = []
         paths = self.getPaths()
