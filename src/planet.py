@@ -97,6 +97,26 @@ class Planet:
         return pathdict
 
 
+    def getTarget(self) -> Tuple[int, int]:
+        """
+        Get target on planet.
+
+        Examples:
+            getTarget() returns: (3, 7)
+            getTarget() returns: None
+        : return: 2-Tuple[int, int]
+        """
+        return self.target
+
+    def setTarget(self, node: Tuple[int, int]):
+        """
+        Set target on planet.
+
+        Examples:
+            setTarget((31, 41))
+        : return: void
+        """
+        self.target = node
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """
