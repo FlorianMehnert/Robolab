@@ -133,6 +133,69 @@ class Planet:
         :param target: 2-Tuple
         :return: 2-Tuple[List, Direction]
         """
+        return self.shortestPathDijkstra(start, target)
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+    def shortestPathDijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+        """
+        Returns a shortest path between two nodes using Djikstra algorithm
+
+        Examples:
+            shortest_path((0,0), (2,2)) returns: [((0, 0), Direction.EAST), ((1, 0), Direction.NORTH)]
+            shortest_path((0,0), (1,2)) returns: None
+        :param start: 2-Tuple
+        :param target: 2-Tuple
+        :return: 2-Tuple[List, Direction]
+        """
+        # TODO: What happens if no connection is known between start and target.
+        visitedNodes = []
+        paths = self.getPaths()
+        countNode = len(paths)
+        table = {}# Dict[node: Tuple[int, int]: 3-Tuple(weight: int, previous: int, Direction)]
+        targetKnown = False
+        startKnown = False
+
+        if start == target:
+            return [start, 0]
+        # Initialization of table
+        for node in paths:
+            table.update(node, (0x7fffff, (int, int), Direction))
+            if node == target:
+                targetKnown = True
+            if node == start:
+                startKnown = True
+        if not targetKnown or not startKnown:
+            return None
+        table[start] = (0, start)
+
+        # Weight calculation
+        while countNode > len(visitedNodes):
+            currentNode = ((int, int), 0x7fffff, (int, int)) # (node, weight, previous)
+            # Select node with lowest weight
+            for node in table:
+                if node[0] in visitedNodes:
+                    continue
+                if node[1] < currentNode[1]:
+                    currentNode = node
+            # Update table
+            for dir in Direction:
+                if dir in paths[currentNode[0]]:
+                    if paths[currentNode[0]][dir][0] not in visitedNodes:
+                        totalWeight = currentNode[1] + paths[currentNode[0]][dir][2]
+                        if totalWeight < table[paths[currentNode[0]][dir][0]][1]:
+                            table[paths[currentNode[0]][dir][0]][0] = totalWeight
+                            table[paths[currentNode[0]][dir][0]][1] = currentNode[0]
+                            table[paths[currentNode[0]][dir][0]][2] = dir
+            visitedNodes.append(currentNode[0])
+
+        # Find shortest path
+        shortestPathReverse = []
+        nextNode = target
+        while nextNode == start:
+            shortestPathReverse.append((nextNode, table[nextNode][2]))
+            nextNode = table[nextNode][1]
+        shortestPathReverse.append((nextNode, table[nextNode][2]))
+        shortestPath = []
+        while len(shortestPathReverse) > 0:
+            shortestPath.append(shortestPathReverse.pop)
+        return shortestPath
+
