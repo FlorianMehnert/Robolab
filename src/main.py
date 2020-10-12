@@ -3,16 +3,18 @@
 import logging
 import os
 import uuid
-import signal
+# import signal
 from time import sleep
+from typing import Tuple, List
 
 import ev3dev.ev3 as ev3
 import paho.mqtt.client as mqtt
 from ev3dev.core import PowerSupply
 
 import specials
-from follow import Follow
+from follow import Follow, convPathsToDirection
 from follow import isColor
+from odometry import Odometry
 from specials import blink
 
 client = None  # DO NOT EDIT
@@ -23,10 +25,10 @@ cs: ev3.ColorSensor = ev3.ColorSensor()
 ts: ev3.TouchSensor = ev3.TouchSensor()
 gy: ev3.GyroSensor = ev3.GyroSensor()
 ps: PowerSupply = PowerSupply()
-rc: ev3.RemoteControl = ev3.RemoteControl()
+# rc: ev3.RemoteControl = ev3.RemoteControl()
 us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
 
-follow = Follow(m1, m2, cs, ts, gy, rc)
+
 
 print(f"current battery is {ps.measured_volts}")
 
@@ -50,57 +52,94 @@ def run():
                         )
     logger = logging.getLogger('RoboLab')
 
-    # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
-    # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
+    # THIS IS WHERE PARADISE BEGINS
+    # COD
+    movement: List[
+        Tuple[
+            int, int]] = []  # used to save all movement values gathered while line following for odometry calculations
 
-    dist = 25
+    oldGamma = 0
+    newGamma = 0
+    oldNodeX = 0
+    oldNodeY = 0
+    newNodeX = 0
+    newNodeY = 0
+
+    follow = Follow(m1, m2, cs, ts, gy, movement)
+    odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
+    follow.reset()
+
+    oldM1: int = m1.position
+    oldM2: int = m2.position
+    newM1 = 0
+    newM2 = 0
+
+
     try:
         run = True
 
-        print("starting")
-
-        mode = input("mode?")
-
-        if mode == "wasd":
-            specials.wasd(m1, m2)
-        elif mode == "paths":
-            follow.findAttachedPaths()
-        elif mode == "ir":
-            specials.remoteControl(rc, m1, m2)
-        elif mode == "test":
-            for i in range(4):
-                follow.turnRightXTimes(1)
-                m1.stop()
-                m2.stop()
-                sleep(2)
-
-        # rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
         rgbRed = (160, 61, 27)
         rgbBlue = (40, 152, 142)
         rgbBlack = (34, 78, 33)
         rgbWhite = (245, 392, 258)
         optimal = 171.5
+
+        print("starting")
+
+        while run:
+            mode = input("mode?")
+            if mode == "wasd":
+                specials.wasd(m1, m2)
+            elif mode == "paths":
+                follow.findAttachedPaths()
+            # elif mode == "ir":
+            #     if rc:
+            #         specials.remoteControl(rc, m1, m2)
+            elif mode == "battery":
+                print(ps.measured_volts)
+            elif mode == "calibrate":
+                rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
+            elif mode == "/help":
+                print("wasd, paths, battery, calibrate, ")
+            elif mode == "":
+                run = False
+        run = True
         while run:
             cs.mode = "RGB-RAW"
             currentColor = cs.bin_data("hhh")
-            if isColor(currentColor, rgbRed, dist):
+
+            if isColor(currentColor, rgbRed, 25):
                 # finding a red node
                 print("red detected")
                 ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
-                dirDict = follow.findAttachedPaths()
+                # dirDict = follow.findAttachedPaths()
+                follow.stop()
+                run = False
+                print(movement)
+                odo.calculateNewPosition(movement)
                 # do some calculation stuff
 
-            elif isColor(currentColor, rgbBlue, dist):
+                # follow.turnRightXTimes(convPathsToDirection(dirDict))  # only needed as long dfs isn't implemented
+
+            elif isColor(currentColor, rgbBlue, 25):
                 # finding a blue node
                 print("blue detected")
                 ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
-                follow.findAttachedPaths()
+                dirDict = follow.findAttachedPaths()
+                follow.stop()
+                run = False
+                print(movement)
+                odo.calculateNewPosition(movement)
+                follow.turnRightXTimes(convPathsToDirection(dirDict))  # only needed as long dfs isn't implemented
+
 
             else:
                 # default line follow
-                follow.follow(optimal, 250)
+
+                follow.follow(optimal, 250, odo)
+
                 if us.value() < 200:
                     m1.run_forever(speed_sp=200)
                     m2.run_forever(speed_sp=-200)
@@ -108,8 +147,13 @@ def run():
                     blink()
                     while m1.position < 550:
                         sleep(.2)
-                    m1.stop()
-                    m2.stop()
+                    follow.stop()
+
+                oldM1 = newM1
+                oldM2 = newM2
+                newM1 = m1.position
+                newM2 = m2.position
+                movement.append((newM1 - oldM1, newM2 - oldM2))
 
     except Exception as exc:
         print(exc)
@@ -126,9 +170,10 @@ def CtrlCHandler(signm, frame):
     print("\nCtrl-C pressed")
     m1.stop()
     m2.stop()
+    exit(0)
 
 
-signal.signal(signal.SIGINT, CtrlCHandler)
+# signal.signal(signal.SIGINT, CtrlCHandler) #only useful when starting robot per ssh
 
 # DO NOT EDIT
 if __name__ == '__main__':

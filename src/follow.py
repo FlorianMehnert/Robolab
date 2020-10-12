@@ -3,6 +3,8 @@ from typing import Dict, Tuple
 
 import ev3dev.ev3 as ev3
 
+from odometry import Odometry
+
 
 def isColor(currentColor: tuple, matchingColor: tuple, distance: int) -> bool:
     """
@@ -21,17 +23,7 @@ def isColor(currentColor: tuple, matchingColor: tuple, distance: int) -> bool:
     return match
 
 
-def stop(m1: ev3.LargeMotor, m2: ev3.LargeMotor) -> None:
-    """
-    stops both given Motors
-    """
-    m1.stop_action = "brake"
-    m2.stop_action = "brake"
-    m1.stop()
-    m2.stop()
-
-
-def convPathsToDirection(dircts: dict) -> int:
+def convPathsToDirection(dircts: Dict) -> int:
     """
     dircts -- directions dictionary with following structure: {North: bool, East: bool, South: bool, West:bool}
     conversion function used in findAttachedPaths
@@ -56,7 +48,7 @@ def isBlack(rgb: (int, int, int)):
 
 class Follow:
     def __init__(self, m1: ev3.LargeMotor, m2: ev3.LargeMotor, cs: ev3.ColorSensor, ts: ev3.TouchSensor,
-                 gy: ev3.GyroSensor, rc: ev3.RemoteControl = None) -> None:
+                 gy: ev3.GyroSensor, movement: list, rc: ev3.RemoteControl = None) -> None:
         self.m1 = m1
         self.m2 = m2
         self.cs = cs
@@ -65,6 +57,20 @@ class Follow:
         self.kp = .8
         self.rgbBlack = (34, 78, 33)
         self.rc = rc
+        self.movement = movement
+
+    def stop(self) -> None:
+        """
+        stops both given Motors
+        """
+        self.m1.stop_action = "brake"
+        self.m2.stop_action = "brake"
+        self.m1.stop()
+        self.m2.stop()
+
+    def reset(self):
+        self.m1.position = 0
+        self.m2.position = 0
 
     def touchPause(self):
         """
@@ -123,7 +129,7 @@ class Follow:
 
         return rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal
 
-    def follow(self, optimal, baseSpeed):
+    def follow(self, optimal, baseSpeed, odo: Odometry):
         """
         currently p-Controller
         optimal -- medium value between calibrated white and black
@@ -132,7 +138,6 @@ class Follow:
 
         error = optimal - self.cs.value()
         output = self.kp * error
-
         self.m1.run_forever(speed_sp=baseSpeed + output)
         self.m2.run_forever(speed_sp=baseSpeed - output)
 
@@ -193,6 +198,5 @@ class Follow:
                 dirDict["West"] = True
             sleep(0.05)
 
-        self.turnRightXTimes(convPathsToDirection(dirDict))
         print(dirDict)
         return dirDict

@@ -57,20 +57,22 @@ def wasd(m1: ev3.LargeMotor, m2: ev3.LargeMotor) -> None:
     """
     very basic implementation of a wasd-control
     """
+    speed = 1000
     while True:
         direction = input("")
+
         if direction == "w":
-            m1.run_forever(speed_sp=400)
-            m2.run_forever(speed_sp=400)
+            m1.run_forever(speed_sp=speed)
+            m2.run_forever(speed_sp=speed)
         elif direction == "s":
-            m1.run_forever(speed_sp=-400)
-            m2.run_forever(speed_sp=-400)
+            m1.run_forever(speed_sp=-speed)
+            m2.run_forever(speed_sp=-speed)
         elif direction == "a":
-            m1.run_forever(speed_sp=-100)
-            m2.run_forever(speed_sp=100)
+            m1.run_forever(speed_sp=-speed/5)
+            m2.run_forever(speed_sp=speed/5)
         elif direction == "d":
-            m1.run_forever(speed_sp=100)
-            m2.run_forever(speed_sp=-100)
+            m1.run_forever(speed_sp=speed/5)
+            m2.run_forever(speed_sp=-speed/5)
         elif direction == "exit":
             m1.stop()
             m2.stop()
