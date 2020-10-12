@@ -30,9 +30,13 @@ class Planet:
     it according to the specifications
     """
 
+    planetdict = {}
+
     def __init__(self):
         """ Initializes the data structure """
         self.target = None
+        planetdict = {}
+
 
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
@@ -46,12 +50,15 @@ class Planet:
         :param weight: Integer
         :return: void
         """
-        try:
-            PlanetDict[start] = (target,weight)
-        except:
-             PlanetDict = {start: (target,weight)}
-        PlanetDict[target] = (start,weight)
+
+        Planet.planetdict[start] = (target,weight)
+        Planet.planetdict[target] = (start,weight)
         return 
+
+
+    def add_unknown_path(self, start: Tuple[Tuple[int, int], Direction]):
+        Planet.planetdict[start] = ()
+        return
 
 
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
@@ -74,25 +81,23 @@ class Planet:
         :return: Dict
         """
 
-        for Start in PlanetDict:
-            (Coord,Direction) = Start
-            PathDict = {}
-            try:
-                if Coord in PathDict:
-                    PathDict[Start] = PathDict[Start].update(GetTargets(Direction,PlanetDict[Start]))
-                else:
-                    PathDict[Coord] = GetTargets(Direction,PlanetDict[Start])
-            except:
-                PathDict = {Coord: GetTargets(Direction,PlanetDict[Start])}
-        return PathDict
+        for key in planetdict:
+            (coord,direction) = key
+            pathdict = {}
+            if coord in pathdict:
+                 pathdict[start] = pathdict[key].update(get_targets(direction,planetdict[key]))
+            else:
+                pathdict[coord] = get_targets(direction,planetdict[key])
+            pathdict = {coord: get_targets(direction,planetdict[key])}
+        return pathdict
 
 
-    def GetTargets(self,Direction,Target):          #dict in dict
+    def get_targets(self,direction,target):          #dict in dict
         try:
-            HelpDict[Direction] = (Target)
+            helpdict[direction] = (target)
         except:
-            HelpDict = {Direction: Target}
-        return HelpDict
+            helpdict = {direction: target}
+        return helpdict
 
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
