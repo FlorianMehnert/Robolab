@@ -30,13 +30,10 @@ class Planet:
     it according to the specifications
     """
 
-    paths = {}
-
     def __init__(self):
         """ Initializes the data structure """
         self.target = None
-        planetdict = {}
-
+        self.paths = {}
 
     def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
