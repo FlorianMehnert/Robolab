@@ -50,9 +50,13 @@ class Communication:
         """
         payload = json.loads(message.payload.decode('utf-8'))
         self.logger.debug(json.dumps(payload, indent=2))
-        if payload["from"] == "server":
-            if payload["type"] == "planet":
-                self.planet.setName(payload["payload"]["planetName"])
+        msgFrom = payload["from"]
+        msgType = payload["type"]
+        payload = payload["payload"]
+
+        if msgFrom == "server":
+            if msgType == "planet":
+                self.planet.setName(payload["planetName"])
                 self.client.subscribe("planet/" + self.planet.getName() + "/" + self.group, qos=1)
                 self.logger.debug("Planet name: " + self.planet.getName())
 
