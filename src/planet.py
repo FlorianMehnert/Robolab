@@ -97,12 +97,6 @@ class Planet:
         return pathdict
 
 
-    def get_targets(self, direction, target):          #dict in dict
-        try:
-            helpdict[direction] = (target)
-        except:
-            helpdict = {direction: target}
-        return helpdict
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """
