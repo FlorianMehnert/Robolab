@@ -50,9 +50,16 @@ class Planet:
         :param weight: Integer
         :return: void
         """
+        if start[0] not in self.paths:
+            self.addNode(start[0])
+        if target[0] not in self.paths:
+            self.addNode(target[0])
 
-        self.paths[start] = (target, weight)
-        self.paths[target] = (start, weight)
+        if target is None:
+            self.paths[start][start[1]] = False
+        else:
+            self.paths[start][start[1]] = (target[0], target[1], weight)
+            self.paths[target][target[1]] = (start[0], start[1], weight)
         return
 
 
