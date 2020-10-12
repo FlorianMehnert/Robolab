@@ -60,6 +60,11 @@ class Planet:
         self.paths[start] = ()
         return
 
+    def add_node(self, node: Tuple[int, int]):
+        nodepaths = {}
+        for dir in Direction:
+            nodepaths[dir].update(None)
+        self.paths[node].update(nodepaths)
 
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
