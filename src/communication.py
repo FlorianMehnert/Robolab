@@ -16,11 +16,12 @@ class Communication:
     Class to hold the MQTT client communication
     """
 
-    def __init__(self, mqtt_client, logger):
+    def __init__(self, mqtt_client, logger, planet):
         """
         Initializes communication module, connect to server, subscribe, etc.
         :param mqtt_client: paho.mqtt.client.Client
         :param logger: logging.Logger
+        :param planet: Planet
         """
         # DO NOT CHANGE THE SETUP HERE
         self.client = mqtt_client
@@ -29,7 +30,7 @@ class Communication:
         # Add your client setup here
         self.logger = logger
         self.group = self.client._client_id[0:3].decode('utf-8')
-        self.planetname = ""
+        self.planet = planet
         self.logger.debug(self.group)
         self.client.enable_logger(logger)
         self.client.username_pw_set(self.group, 'eYa0NxbLnI')
@@ -50,9 +51,9 @@ class Communication:
         self.logger.debug(json.dumps(payload, indent=2))
         if payload["from"] == "server":
             if payload["type"] == "planet":
-                self.planetname = payload["payload"]["planetName"]
-                self.client.subscribe("planet/" + self.planetname + "/" + self.group, qos=1)
-                self.logger.debug("Planet name: " + self.planetname)
+                self.planet.setName(payload["payload"]["planetName"])
+                self.client.subscribe("planet/" + self.planet.getName() + "/" + self.group, qos=1)
+                self.logger.debug("Planet name: " + self.planet.getName())
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
@@ -110,7 +111,7 @@ class Communication:
                     }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planetname + "/" + self.group
+        topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
 
     def sendPathSelect(self, path: Tuple[Tuple[int, int], Direction]):
@@ -124,7 +125,7 @@ class Communication:
                   }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planetname + "/" + self.group
+        topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
 
     def sendTargetReached(self):
@@ -136,7 +137,7 @@ class Communication:
                   }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planetname + "/" + self.group
+        topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
 
     def sendExplorationCompleted(self):
@@ -148,5 +149,5 @@ class Communication:
                   }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planetname + "/" + self.group
+        topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
