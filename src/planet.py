@@ -30,7 +30,7 @@ class Planet:
     it according to the specifications
     """
 
-    planetdict = {}
+    paths = {}
 
     def __init__(self):
         """ Initializes the data structure """
@@ -51,13 +51,13 @@ class Planet:
         :return: void
         """
 
-        Planet.planetdict[start] = (target,weight)
-        Planet.planetdict[target] = (start,weight)
+        self.paths[start] = (target, weight)
+        self.paths[target] = (start, weight)
         return
 
 
     def add_unknown_path(self, start: Tuple[Tuple[int, int], Direction]):
-        Planet.planetdict[start] = ()
+        self.paths[start] = ()
         return
 
 
@@ -81,18 +81,18 @@ class Planet:
         :return: Dict
         """
 
-        for key in planetdict:
+        for key in self.paths:
             (coord,direction) = key
             pathdict = {}
             if coord in pathdict:
-                 pathdict[start] = pathdict[key].update(get_targets(direction,planetdict[key]))
+                 pathdict[start] = pathdict[key].update(self.get_targets(direction, self.paths[key]))
             else:
-                pathdict[coord] = get_targets(direction,planetdict[key])
-            pathdict = {coord: get_targets(direction,planetdict[key])}
+                pathdict[coord] = self.get_targets(direction, self.paths[key])
+            pathdict = {coord: self.get_targets(direction, self.paths[key])}
         return pathdict
 
 
-    def get_targets(self,direction,target):          #dict in dict
+    def get_targets(self, direction, target):          #dict in dict
         try:
             helpdict[direction] = (target)
         except:
