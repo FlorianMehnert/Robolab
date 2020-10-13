@@ -62,6 +62,7 @@ class Planet:
 
 
     def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
+        #to backtrack unknown paths
         self.paths[start] = ()
         return
     
