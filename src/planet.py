@@ -176,7 +176,7 @@ class Planet:
             setStartCoord((42, 42))
         : return: void
         """
-        self.start[0] = coord
+        self.start = (coord, self.start[1])
 
     def setStartDirection(self, orientation: Direction):
         """
@@ -186,7 +186,7 @@ class Planet:
             setStartDirection((42, 42), Direction.NORTH)
         : return: void
         """
-        self.start[1] = orientation
+        self.start = (self.start[0], orientation)
 
     def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """
