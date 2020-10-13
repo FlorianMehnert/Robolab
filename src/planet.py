@@ -35,11 +35,11 @@ class Planet:
         self.target = None
         self.paths = {}
         self.planetname = ""
-        self.start = Tuple[Tuple[int, int], Direction]
+        self.start = None  # Tuple[Tuple[int, int], Direction]
         self.newPlanet = True
 
     def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
-                 weight: int):
+                weight: int):
         """
          Adds a bidirectional path defined between the start and end coordinates to the map and assigns the weight to it
 
@@ -62,22 +62,22 @@ class Planet:
             self.paths[target][target[1]] = (start[0], start[1], weight)
         return
 
-
     def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
-        #to backtrack unknown paths
+        # to backtrack unknown paths
         self.paths[start] = ()
         return
-    
+
     def removePath(self, path: Tuple[Tuple[int, int], Direction]):
-        #removes path with obstacle
+        # removes path with obstacle
         self.paths.pop(path)
         return
 
     def addNode(self, node: Tuple[int, int]):
         nodepaths = {}
         for dir in Direction:
-            nodepaths[dir].update(None)
-        self.paths[node].update(nodepaths)
+            print("in for", dir)
+            nodepaths.update({dir: None})
+        self.paths.update({node:nodepaths})
 
     def getPaths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
@@ -100,21 +100,19 @@ class Planet:
         """
         pathdict = {}
         for key in self.paths:
-            (coord,direction) = key
+            (coord, direction) = key
             if coord in pathdict:
-                 pathdict[key] = pathdict[key].update(self.getTargets(direction, self.paths[key]))
+                pathdict[key] = pathdict[key].update(self.getTargets(direction, self.paths[key]))
             else:
                 pathdict[coord] = self.getTargets(direction, self.paths[key])
         return pathdict
 
-
-    def getTargets(self,direction,target):      #dict in dict
+    def getTargets(self, direction, target):  # dict in dict
         try:
             helpdict[direction] = (target)
         except:
             helpdict = {direction: target}
         return helpdict
-
 
     def getTarget(self) -> Tuple[int, int]:
         """
@@ -158,7 +156,7 @@ class Planet:
         """
         self.planetname = name
 
-    def setStart(self, coord: Tuple[int, int], orientation: Direction):
+    def setStart(self, coord: List[int], orientation: Direction):
         """
         Set start node of planet. Tuple is new set at every node
 
@@ -166,7 +164,7 @@ class Planet:
             setStart((42, 42), Direction.NORTH)
         : return: void
         """
-        self.start = (coord, Direction)
+        self.start = (coord, orientation)
 
     def setStartCoord(self, coord: Tuple[int, int]):
         """
@@ -188,7 +186,8 @@ class Planet:
         """
         self.start = (self.start[0], orientation)
 
-    def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+    def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
+        None, List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
 
@@ -201,7 +200,8 @@ class Planet:
         """
         return self.shortestPathDijkstra(start, target)
 
-    def shortestPathDijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+    def shortestPathDijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
+        None, List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes using Djikstra algorithm
 
@@ -216,7 +216,7 @@ class Planet:
         visitedNodes = []
         paths = self.getPaths()
         countNode = len(paths)
-        table = {}# Dict[node: Tuple[int, int]: 3-Tuple(weight: int, previous: int, Direction)]
+        table = {}  # Dict[node: Tuple[int, int]: 3-Tuple(weight: int, previous: int, Direction)]
         targetKnown = False
         startKnown = False
 
@@ -235,7 +235,7 @@ class Planet:
 
         # Weight calculation
         while countNode > len(visitedNodes):
-            currentNode = ((int, int), 0x7fffff, (int, int)) # (node, weight, previous)
+            currentNode = ((int, int), 0x7fffff, (int, int))  # (node, weight, previous)
             # Select node with lowest weight
             for node in table:
                 if node[0] in visitedNodes:
@@ -265,20 +265,19 @@ class Planet:
             shortestPath.append(shortestPathReverse.pop)
         return shortestPath
 
-
     def getNewPath(self, position: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
-        #finds the closest unvisited path
-        compare = 100       #might need to change value
+        # finds the closest unvisited path
+        compare = 100  # might need to change value
         newCoord = []
         for key in self.paths:
-            (coord,direction) = key
+            (coord, direction) = key
             if self.paths[key] == ():
-                #find the closest point
-                (a,b) = coord
-                (c,d) = position
+                # find the closest point
+                (a, b) = coord
+                (c, d) = position
                 if abs((a + b) - (c - d)) <= compare:
-                     newCoord = key
+                    newCoord = key
         if newCoord == []:
-            return #map explored
+            return  # map explored
         else:
-            return self.shortestPath(position,newCoord)
+            return self.shortestPath(position, newCoord)

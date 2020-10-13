@@ -55,14 +55,18 @@ class Communication:
         self.logger.debug(json.dumps(payload, indent=2))
         msgFrom = payload["from"]
         msgType = payload["type"]
-        payload = payload["payload"]
+        print(json.dumps(payload, indent=2))
+        print(msgFrom, msgType, "on_message")
 
         if msgFrom == "server":
+            payload = payload["payload"]
             if msgType == "planet":
                 self.planet.setName(payload["planetName"])
                 self.client.subscribe("planet/" + self.planet.getName() + "/" + self.group, qos=1)
                 self.logger.debug("Planet name: " + self.planet.getName())
                 self.planet.setStart((payload["startX"], payload["startY"]), payload["startOrientation"])
+
+                print(self.planet.start, " O")
                 self.wait = False
             elif msgType == "path":
                 self.planet.addPath(((payload["startX"], payload["startY"]), payload["startDirection"]),
@@ -95,9 +99,8 @@ class Communication:
         self.lastConnectionTime = time.time()
         self.logger.debug('Send to: ' + topic)
         self.logger.debug(json.dumps(message, indent=2))
-        self.wait = True
         # YOUR CODE FOLLOWS
-        
+
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #
@@ -123,6 +126,7 @@ class Communication:
         payload = json.dumps(payload)
         self.client.publish("explorer/" + self.group, payload=payload, qos=1)
         self.planet.newPlanet = False
+        self.wait = True
         while self.wait:
             continue
 
@@ -143,6 +147,7 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
+        self.wait = True
         while self.wait:
             continue
 
@@ -171,6 +176,7 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
+        self.wait = True
         while self.wait:
             continue
 
@@ -185,6 +191,7 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
+        self.wait = True
         while self.wait:
             continue
 
