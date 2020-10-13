@@ -1,0 +1,53 @@
+[
+  {
+    "from": "client",
+    "type": "ready|testplanet|path|pathSelect|targetReached|explorationCompleted",
+    "payload": {
+      "planetName": "<planetName>",
+      "startX": <Xs>,
+      "startY": <Ys>,
+      "startDirection": <Ds>,
+      "endX": <Xe>,
+      "endY": <Ye>,
+      "endDirection": <De>,
+      "pathStatus": "<status>",
+      "message": "<text>"
+    }
+  },
+  {
+    "from": "server",
+    "type": "path|pathSelect|pathUnveiled|target|planet|done",
+    "payload": {
+      "planetName": "<planetName>",
+      "startX": <Xs>,
+      "startY": <Ys>,
+      "startDirection": <Ds>,
+      "startOrientation": <O>,
+      "endX": <Xc>,
+      "endY": <Yc>,
+      "endDirection": <Dc>,
+      "targetX": <Xt>,
+      "targetY": <Yt>,
+      "pathStatus": "<status>",
+      "pathWeight": <weight>,
+      "message": "<text>",
+      "debug": "<original_message_escaped>"
+    }
+  },
+  {
+    "from": "debug",
+    "type": "error|notice|adjust,syntax",
+    "payload": {
+      "planetName": "<planetName>",
+      "startX": <Xs>,
+      "startY": <Ys>,
+      "startDirection": <Ds>,
+      "endX": <Xc>,
+      "endY": <Yc>,
+      "endDirection": <Dc>,
+      "message": "<text>",
+      "debug": "<original_message_escaped>",
+      "errors": []
+    }
+  }
+]
