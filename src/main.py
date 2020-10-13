@@ -16,6 +16,8 @@ from follow import Follow, convPathsToDirection
 from follow import isColor
 from odometry import Odometry
 from specials import blink
+from planet import Planet
+from communication import Communication
 
 client = None  # DO NOT EDIT
 
@@ -54,6 +56,8 @@ def run():
 
     # THIS IS WHERE PARADISE BEGINS
     # COD
+    planet = Planet()
+    mqttc = Communication(client, logger, planet)
     movement: List[
         Tuple[
             int, int]] = []  # used to save all movement values gathered while line following for odometry calculations
