@@ -24,8 +24,8 @@ class ExampleTestPlanet(unittest.TestCase):
         """
         # Initialize your data structure here
         self.planet = Planet()
-        self.planet.add_path(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 1)
-        self.planet.add_path(((0, 1), Direction.WEST), ((0, 0), Direction.WEST), 1)
+        self.planet.addPath(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 1)
+        self.planet.addPath(((0, 1), Direction.WEST), ((0, 0), Direction.WEST), 1)
 
     @unittest.skip('Example test, should not count in final test results')
     def test_target_not_reachable_with_loop(self):

@@ -64,6 +64,11 @@ class Planet:
     def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
         self.paths[start] = ()
         return
+    
+    def removePath(self, path: Tuple[Tuple[int, int], Direction]):
+        #removes path with obstacle
+        self.paths.pop(path)
+        return
 
     def addNode(self, node: Tuple[int, int]):
         nodepaths = {}
@@ -90,16 +95,22 @@ class Planet:
             }
         :return: Dict
         """
-
+        pathdict = {}
         for key in self.paths:
             (coord,direction) = key
-            pathdict = {}
             if coord in pathdict:
-                 pathdict[start] = pathdict[key].update(self.get_targets(direction, self.paths[key]))
+                 pathdict[key] = pathdict[key].update(self.getTargets(direction, self.paths[key]))
             else:
-                pathdict[coord] = self.get_targets(direction, self.paths[key])
-            pathdict = {coord: self.get_targets(direction, self.paths[key])}
+                pathdict[coord] = self.getTargets(direction, self.paths[key])
         return pathdict
+
+
+    def getTargets(self,direction,target):      #dict in dict
+        try:
+            helpdict[direction] = (target)
+        except:
+            helpdict = {direction: target}
+        return helpdict
 
 
     def getTarget(self) -> Tuple[int, int]:
@@ -221,3 +232,20 @@ class Planet:
             shortestPath.append(shortestPathReverse.pop)
         return shortestPath
 
+
+    def getNewPath(self, position: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+        #finds the closest unvisited path
+        compare = 100       #might need to change value
+        newCoord = []
+        for key in self.paths:
+            (coord,direction) = key
+            if self.paths[key] == ():
+                #find the closest point
+                (a,b) = coord
+                (c,d) = position
+                if abs((a + b) - (c - d)) <= compare:
+                     newCoord = key
+        if newCoord == []:
+            return #map explored
+        else:
+            return self.shortestPath(position,newCoord)
