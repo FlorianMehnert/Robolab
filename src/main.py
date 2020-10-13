@@ -53,10 +53,9 @@ def run():
     logger = logging.getLogger('RoboLab')
 
     # THIS IS WHERE PARADISE BEGINS
-    # COD
+    # CODe
     movement: List[
-        Tuple[
-            int, int]] = []  # used to save all movement values gathered while line following for odometry calculations
+        Tuple[int, int]] = []  # used to save all movement values gathered while line following for odometry calculations
 
     oldGamma = 0
     newGamma = 0
@@ -103,24 +102,33 @@ def run():
                 print("wasd, paths, battery, calibrate, ")
             elif mode == "":
                 run = False
+            elif mode == "pid":
+                k = input("kp, ki, kp")
+                if k == "p":
+                    follow.kp = float(input("proportional?"))
+                elif k == "i":
+                    follow.ki = float(input("integral?"))
+                elif k == "d":
+                    follow.kd = float(input("derivate?"))
+            elif mode == "test":
+                with open("/home/src/values.txt") as file:
+                    for line in file:
+                        print(line)
         run = True
         while run:
             cs.mode = "RGB-RAW"
             currentColor = cs.bin_data("hhh")
 
-            if isColor(currentColor, rgbRed, 25):
-                # finding a red node
+            if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue , 25):
+
+                # finding a node
                 print("red detected")
                 ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
-                # dirDict = follow.findAttachedPaths()
+                dirDict = follow.findAttachedPaths()
                 follow.stop()
-                run = False
-                print(movement)
                 odo.calculateNewPosition(movement)
-                # do some calculation stuff
-
-                # follow.turnRightXTimes(convPathsToDirection(dirDict))  # only needed as long dfs isn't implemented
+                follow.turnRightXTimes(convPathsToDirection(dirDict))  # only needed as long dfs isn't implemented
 
             elif isColor(currentColor, rgbBlue, 25):
                 # finding a blue node
@@ -129,8 +137,6 @@ def run():
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
                 dirDict = follow.findAttachedPaths()
                 follow.stop()
-                run = False
-                print(movement)
                 odo.calculateNewPosition(movement)
                 follow.turnRightXTimes(convPathsToDirection(dirDict))  # only needed as long dfs isn't implemented
 
@@ -138,7 +144,7 @@ def run():
             else:
                 # default line follow
 
-                follow.follow(optimal, 250, odo)
+                follow.follow(optimal, 350, odo)
 
                 if us.value() < 200:
                     m1.run_forever(speed_sp=200)

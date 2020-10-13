@@ -1,5 +1,6 @@
 from time import sleep
 from typing import Dict, Tuple
+from planet import Direction
 
 import ev3dev.ev3 as ev3
 
@@ -28,14 +29,18 @@ def convPathsToDirection(dircts: Dict) -> int:
     dircts -- directions dictionary with following structure: {North: bool, East: bool, South: bool, West:bool}
     conversion function used in findAttachedPaths
     """
-    if dircts["North"]:
+    if dircts[Direction.NORTH]:
+        print("0")
         return 0
-    elif dircts["East"]:
+    elif dircts[Direction.EAST]:
+        print("1")
         return 1
-    elif dircts["West"]:
-        return -1
-    else:
+    elif dircts[Direction.SOUTH]:
+        print("2")
         return 2
+    elif dircts[Direction.WEST]:
+        print("-1")
+        return -1
 
 
 def isBlack(rgb: (int, int, int)):
@@ -54,10 +59,13 @@ class Follow:
         self.cs = cs
         self.ts = ts
         self.gy = gy
-        self.kp = .8
         self.rgbBlack = (34, 78, 33)
         self.rc = rc
         self.movement = movement
+
+        self.kp = .8
+        self.ki = .2
+        self.kd = .3
 
     def stop(self) -> None:
         """
@@ -135,9 +143,12 @@ class Follow:
         optimal -- medium value between calibrated white and black
         baseSpeed -- how fast should the robot go
         """
-
+        integral = 0
+        previousError = 0
         error = optimal - self.cs.value()
-        output = self.kp * error
+        integral += error
+        derivate = error - previousError
+        output = self.kp * error + self.ki * integral + self.kd * derivate
         self.m1.run_forever(speed_sp=baseSpeed + output)
         self.m2.run_forever(speed_sp=baseSpeed - output)
 
@@ -162,15 +173,16 @@ class Follow:
 
         self.m1.position = 0
 
-        while self.m1.position < abs(x) * degreeFor90:
+        if x == -1:
+            degreeFor90 = degreeFor90 / 4 * 3
+        while abs(self.m1.position) < abs(x * degreeFor90):
             sleep(0.1)
 
-    def findAttachedPaths(self) -> Dict[str, bool]:
+    def findAttachedPaths(self) -> Dict[Direction, bool]:
         """
         finds attached paths to discovered knots by turning 360° and repositions the robot to the next viable path
         """
-
-        dirDict = {"North": False, "East": False, "South": False, "West": False}
+        dirDict = {Direction.NORTH: False, Direction.EAST: False, Direction.SOUTH: False, Direction.WEST: False}
 
         self.m1.stop(stop_action="brake")
         self.m2.stop(stop_action="brake")
@@ -189,13 +201,13 @@ class Follow:
         while self.m1.position < 1115:
             binData = self.cs.bin_data("hhh")
             if (self.m1.position in range(0, 135) or self.m1.position in range(980, 1200)) and isBlack(binData):
-                dirDict["North"] = True
+                dirDict[Direction.NORTH] = True
             elif self.m1.position in range(143, 413) and isBlack(binData):
-                dirDict["East"] = True
+                dirDict[Direction.EAST] = True
             elif self.m1.position in range(422, 692) and isBlack(binData):
-                dirDict["South"] = True
+                dirDict[Direction.SOUTH] = True
             elif self.m1.position in range(701, 971) and isBlack(binData):
-                dirDict["West"] = True
+                dirDict[Direction.WEST] = True
             sleep(0.05)
 
         print(dirDict)

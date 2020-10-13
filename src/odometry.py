@@ -28,8 +28,8 @@ class Odometry:
             straightDistance: float = ((dR + dL) / alpha) * math.sin(beta)
         else:
             straightDistance = dR
-        dX: float = math.sin(self.gamma + beta) * straightDistance
-        dY: float = math.cos(self.gamma + beta) * straightDistance
+        dX = math.sin(self.gamma + beta) * straightDistance
+        dY = math.cos(self.gamma + beta) * straightDistance
         self.gamma -= alpha
 
         self.posX += dX
