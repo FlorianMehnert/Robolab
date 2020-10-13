@@ -119,6 +119,12 @@ def run():
                 ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
                 # dirDict = follow.findAttachedPaths()
                 follow.stop()
+                if planet.newPlanet:
+                    mqttc.sendReady()
+                    mqttc.timeout()
+                else:
+                    mqttc.sendPath()
+                    mqttc.timeout()
                 run = False
                 print(movement)
                 odo.calculateNewPosition(movement)

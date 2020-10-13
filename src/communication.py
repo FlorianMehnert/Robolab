@@ -122,6 +122,7 @@ class Communication:
         payload = {"from" : "client", "type" : "ready"}
         payload = json.dumps(payload)
         self.client.publish("explorer/" + self.group, payload=payload, qos=1)
+        self.planet.newPlanet = False
         while self.wait:
 
     def sendPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
