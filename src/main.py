@@ -16,6 +16,8 @@ from follow import Follow, convPathsToDirection
 from follow import isColor
 from odometry import Odometry
 from specials import blink
+from planet import Planet
+from communication import Communication
 
 client = None  # DO NOT EDIT
 
@@ -38,7 +40,7 @@ def run():
     # Your script isn't able to close the client after crashing.
     global client
 
-    client_id = 'YOURGROUPID-' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
+    client_id = '217' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
     client = mqtt.Client(client_id=client_id,  # Unique Client-ID to recognize our program
                          clean_session=True,  # We want a clean session after disconnect or abort/crash
                          protocol=mqtt.MQTTv311  # Define MQTT protocol version
@@ -52,6 +54,8 @@ def run():
 
     # THIS IS WHERE PARADISE BEGINS
     # CODe
+    planet = Planet()
+    mqttc = Communication(client, logger, planet)
     movement: List[
         Tuple[
             int, int]] = []  # used to save all movement values gathered while line following for odometry calculations
@@ -154,6 +158,12 @@ def run():
             currentColor = cs.bin_data("hhh")
 
             if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue, 25):
+                if planet.newPlanet:
+                    mqttc.sendReady()
+                    mqttc.timeout()
+                else:
+                    mqttc.sendPath()
+                    mqttc.timeout()
 
                 # finding a node
                 if isColor(currentColor, rgbRed, 25):
