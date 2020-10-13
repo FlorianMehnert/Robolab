@@ -124,6 +124,7 @@ class Communication:
         self.client.publish("explorer/" + self.group, payload=payload, qos=1)
         self.planet.newPlanet = False
         while self.wait:
+            continue
 
     def sendPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  status: str):
@@ -143,6 +144,7 @@ class Communication:
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
         while self.wait:
+            continue
 
     def sendPathSelect(self, path: Tuple[Tuple[int, int], Direction]):
         payload = {
@@ -170,6 +172,7 @@ class Communication:
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
         while self.wait:
+            continue
 
     def sendExplorationCompleted(self):
         payload = {
@@ -183,6 +186,8 @@ class Communication:
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.client.publish(topic, payload=payload, qos=1)
         while self.wait:
+            continue
 
     def timeout(self):
         while time.time() - self.lastConnectionTime < 3:
+            continue
