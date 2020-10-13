@@ -36,6 +36,7 @@ class Planet:
         self.paths = {}
         self.planetname = ""
         self.start = Tuple[Tuple[int, int], Direction]
+        self.newPlanet = True
 
     def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
