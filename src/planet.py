@@ -56,10 +56,10 @@ class Planet:
             self.addNode(target[0])
 
         if target is None:
-            self.paths[start][start[1]] = False
+            self.paths[start[0]][start[1]] = False
         else:
-            self.paths[start][start[1]] = (target[0], target[1], weight)
-            self.paths[target][target[1]] = (start[0], start[1], weight)
+            self.paths[start[0]][start[1]] = (target[0], target[1], weight)
+            self.paths[target[0]][target[1]] = (start[0], start[1], weight)
         return
 
     def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
@@ -75,9 +75,8 @@ class Planet:
     def addNode(self, node: Tuple[int, int]):
         nodepaths = {}
         for dir in Direction:
-            print("in for", dir)
-            nodepaths.update({dir: None})
-        self.paths.update({node:nodepaths})
+            nodepaths[dir] = None
+        self.paths[node] = nodepaths
 
     def getPaths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
@@ -102,7 +101,7 @@ class Planet:
         for key in self.paths:
             (coord, direction) = key
             if coord in pathdict:
-                pathdict[key] = pathdict[key].update(self.getTargets(direction, self.paths[key]))
+                pathdict[key] = self.getTargets(direction, self.paths[key])
             else:
                 pathdict[coord] = self.getTargets(direction, self.paths[key])
         return pathdict
