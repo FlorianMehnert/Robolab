@@ -35,6 +35,7 @@ class Planet:
         self.target = None
         self.paths = {}
         self.planetname = ""
+        self.start = Tuple[Tuple[int, int], Direction]
 
     def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
@@ -143,6 +144,36 @@ class Planet:
         : return: void
         """
         self.planetname = name
+
+    def setStart(self, coord: Tuple[int, int], orientation: Direction):
+        """
+        Set start node of planet. Tuple is new set at every node
+
+        Examples:
+            setStart((42, 42), Direction.NORTH)
+        : return: void
+        """
+        self.start = (coord, Direction)
+
+    def setStartCoord(self, coord: Tuple[int, int]):
+        """
+        Set start coordinates of planet. Tuple is new set at every node
+
+        Examples:
+            setStartCoord((42, 42))
+        : return: void
+        """
+        self.start[0] = coord
+
+    def setStartDirection(self, orientation: Direction):
+        """
+        Set start orientation of planet. Direction is new set at every node
+
+        Examples:
+            setStartDirection((42, 42), Direction.NORTH)
+        : return: void
+        """
+        self.start[1] = orientation
 
     def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """

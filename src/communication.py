@@ -68,7 +68,7 @@ class Communication:
                 self.planet.addPath(((payload["startX"], payload["startY"]), payload["startDirection"]),
                                     ((payload["endX"], payload["endY"]), payload["endDirection"]),
                                     payload["pathWeight"])
-                self.planet.setStartNode((payload["endX"], payload["endY"]))
+                self.planet.setStartCoord((payload["endX"], payload["endY"]))
                 self.wait = False
             elif msgType == "pathSelect":
                 self.planet.setStartDirection(payload["startDirection"])
