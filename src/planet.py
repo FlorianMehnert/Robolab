@@ -72,6 +72,13 @@ class Planet:
         self.paths.pop(path)
         return
 
+    def setAttachedPaths(self, node: Tuple[int, int], dirDict: Dict[Direction: bool]):
+        if node not in self.paths:
+            self.addNode(node)
+        for dir, available in dirDict:
+            if self.paths[node][dir] is None:
+                self.paths[node][dir] = available
+
     def addNode(self, node: Tuple[int, int]):
         nodepaths = {}
         for dir in Direction:
