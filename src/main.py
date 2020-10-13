@@ -16,7 +16,7 @@ from follow import Follow, convPathsToDirection
 from follow import isColor
 from odometry import Odometry
 from specials import blink
-from planet import Planet
+from planet import Planet, Direction
 from communication import Communication
 
 client = None  # DO NOT EDIT
@@ -60,12 +60,7 @@ def run():
         Tuple[
             int, int]] = []  # used to save all movement values gathered while line following for odometry calculations
 
-    oldGamma = 0
-    newGamma = 0
-    oldNodeX = 0
-    oldNodeY = 0
-    newNodeX = 0
-    newNodeY = 0
+
 
     follow = Follow(m1, m2, cs, ts, gy, movement)
     odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
@@ -85,6 +80,20 @@ def run():
         rgbWhite = (245, 392, 258)
         optimal = 171.5
 
+        global oldGamma
+        global newGamma
+        global oldNodeX
+        global oldNodeY
+        global newNodeX
+        global newNodeY
+
+        oldGamma = Direction.NORTH
+        newGamma = Direction.NORTH
+        oldNodeX = 0
+        oldNodeY = 0
+        newNodeX = 0
+        newNodeY = 0
+
         print("starting")
 
         while run:
@@ -98,8 +107,6 @@ def run():
             #         specials.remoteControl(rc, m1, m2)
             elif mode == "battery":
                 print(ps.measured_volts)
-            elif mode == "calibrate":
-                rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
             elif mode == "/help":
                 print("wasd, paths, battery, calibrate, ")
             elif mode == "":
@@ -156,14 +163,26 @@ def run():
 
             cs.mode = "RGB-RAW"
             currentColor = cs.bin_data("hhh")
+            currentColor = rgbRed
 
             if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue, 25):
+                follow.stop()
+
                 if planet.newPlanet:
+                    print("after new planet")
                     mqttc.sendReady()
+                    print("after send ready")
                     mqttc.timeout()
+                    print("after send timeout")
+                    print(planet.start, "IN MAIN")
                 else:
-                    mqttc.sendPath()
+                    # mqttc.sendPath((((startX, startY),startDirection),(endX, endY), endDirection), )
+                    mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma), status="free")
                     mqttc.timeout()
+
+                oldNodeX = planet.start[0][0]
+                oldNodeY = planet.start[0][1]
+                oldGamma = planet.start[1]
 
                 # finding a node
                 if isColor(currentColor, rgbRed, 25):
