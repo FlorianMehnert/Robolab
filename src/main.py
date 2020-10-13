@@ -28,8 +28,6 @@ ps: PowerSupply = PowerSupply()
 # rc: ev3.RemoteControl = ev3.RemoteControl()
 us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
 
-
-
 print(f"current battery is {ps.measured_volts}")
 
 
@@ -55,7 +53,8 @@ def run():
     # THIS IS WHERE PARADISE BEGINS
     # CODe
     movement: List[
-        Tuple[int, int]] = []  # used to save all movement values gathered while line following for odometry calculations
+        Tuple[
+            int, int]] = []  # used to save all movement values gathered while line following for odometry calculations
 
     oldGamma = 0
     newGamma = 0
@@ -72,7 +71,6 @@ def run():
     oldM2: int = m2.position
     newM1 = 0
     newM2 = 0
-
 
     try:
         run = True
@@ -110,36 +108,65 @@ def run():
                     follow.ki = float(input("integral?"))
                 elif k == "d":
                     follow.kd = float(input("derivate?"))
-            elif mode == "test":
-                with open("/home/src/values.txt") as file:
+            elif mode == "read":
+                with open("/home/robot/src/values.txt", mode="r") as file:
+                    colorValues = []
                     for line in file:
-                        print(line)
+                        if line == "\n":
+                            continue
+                        else:
+                            try:
+                                colorValues.append(float(line.replace("\n", "")))
+                            except Exception:
+                                colorValues.append(follow.convStrToRGB(line.replace("\n","")))
+                    rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+                    print(rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal)
+            elif mode == "calibrate":
+                with open("/home/robot/src/values.txt", mode="w") as file:
+                    for i in follow.calibrate():
+                        file.write(f"{i}")
+
+                with open("/home/robot/src/values.txt", mode="r") as file:
+                    for line in file:
+                        if line == "\n":
+                            continue
+                        else:
+                            colorValues.append(float(line.replace("\n", "")))
+                    rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+
         run = True
         while run:
+
+            # obtaining calibrates color values from values.txt and setting them as rgb
+            with open("/home/robot/src/values.txt", mode="r") as file:
+                colorValues = []
+                for line in file:
+                    if line == "\n":
+                        continue
+                    else:
+                        try:
+                            colorValues.append(float(line.replace("\n", "")))
+                        except Exception:
+                            colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
+                rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+
             cs.mode = "RGB-RAW"
             currentColor = cs.bin_data("hhh")
 
-            if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue , 25):
+            if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue, 25):
 
                 # finding a node
-                print("red detected")
-                ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
-                ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
+                if isColor(currentColor, rgbRed, 25):
+                    print("RED")
+                    follow.leds(ev3.Leds.RED)
+                elif isColor(currentColor, rgbBlue, 25):
+                    print("BLUE")
+                    follow.leds(ev3.Leds.GREEN)
+
                 dirDict = follow.findAttachedPaths()
                 follow.stop()
                 odo.calculateNewPosition(movement)
                 follow.turnRightXTimes(convPathsToDirection(dirDict))  # only needed as long dfs isn't implemented
-
-            elif isColor(currentColor, rgbBlue, 25):
-                # finding a blue node
-                print("blue detected")
-                ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
-                ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
-                dirDict = follow.findAttachedPaths()
-                follow.stop()
-                odo.calculateNewPosition(movement)
-                follow.turnRightXTimes(convPathsToDirection(dirDict))  # only needed as long dfs isn't implemented
-
 
             else:
                 # default line follow

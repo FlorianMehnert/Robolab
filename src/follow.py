@@ -67,6 +67,24 @@ class Follow:
         self.ki = .2
         self.kd = .3
 
+    def convStrToRGB(self, s:str):
+        valTemp = ""
+        rgbTemp = []
+        rgb: Tuple[float, float, float]
+        s.replace("\n", "")
+
+        for character in s:
+            if character == "," or character == ")":
+                val = float(valTemp)
+                rgbTemp.append(val)
+                valTemp = ""
+            elif character == "(" or character == " ":
+                pass
+            else:
+                valTemp += character
+        rgb = (rgbTemp[0], rgbTemp[1], rgbTemp[2])
+        return rgb
+
     def stop(self) -> None:
         """
         stops both given Motors
