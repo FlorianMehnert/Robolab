@@ -230,7 +230,7 @@ class Planet:
             return [start, 0]
         # Initialization of table
         for node in paths:
-            table.update(node, (0x7fffff, (int, int), Direction))
+            table.update({node: (0x7fffff, (int, int), Direction)})
             if node == target:
                 targetKnown = True
             if node == start:

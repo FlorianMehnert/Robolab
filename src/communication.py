@@ -55,7 +55,7 @@ class Communication:
         self.logger.debug(json.dumps(payload, indent=2))
         msgFrom = payload["from"]
         msgType = payload["type"]
-        print(json.dumps(payload, indent=2))
+        #print(json.dumps(payload, indent=2))
         print(msgFrom, msgType, "on_message")
 
         if msgFrom == "server":

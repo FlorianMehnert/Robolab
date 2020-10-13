@@ -204,7 +204,7 @@ class Follow:
 
         self.m1.stop(stop_action="brake")
         self.m2.stop(stop_action="brake")
-
+        print("move forward")
         self.m1.run_to_rel_pos(speed_sp=200, position_sp=230)
         self.m2.run_to_rel_pos(speed_sp=-200, position_sp=230)
 
@@ -230,3 +230,30 @@ class Follow:
 
         print(dirDict)
         return dirDict
+
+    def substractGamma(self, dirDict: Dict[Direction: bool], gamma: float):
+        if gamma == Direction.EAST:
+            dirDict[Direction.NORTH] = dirDict[Direction.WEST]
+            dirDict[Direction.EAST] = dirDict[Direction.NORTH]
+            dirDict[Direction.SOUTH] = dirDict[Direction.EAST]
+            dirDict[Direction.WEST] = dirDict[Direction.SOUTH]
+        elif gamma == Direction.SOUTH:
+            dirDict[Direction.NORTH] = dirDict[Direction.SOUTH]
+            dirDict[Direction.EAST] = dirDict[Direction.WEST]
+            dirDict[Direction.SOUTH] = dirDict[Direction.NORTH]
+            dirDict[Direction.WEST] = dirDict[Direction.EAST]
+        elif gamma == Direction.WEST:
+            dirDict[Direction.NORTH] = dirDict[Direction.EAST]
+            dirDict[Direction.EAST] = dirDict[Direction.SOUTH]
+            dirDict[Direction.SOUTH] = dirDict[Direction.WEST]
+            dirDict[Direction.WEST] = dirDict[Direction.NORTH]
+
+    def gammaToDirection(self, gamma):
+        if gamma in range(316,360) or gamma in range(0, 45):
+            return Direction.NORTH
+        elif gamma in range(46, 135):
+            return Direction.EAST
+        elif gamma in range(136, 225):
+            return Direction.SOUTH
+        elif gamma in range(226, 315):
+            return Direction.WEST

@@ -74,11 +74,7 @@ def run():
     try:
         run = True
 
-        rgbRed = (160, 61, 27)
-        rgbBlue = (40, 152, 142)
-        rgbBlack = (34, 78, 33)
-        rgbWhite = (245, 392, 258)
-        optimal = 171.5
+
 
         global oldGamma
         global newGamma
@@ -119,6 +115,8 @@ def run():
                     follow.ki = float(input("integral?"))
                 elif k == "d":
                     follow.kd = float(input("derivate?"))
+            elif mode == "cal":
+                rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
             elif mode == "read":
                 with open("/home/robot/src/values.txt", mode="r") as file:
                     colorValues = []
@@ -159,32 +157,54 @@ def run():
                             colorValues.append(float(line.replace("\n", "")))
                         except Exception:
                             colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
-                rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+                # rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+                rgbRed = (160, 61, 27)
+                rgbBlue = (40, 152, 142)
+                rgbBlack = (34, 78, 33)
+                rgbWhite = (245, 392, 258)
+                optimal = 171.5
 
             cs.mode = "RGB-RAW"
             currentColor = cs.bin_data("hhh")
-            currentColor = rgbRed
 
             if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue, 25):
                 follow.stop()
 
                 if planet.newPlanet:
-                    print("after new planet")
+                    print("if")
                     mqttc.sendReady()
-                    print("after send ready")
                     mqttc.timeout()
-                    print("after send timeout")
                     print(planet.start, "IN MAIN")
+                    m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
+                    m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
+
                 else:
+                    print("else")
+                    odo.calculateNewPosition(movement)
+                    newNodeX = int(odo.posX/15)
+                    newNodeY = int(odo.posY/15)
+                    newGamma = follow.gammaToDirection(odo.gamma)
                     # mqttc.sendPath((((startX, startY),startDirection),(endX, endY), endDirection), )
                     mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma), status="free")
                     mqttc.timeout()
 
+                print("after")
+                print(planet.start, "planet start")
                 oldNodeX = planet.start[0][0]
                 oldNodeY = planet.start[0][1]
                 oldGamma = planet.start[1]
+                odo.posX = oldNodeX
+                odo.posY = oldNodeY
+                odo.gamma = oldGamma
+                print(oldNodeX, newNodeY, newNodeX, newNodeY, oldGamma, newGamma, "many values")
 
-                # finding a node
+                dirDict = follow.substractGamma(follow.findAttachedPaths(), oldGamma)
+                planet.setAttachedPaths((oldNodeX, oldNodeY), dirDict)
+                # select one path
+                # send to server
+                # apply server changes to gamma from start
+                # (turn to direction of server)
+
                 if isColor(currentColor, rgbRed, 25):
                     print("RED")
                     follow.leds(ev3.Leds.RED)
@@ -192,10 +212,10 @@ def run():
                     print("BLUE")
                     follow.leds(ev3.Leds.GREEN)
 
-                dirDict = follow.findAttachedPaths()
-                follow.stop()
-                odo.calculateNewPosition(movement)
-                follow.turnRightXTimes(convPathsToDirection(dirDict))  # only needed as long dfs isn't implemented
+
+                # )  # only needed as long dfs isn't implemented
+                # odo.posX
+                # odo.posY
 
             else:
                 # default line follow
