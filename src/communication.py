@@ -85,6 +85,8 @@ class Communication:
                                     payload["pathWeight"])
             elif msgType == "done":
                 self.wait = False
+        elif msgFrom == "client":
+            self.waitSendFinish = False
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
@@ -100,7 +102,6 @@ class Communication:
         self.lastConnectionTime = time.time()
         self.logger.debug('Send to: ' + topic)
         self.logger.debug(json.dumps(message, indent=2))
-        self.waitSendFinish = False
 
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
@@ -213,7 +214,7 @@ class Communication:
         :param payload: String: payload in JSON of MQTT message
         :param topic: String: topic of MQTT message
         """
-        self.client.publish(topic, payload=payload, qos=1)
         self.waitSendFinish = True
+        self.client.publish(topic, payload=payload, qos=1)
         while self.waitSendFinish:
             continue
