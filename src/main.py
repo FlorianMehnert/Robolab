@@ -234,7 +234,7 @@ def CtrlCHandler(signm, frame):
 # PLS EDIT
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--calibrate", action="calibrate")
+    parser.add_argument("-c", "--calibrate", action="store_true")
     args = parser.parse_args()
 
     if args.calibrate:
