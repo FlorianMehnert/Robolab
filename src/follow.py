@@ -232,23 +232,24 @@ class Follow:
         return dirDict
 
     def substractGamma(self, dirDict: Dict[Direction, bool], gamma: float):
-        if gamma == Direction.EAST:
-            dirDict[Direction.NORTH] = dirDict[Direction.WEST]
-            dirDict[Direction.EAST] = dirDict[Direction.NORTH]
-            dirDict[Direction.SOUTH] = dirDict[Direction.EAST]
-            dirDict[Direction.WEST] = dirDict[Direction.SOUTH]
-        elif gamma == Direction.SOUTH:
-            dirDict[Direction.NORTH] = dirDict[Direction.SOUTH]
-            dirDict[Direction.EAST] = dirDict[Direction.WEST]
-            dirDict[Direction.SOUTH] = dirDict[Direction.NORTH]
-            dirDict[Direction.WEST] = dirDict[Direction.EAST]
-        elif gamma == Direction.WEST:
-            dirDict[Direction.NORTH] = dirDict[Direction.EAST]
-            dirDict[Direction.EAST] = dirDict[Direction.SOUTH]
-            dirDict[Direction.SOUTH] = dirDict[Direction.WEST]
-            dirDict[Direction.WEST] = dirDict[Direction.NORTH]
+        secDict = {}
+        if gamma == Direction.EAST.value:
+            secDict[Direction.NORTH] = dirDict[Direction.WEST]
+            secDict[Direction.EAST] = dirDict[Direction.NORTH]
+            secDict[Direction.SOUTH] = dirDict[Direction.EAST]
+            secDict[Direction.WEST] = dirDict[Direction.SOUTH]
+        elif gamma == Direction.SOUTH.value:
+            secDict[Direction.NORTH] = dirDict[Direction.SOUTH]
+            secDict[Direction.EAST] = dirDict[Direction.WEST]
+            secDict[Direction.SOUTH] = dirDict[Direction.NORTH]
+            secDict[Direction.WEST] = dirDict[Direction.EAST]
+        elif gamma == Direction.WEST.value:
+            secDict[Direction.NORTH] = dirDict[Direction.EAST]
+            secDict[Direction.EAST] = dirDict[Direction.SOUTH]
+            secDict[Direction.SOUTH] = dirDict[Direction.WEST]
+            secDict[Direction.WEST] = dirDict[Direction.NORTH]
 
-        return dirDict
+        return secDict
 
     def gammaToDirection(self, gamma):
         if gamma in range(316,360) or gamma in range(0, 45):
