@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import argparse
 import logging
 import os
 import uuid
@@ -31,7 +31,7 @@ ps: ev3.PowerSupply = ev3.PowerSupply()
 print(f"current battery is {ps.measured_volts}")
 
 
-def run():
+def run(calibrate=False):
     # DO NOT CHANGE THESE VARIABLES
     #
     # The deploy-script uses the variable "client" to stop the mqtt-client after your program stops or crashes.
@@ -61,15 +61,13 @@ def run():
     gy.mode = 'GYRO-CAL'
     gy.mode = 'GYRO-ANG'
     follow = Follow(m1=m1, m2=m2, cs=cs, ts=ts, gy=gy, movement=movement, ps=ps, sd=sd)
-    odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
+    odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2, )
     follow.reset()
 
-    newM1 = 0
-    newM2 = 0
 
     try:
 
-        specials.menu(follow)
+        specials.menu(follow, calibrate)
 
         global oldGamma
         global newGamma
@@ -96,10 +94,6 @@ def run():
                         colorValues.append(float(line.replace("\n", "")))
                     except Exception:
                         colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
-
-        run = True
-        while run:
-
             rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
 
             # rgbRed = (160, 61, 27)
@@ -108,11 +102,15 @@ def run():
             # rgbWhite = (245, 392, 258)
             # optimal = 171.5
 
+        run = True
+        while run:
+
             cs.mode = "RGB-RAW"
             currentColor = cs.bin_data("hhh")
 
             if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue, 25):
                 # discovers node
+                follow.stop()
                 follow.stop()
 
                 if planet.newPlanet:
@@ -191,23 +189,27 @@ def run():
                 if us.value() < 200:
                     print("\u001b[31mPATH BLOCKED\u001b[0m")
                     follow.pathBlocked = True
+                    blink()
+                    sleep(1)
+
                     m1.run_forever(speed_sp=200)
                     m2.run_forever(speed_sp=-200)
                     m1.position = 0
-                    blink()
+
                     while m1.position < 550:
-                        oldM1 = newM1
-                        oldM2 = newM2
-                        newM1 = m1.position
-                        newM2 = m2.position
-                        movement.append((newM1 - oldM1, newM2 - oldM2))
+                        odo.oldM1 = odo.newM1
+                        odo.oldM2 = odo.newM2
+                        odo.newM1 = m1.position
+                        odo.newM2 = m2.position
+                        movement.append((odo.newM1 - odo.oldM1, odo.newM2 - odo.oldM2))
+                    follow.stop()
                     follow.stop()
 
-                oldM1 = newM1
-                oldM2 = newM2
-                newM1 = m1.position
-                newM2 = m2.position
-                movement.append((newM1 - oldM1, newM2 - oldM2))
+                odo.oldM1 = odo.newM1
+                odo.oldM2 = odo.newM2
+                odo.newM1 = m1.position
+                odo.newM2 = m2.position
+                movement.append((odo.newM1 - odo.oldM1, odo.newM2 - odo.oldM2))
 
     except NotADirectoryError as exc:
         print(exc)
@@ -229,7 +231,13 @@ def CtrlCHandler(signm, frame):
 
 # signal.signal(signal.SIGINT, CtrlCHandler) #only useful when starting robot per ssh
 
-# DO NOT EDIT
+# PLS EDIT
 if __name__ == '__main__':
-    #
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--calibrate", action="calibrate")
+    args = parser.parse_args()
+
+    if args.calibrate:
+        run(calibrate=True)
+    else:
+        run(calibrate=False)

@@ -14,6 +14,10 @@ class Odometry:
         self.gamma: float = gamma
         self.posX: float = posX
         self.posY: float = posY
+        self.oldM1 = 0
+        self.oldM2 = 0
+        self.newM1 = 0
+        self.newM2 = 0
 
     def calculatePart(self, dR: float, dL: float):
         """
