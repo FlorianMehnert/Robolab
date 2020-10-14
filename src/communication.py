@@ -34,6 +34,7 @@ class Communication:
         self.planet = planet
         self.wait = False
         self.waitSendFinish = False
+        self.timeoutComplete = True
         self.lastConnectionTime = time.time()
         self.logger.debug(self.group)
         self.client.enable_logger(logger)
@@ -52,6 +53,7 @@ class Communication:
         :return: void
         """
         self.lastConnectionTime = time.time()
+        self.timeoutComplete = False
         payload = json.loads(message.payload.decode('utf-8'))
         self.logger.debug(json.dumps(payload, indent=2))
         msgFrom = payload["from"]
@@ -131,6 +133,7 @@ class Communication:
         self.wait = True
         while self.wait:
             continue
+        self.timeout()
 
     def sendPath(self,start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction], status: str):
         """
@@ -157,6 +160,7 @@ class Communication:
         self.wait = True
         while self.wait:
             continue
+        self.timeout()
 
     def sendPathSelect(self, path: Tuple[Tuple[int, int], Direction]):
         payload = {
@@ -171,6 +175,7 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
         self.sendMessage(payload, topic)
+        self.timeout()
 
     def sendTargetReached(self):
         payload = {
@@ -186,6 +191,7 @@ class Communication:
         self.wait = True
         while self.wait:
             continue
+        self.timeout()
 
     def sendExplorationCompleted(self):
         payload = {
@@ -201,10 +207,14 @@ class Communication:
         self.wait = True
         while self.wait:
             continue
+        self.timeout()
 
     def timeout(self):
         while time.time() - self.lastConnectionTime < 3:
             continue
+        if not self.timeoutComplete:
+            # TODO: get Sound
+            self.timeoutComplete = True
 
     def sendMessage(self, payload: str, topic: str):
         """

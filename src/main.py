@@ -170,7 +170,6 @@ def run():
                         mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma),
                                        status="blocked")
                         follow.pathBlocked = False
-                    mqttc.timeout()
 
                 print("after")
                 print(planet.start, "planet start")
@@ -191,7 +190,6 @@ def run():
                 print(dirDict, oldGamma, type(dirDict))
                 planet.setAttachedPaths((oldNodeX, oldNodeY), dirDict)
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDir))
-                mqttc.timeout()
 
                 # select one path
                 # send to server
