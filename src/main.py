@@ -2,9 +2,8 @@
 
 import logging
 import os
-import uuid
 import random
-# import signal
+import uuid
 from time import sleep
 from typing import Tuple, List
 
@@ -13,12 +12,12 @@ import paho.mqtt.client as mqtt
 from ev3dev.core import PowerSupply
 
 import specials
-from follow import Follow, convPathsToDirection
+from communication import Communication
+from follow import Follow
 from follow import isColor
 from odometry import Odometry
-from specials import blink
 from planet import Planet, Direction
-from communication import Communication
+from specials import blink
 
 client = None  # DO NOT EDIT
 
@@ -28,7 +27,6 @@ cs: ev3.ColorSensor = ev3.ColorSensor()
 ts: ev3.TouchSensor = ev3.TouchSensor()
 gy: ev3.GyroSensor = ev3.GyroSensor()
 ps: PowerSupply = PowerSupply()
-# rc: ev3.RemoteControl = ev3.RemoteControl()
 us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
 
 print(f"current battery is {ps.measured_volts}")
@@ -39,7 +37,7 @@ def run():
     #
     # The deploy-script uses the variable "client" to stop the mqtt-client after your program stops or crashes.
     # Your script isn't able to close the client after crashing.
-    global client
+    global client, updatedColorValues
 
     client_id = '217' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
     client = mqtt.Client(client_id=client_id,  # Unique Client-ID to recognize our program
@@ -55,13 +53,12 @@ def run():
 
     # THIS IS WHERE PARADISE BEGINS
     # CODe
+
     planet = Planet()
     mqttc = Communication(client, logger, planet)
     movement: List[
-        Tuple[
-            int, int]] = []  # used to save all movement values gathered while line following for odometry calculations
-
-
+        Tuple[int, int]] = []
+    # used to save all movement values gathered while line following for odometry calculations
 
     follow = Follow(m1, m2, cs, ts, gy, movement)
     odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
@@ -73,9 +70,7 @@ def run():
     newM2 = 0
 
     try:
-        run = True
-
-
+        mode = True
 
         global oldGamma
         global newGamma
@@ -93,7 +88,9 @@ def run():
 
         print("starting")
 
-        while run:
+        while mode:
+            updatedColorValues = False
+
             mode = input("mode?")
             if mode == "wasd":
                 specials.wasd(m1, m2)
@@ -105,9 +102,13 @@ def run():
             elif mode == "battery":
                 print(ps.measured_volts)
             elif mode == "/help":
-                print("wasd, paths, battery, calibrate, ")
+                print("wasd, paths, battery, calibrate, sop, pid")
             elif mode == "":
-                run = False
+                mode = False
+            elif mode == "sop":
+                while not ts.is_pressed:
+                    continue
+                mode = False
             elif mode == "pid":
                 k = input("kp, ki, kp")
                 if k == "p":
@@ -116,9 +117,12 @@ def run():
                     follow.ki = float(input("integral?"))
                 elif k == "d":
                     follow.kd = float(input("derivate?"))
-            elif mode == "cal":
-                rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = follow.calibrate()
-            elif mode == "read":
+            elif mode == "calibrate":
+                updatedColorValues = True
+                with open("/home/robot/src/values.txt", mode="w") as file:
+                    for i in follow.calibrate():
+                        file.write(f"{i}\n")
+
                 with open("/home/robot/src/values.txt", mode="r") as file:
                     colorValues = []
                     for line in file:
@@ -128,37 +132,13 @@ def run():
                             try:
                                 colorValues.append(float(line.replace("\n", "")))
                             except Exception:
-                                colorValues.append(follow.convStrToRGB(line.replace("\n","")))
-                    rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
-                    print(rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal)
-            elif mode == "calibrate":
-                with open("/home/robot/src/values.txt", mode="w") as file:
-                    for i in follow.calibrate():
-                        file.write(f"{i}")
-
-                with open("/home/robot/src/values.txt", mode="r") as file:
-                    for line in file:
-                        if line == "\n":
-                            continue
-                        else:
-                            colorValues.append(float(line.replace("\n", "")))
-                    rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+                                colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
 
         run = True
         while run:
-
-            # obtaining calibrates color values from values.txt and setting them as rgb
-            with open("/home/robot/src/values.txt", mode="r") as file:
-                colorValues = []
-                for line in file:
-                    if line == "\n":
-                        continue
-                    else:
-                        try:
-                            colorValues.append(float(line.replace("\n", "")))
-                        except Exception:
-                            colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
-                # rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+            if updatedColorValues:
+                rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+            else:
                 rgbRed = (160, 61, 27)
                 rgbBlue = (40, 152, 142)
                 rgbBlack = (34, 78, 33)
@@ -182,8 +162,8 @@ def run():
                 else:
                     print("else")
                     odo.calculateNewPosition(movement)
-                    newNodeX = int(odo.posX/15)
-                    newNodeY = int(odo.posY/15)
+                    newNodeX = int(odo.posX / 15)
+                    newNodeY = int(odo.posY / 15)
                     newGamma = follow.gammaToDirection(odo.gamma)
                     # mqttc.sendPath((((startX, startY),startDirection),(endX, endY), endDirection), )
                     mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma), status="free")
@@ -202,11 +182,11 @@ def run():
                 dirDict = follow.substractGamma(follow.findAttachedPaths(), oldGamma)
                 print(dirDict, oldGamma, type(dirDict))
                 planet.setAttachedPaths((oldNodeX, oldNodeY), dirDict)
-                randDir = Direction(random.randrange(0,270, 90))
+                randDir = Direction(random.randrange(0, 270, 90))
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDir))
                 mqttc.timeout()
 
-                follow.turnRightXTimes(randDir/90)
+                follow.turnRightXTimes(randDir / 90)
                 # select one path
                 # send to server
                 # apply server changes to gamma from start
@@ -218,7 +198,6 @@ def run():
                 elif isColor(currentColor, rgbBlue, 25):
                     print("BLUE")
                     follow.leds(ev3.Leds.GREEN)
-
 
                 # )  # only needed as long dfs isn't implemented
                 # odo.posX
@@ -244,7 +223,7 @@ def run():
                 newM2 = m2.position
                 movement.append((newM1 - oldM1, newM2 - oldM2))
 
-    except NotADirectoryError as exc:
+    except Exception as exc:
         print(exc)
         try:
             m1.stop()
