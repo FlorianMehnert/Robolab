@@ -13,17 +13,6 @@ class Direction(IntEnum):
     SOUTH = 180
     WEST = 270
 
-
-Weight = int
-"""
-Weight of a given path (received from the server)
-
-Value:  -1 if blocked path
-        >0 for all other paths
-        never 0
-"""
-
-
 class Planet:
     """
     Contains the representation of the map and provides certain functions to manipulate or extend
@@ -47,6 +36,13 @@ class Planet:
             add_path(((0, 3), Direction.NORTH), ((0, 3), Direction.WEST), 1)
         :param start: 2-Tuple
         :param target:  2-Tuple
+        :param weight: Integer,
+            Weight of a given path (received from the server)
+            Value: -3 if no existing path
+                -2 if unknown available path
+                -1 if blocked path,
+                0 discovered paths, unknown if free or blocked,
+                >0 for all free paths
         :param weight: Integer
         :return: void
         """
@@ -55,11 +51,33 @@ class Planet:
         if target[0] not in self.paths:
             self.addNode(target[0])
 
-        if target is None:
-            self.paths[start[0]][start[1]] = False
-        else:
-            self.paths[start[0]][start[1]] = (target[0], target[1], weight)
-            self.paths[target[0]][target[1]] = (start[0], start[1], weight)
+        # no existing path
+        if weight == -3 and self.paths[start[0]][start[1]][2] == -2:
+            self.paths[start[0]][start[1]][2] == -3
+            print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
+        # existing path but no more information
+        elif weight == 0 and self.paths[start[0]][start[1]][2] == -2:
+            self.paths[start[0]][start[1]][2] == 0
+            print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
+        # blocked path
+        elif weight == -1:
+            self.paths[start[0]][start[1]][2] = -1
+            # target known and not stored
+            if not self.paths[start[0]][start[1]][0] and start != target:
+                self.paths[start[0]][start[1]][0] = target[0]
+                self.paths[start[0]][start[1]][1] = target[1]
+                self.paths[target[0]][target[1]][0] = start[0]
+                self.paths[target[0]][target[1]][1] = start[1]
+                print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
+            else:
+                print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
+        elif weight > 0:
+            self.paths[start[0]][start[1]][0] = target[0]
+            self.paths[start[0]][start[1]][1] = target[1]
+            self.paths[target[0]][target[1]][0] = start[0]
+            self.paths[target[0]][target[1]][1] = start[1]
+            print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
+
         return
 
     def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
@@ -73,17 +91,24 @@ class Planet:
         return
 
     def setAttachedPaths(self, node: Tuple[int, int], dirList: List[Direction]):
-        if node not in self.paths:
-            self.addNode(node)
-        for dir in dirList:
-            if self.paths[node][dir] is None:
-                self.paths[node][dir] = dirList[dir]
-
+        for dir in self.paths[node]:
+            if dir in dirList:
+                self.addPath((node, dir), (node, dir), 0)
+            else:
+                self.addPath((node, dir), (node, dir), -3)
 
     def addNode(self, node: Tuple[int, int]):
+        """
+        Add new node in path dictionary with unknown path status
+
+        Example:
+            addNode((3, 4))
+        :param node: 2-Tuple (posX, posY)
+        :return: void
+        """
         nodepaths = {}
         for dir in Direction:
-            nodepaths[dir] = None
+            nodepaths[dir] = ((), 0, -2)
         self.paths[node] = nodepaths
 
     def getPaths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
@@ -106,12 +131,11 @@ class Planet:
         :return: Dict
         """
         pathdict = {}
-        for key in self.paths:
-            (coord, direction) = key
-            if coord in pathdict:
-                pathdict[key] = self.getTargets(direction, self.paths[key])
-            else:
-                pathdict[coord] = self.getTargets(direction, self.paths[key])
+        for node in self.paths:
+            pathdict[node] = {}
+            for dir in self.paths[node]:
+                if dir[2] > 0:
+                    pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
     def getTargets(self, direction, target):  # dict in dict
