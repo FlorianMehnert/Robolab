@@ -2,7 +2,6 @@
 
 import logging
 import os
-import random
 import uuid
 from time import sleep
 from typing import Tuple, List
@@ -120,8 +119,6 @@ def run():
                     for i in follow.calibrate():
                         file.write(f"{i}\n")
 
-
-
         run = True
         while run:
             colorValues = []
@@ -164,7 +161,12 @@ def run():
                     newNodeY = int(odo.posY / 15)
                     newGamma = follow.gammaToDirection(odo.gamma)
                     print(oldNodeX, oldNodeY, oldGamma, newNodeX, newNodeY, newGamma)
-                    mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma), status="free")
+                    if follow.pathBlocked:
+                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma), status="free")
+                    else:
+                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma),
+                                       status="blocked")
+                        follow.pathBlocked = False
                     mqttc.timeout()
 
                 print("after")
@@ -188,7 +190,6 @@ def run():
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDir))
                 mqttc.timeout()
 
-
                 # select one path
                 # send to server
                 # apply server changes to gamma from start
@@ -211,12 +212,17 @@ def run():
                 follow.follow(optimal, 350, odo)
 
                 if us.value() < 200:
+                    follow.pathBlocked = True
                     m1.run_forever(speed_sp=200)
                     m2.run_forever(speed_sp=-200)
                     m1.position = 0
                     blink()
                     while m1.position < 550:
-                        sleep(.2)
+                        oldM1 = newM1
+                        oldM2 = newM2
+                        newM1 = m1.position
+                        newM2 = m2.position
+                        movement.append((newM1 - oldM1, newM2 - oldM2))
                     follow.stop()
 
                 oldM1 = newM1
@@ -225,7 +231,7 @@ def run():
                 newM2 = m2.position
                 movement.append((newM1 - oldM1, newM2 - oldM2))
 
-    except Exception as exc:
+    except NotADirectoryError as exc:
         print(exc)
         try:
             m1.stop()

@@ -63,6 +63,7 @@ class Follow:
         self.rgbBlack = (34, 78, 33)
         self.rc = rc
         self.movement = movement
+        self.pathBlocked = False
 
         self.kp = 0.8
         self.ki = 0.01
