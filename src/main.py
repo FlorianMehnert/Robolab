@@ -177,13 +177,18 @@ def run():
                 odo.gamma = oldGamma
 
                 paths = follow.findAttachedPaths()
-                dirDict = follow.substractGammaFromDict(paths, oldGamma)
+                print("oldGamma and paths", oldGamma, paths)
+                dirList = follow.gammaRelToAbs(paths, oldGamma)
+                print("randDirRel")
                 randDirRel = follow.selectPath(paths)
-                randDirAbs = follow.selectPath(dirDict)
+                print("randDirAbs")
+                randDirAbs = follow.selectPath(dirList)
                 sleep(1)
-                print(dirDict, "\u001b[31mrandDir + value\u001b[0m", randDirRel, randDirRel.value)
+                print("\u001b[31mrandDirRel, randDirAbs, oldGamma\u001b[0m", randDirRel, randDirAbs, oldGamma)
+                print("dirList", dirList)
+                print("paths", paths)
                 follow.turnRightXTimes(randDirRel.value / 90)
-                planet.setAttachedPaths((oldNodeX, oldNodeY), dirDict)
+                planet.setAttachedPaths((oldNodeX, oldNodeY), dirList)
 
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDirAbs))
 
