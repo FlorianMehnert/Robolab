@@ -54,8 +54,7 @@ def run():
 
     planet = Planet()
     mqttc = Communication(client, logger, planet)
-    movement: List[
-        Tuple[int, int]] = []
+    movement: List[Tuple[int, int]] = []
     # used to save all movement values gathered while line following for odometry calculations
 
     gy.mode = 'GYRO-CAL'
@@ -79,8 +78,8 @@ def run():
         global newNodeX
         global newNodeY
 
-        oldGamma = Direction.NORTH
-        newGamma = Direction.NORTH
+        oldGamma: Direction = Direction.NORTH
+        newGamma: Direction = Direction.NORTH
         oldNodeX = 0
         oldNodeY = 0
         newNodeX = 0
@@ -146,34 +145,31 @@ def run():
 
                     else:
                         # sends just discovered path
-                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma),
+                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma),
+                                       ((newNodeX, newNodeY), Direction((newGamma.value + 180) % 360)),
                                        status="free")
 
+                # applying server data to old position and odometry
                 oldNodeX = planet.start[0][0]
                 oldNodeY = planet.start[0][1]
-                oldGamma = planet.start[1]
+                oldGamma = planet.start[1]  # direction already gets turned
                 odo.posX = oldNodeX
                 odo.posY = oldNodeY
                 odo.gamma = oldGamma
 
                 paths = follow.findAttachedPaths()
                 paths = follow.removeDoubles(paths)
-                print("oldGamma and paths", oldGamma, paths)
 
-                dirList = follow.gammaRelToAbs(paths, newGamma)
+                dirList = follow.gammaRelToAbs(paths, newGamma)  # new gamma needs to be correctly calculated by odo
                 dirList = follow.removeDoubles(dirList)
-                print("randDirRel", dirList)
 
                 randDirRel = follow.selectPath(paths)
-                print("randDirAbs", dirList)
-                randDirAbs = follow.selectPath(dirList)
+                randDirAbs = Direction(randDirRel.value + int(newGamma.value))  # randDirRel + current absolute angle
+
                 sleep(1)
-                print("\u001b[31mrandDirRel, randDirAbs, oldGamma\u001b[0m", randDirRel, randDirAbs, oldGamma)
-                print("dirList", dirList)
-                print("paths", paths)
+
                 follow.turnRightXTimes(randDirRel.value / 90)
                 planet.setAttachedPaths((oldNodeX, oldNodeY), dirList)
-
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDirAbs))
 
                 # select one path

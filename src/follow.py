@@ -5,6 +5,7 @@ from planet import Direction
 
 import ev3dev.ev3 as ev3
 
+
 def isColor(currentColor: tuple, matchingColor: tuple, distance: int) -> bool:
     """
     currentColor -- rgb Tuple of the current color
@@ -21,6 +22,7 @@ def isColor(currentColor: tuple, matchingColor: tuple, distance: int) -> bool:
 
     return match
 
+
 def isBlack(rgb: (int, int, int)):
     val = (rgb[0] + rgb[1] + rgb[2]) / 3
     if val > 100:
@@ -31,7 +33,8 @@ def isBlack(rgb: (int, int, int)):
 
 class Follow:
     def __init__(self, m1: ev3.LargeMotor, m2: ev3.LargeMotor, cs: ev3.ColorSensor, ts: ev3.TouchSensor,
-                 gy: ev3.GyroSensor, movement: list, ps:ev3.PowerSupply, sd: ev3.Sound, rc: ev3.RemoteControl = None) -> None:
+                 gy: ev3.GyroSensor, movement: list, ps: ev3.PowerSupply, sd: ev3.Sound,
+                 rc: ev3.RemoteControl = None) -> None:
         self.m1 = m1
         self.m2 = m2
         self.cs = cs
@@ -215,10 +218,10 @@ class Follow:
         self.m1.wait_until_not_moving()
         return dirList
 
-    def gammaRelToAbs(self, dirList: List[Direction], gamma: float):
+    def gammaRelToAbs(self, dirList: List[Direction], gamma: Direction):
         cnt = 0
         for i in dirList:
-            dirList[cnt] = Direction(i + int(gamma) % 360)
+            dirList[cnt] = Direction(i + int(gamma.value) % 360)
             cnt += 1
         return dirList
 
