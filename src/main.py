@@ -85,20 +85,20 @@ def run():
         newNodeX = 0
         newNodeY = 0
 
+        # extracting colorvalues from values.txt
+        colorValues = []
+        with open("/home/robot/src/values.txt", mode="r") as file:
+            for line in file:
+                if line == "\n":
+                    continue
+                else:
+                    try:
+                        colorValues.append(float(line.replace("\n", "")))
+                    except Exception:
+                        colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
+
         run = True
         while run:
-
-            # extracting colorvalues from values.txt
-            colorValues = []
-            with open("/home/robot/src/values.txt", mode="r") as file:
-                for line in file:
-                    if line == "\n":
-                        continue
-                    else:
-                        try:
-                            colorValues.append(float(line.replace("\n", "")))
-                        except Exception:
-                            colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
 
             rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
 
