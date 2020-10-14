@@ -72,12 +72,12 @@ class Planet:
         self.paths.pop(path)
         return
 
-    def setAttachedPaths(self, node: Tuple[int, int], dirDict: Dict[Direction: bool]):
+    def setAttachedPaths(self, node: Tuple[int, int], dirDict: Dict[Direction, bool]):
         if node not in self.paths:
             self.addNode(node)
-        for dir, available in dirDict:
+        for dir in dirDict.keys():
             if self.paths[node][dir] is None:
-                self.paths[node][dir] = available
+                self.paths[node][dir] = dirDict[dir]
 
     def addNode(self, node: Tuple[int, int]):
         nodepaths = {}
@@ -222,7 +222,7 @@ class Planet:
         visitedNodes = []
         paths = self.getPaths()
         countNode = len(paths)
-        table = {}  # Dict[node: Tuple[int, int]: 3-Tuple(weight: int, previous: int, Direction)]
+        table = {}  # Dict[node, Tuple[int, int]: 3-Tuple(weight: int, previous: int, Direction)]
         targetKnown = False
         startKnown = False
 

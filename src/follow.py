@@ -63,9 +63,9 @@ class Follow:
         self.rc = rc
         self.movement = movement
 
-        self.kp = .8
-        self.ki = .2
-        self.kd = .3
+        self.kp = 0.8
+        self.ki = 0.01
+        self.kd = 0.3
 
     def convStrToRGB(self, s:str):
         valTemp = ""
@@ -231,7 +231,7 @@ class Follow:
         print(dirDict)
         return dirDict
 
-    def substractGamma(self, dirDict: Dict[Direction: bool], gamma: float):
+    def substractGamma(self, dirDict: Dict[Direction, bool], gamma: float):
         if gamma == Direction.EAST:
             dirDict[Direction.NORTH] = dirDict[Direction.WEST]
             dirDict[Direction.EAST] = dirDict[Direction.NORTH]
@@ -247,6 +247,8 @@ class Follow:
             dirDict[Direction.EAST] = dirDict[Direction.SOUTH]
             dirDict[Direction.SOUTH] = dirDict[Direction.WEST]
             dirDict[Direction.WEST] = dirDict[Direction.NORTH]
+
+        return dirDict
 
     def gammaToDirection(self, gamma):
         if gamma in range(316,360) or gamma in range(0, 45):

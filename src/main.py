@@ -3,6 +3,7 @@
 import logging
 import os
 import uuid
+import random
 # import signal
 from time import sleep
 from typing import Tuple, List
@@ -199,7 +200,13 @@ def run():
                 print(oldNodeX, newNodeY, newNodeX, newNodeY, oldGamma, newGamma, "many values")
 
                 dirDict = follow.substractGamma(follow.findAttachedPaths(), oldGamma)
+                print(dirDict, oldGamma, type(dirDict))
                 planet.setAttachedPaths((oldNodeX, oldNodeY), dirDict)
+                randDir = Direction(random.randrange(0,270, 90))
+                mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDir))
+                mqttc.timeout()
+
+                follow.turnRightXTimes(randDir/90)
                 # select one path
                 # send to server
                 # apply server changes to gamma from start
@@ -237,7 +244,7 @@ def run():
                 newM2 = m2.position
                 movement.append((newM1 - oldM1, newM2 - oldM2))
 
-    except Exception as exc:
+    except NotADirectoryError as exc:
         print(exc)
         try:
             m1.stop()
