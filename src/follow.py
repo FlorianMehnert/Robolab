@@ -284,6 +284,8 @@ class Follow:
             return path
 
     def gammaToDirection(self, gamma):
+        print(gamma, "GAMMA TO DIRECTION")
+        gamma = abs(round(gamma))
         if gamma in range(316,360) or gamma in range(0, 45):
             return Direction.NORTH
         elif gamma in range(46, 135):

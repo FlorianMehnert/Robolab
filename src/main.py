@@ -163,6 +163,7 @@ def run():
                     newNodeX = int(odo.posX / 15)
                     newNodeY = int(odo.posY / 15)
                     newGamma = follow.gammaToDirection(odo.gamma)
+                    print(oldNodeX, oldNodeY, oldGamma, newNodeX, newNodeY, newGamma)
                     mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma), status="free")
                     mqttc.timeout()
 
