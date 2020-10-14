@@ -150,28 +150,25 @@ def run():
                 follow.stop()
 
                 if planet.newPlanet:
-                    print("if")
                     mqttc.sendReady()
                     mqttc.timeout()
-                    print(planet.start, "IN MAIN")
                     m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                     m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
 
                 else:
-                    print("else")
                     odo.calculateNewPosition(movement)
                     newNodeX = int(odo.posX / 15)
                     newNodeY = int(odo.posY / 15)
                     newGamma = follow.gammaToDirection(odo.gamma)
-                    print(oldNodeX, oldNodeY, oldGamma, newNodeX, newNodeY, newGamma)
+                    print(oldNodeX, oldNodeY, oldGamma, newNodeX, newNodeY, newGamma, "main else all node values")
                     if follow.pathBlocked:
-                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma), status="free")
-                    else:
                         mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma),
                                        status="blocked")
+                    else:
+                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma),
+                                       status="free")
                         follow.pathBlocked = False
 
-                print("after")
                 print(planet.start, "planet start")
                 oldNodeX = planet.start[0][0]
                 oldNodeY = planet.start[0][1]
@@ -179,7 +176,6 @@ def run():
                 odo.posX = oldNodeX
                 odo.posY = oldNodeY
                 odo.gamma = oldGamma
-                print(oldNodeX, newNodeY, newNodeX, newNodeY, oldGamma, newGamma, "many values")
 
                 paths = follow.findAttachedPaths()
                 dirDict = follow.substractGamma(paths, oldGamma)
@@ -210,7 +206,7 @@ def run():
             else:
                 # default line follow
 
-                follow.follow(optimal, 100)
+                follow.follow(optimal, 400)
 
                 if us.value() < 200:
                     follow.pathBlocked = True

@@ -31,16 +31,12 @@ def convPathsToDirection(dircts: Dict) -> int:
     conversion function used in findAttachedPaths
     """
     if dircts[Direction.NORTH]:
-        print("0")
         return 0
     elif dircts[Direction.EAST]:
-        print("1")
         return 1
     elif dircts[Direction.SOUTH]:
-        print("2")
         return 2
     elif dircts[Direction.WEST]:
-        print("-1")
         return -1
 
 
@@ -69,7 +65,7 @@ class Follow:
 
         self.kp = 0.8
         self.ki = 0.01
-        self.kd = 0.3
+        self.kd = 0.03
 
     def convStrToRGB(self, s:str):
         valTemp = ""
@@ -194,10 +190,7 @@ class Follow:
 
         self.m1.position = 0
 
-        if x == -1:
-            degreeFor90 = degreeFor90 / 4 * 3
         while abs(self.m1.position) < abs(x * degreeFor90):
-            print(self.m1.position, degreeFor90 * x)
             sleep(0.1)
         self.stop()
 
@@ -205,7 +198,6 @@ class Follow:
         """
         finds attached paths to discovered knots by turning 360° and repositions the robot to the next viable path
         """
-        print(self.gy.value(), "GYRO")
 
         dirDict = {Direction.NORTH: False, Direction.EAST: False, Direction.SOUTH: False, Direction.WEST: False}
 
@@ -268,7 +260,6 @@ class Follow:
                 print(i)
 
                 paths.append(i)
-        print(paths, "in selctPath in FOLLOW")
         path: Direction = Direction.SOUTH
         if paths.__contains__(Direction.NORTH) or paths.__contains__(Direction.EAST) or paths.__contains__(Direction.WEST):
             while True:
@@ -282,7 +273,7 @@ class Follow:
 
                 if dirDict[path]:
                     break
-            print(dirDict, "\u001b[31mselected\u001b[0m", path)
+            print("\u001b[31mselected\u001b[0m", path)
             return path
 
     def gammaToDirection(self, gamma):
