@@ -33,6 +33,7 @@ class Communication:
         self.group = self.client._client_id[0:3].decode('utf-8')
         self.planet = planet
         self.wait = False
+        self.waitSendFinish = False
         self.lastConnectionTime = time.time()
         self.logger.debug(self.group)
         self.client.enable_logger(logger)
@@ -99,7 +100,7 @@ class Communication:
         self.lastConnectionTime = time.time()
         self.logger.debug('Send to: ' + topic)
         self.logger.debug(json.dumps(message, indent=2))
-        # YOUR CODE FOLLOWS
+        self.waitSendFinish = False
 
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
@@ -124,7 +125,7 @@ class Communication:
     def sendReady(self):
         payload = {"from" : "client", "type" : "ready"}
         payload = json.dumps(payload)
-        self.client.publish("explorer/" + self.group, payload=payload, qos=1)
+        self.sendMessage(payload, "explorer/" + self.group)
         self.planet.newPlanet = False
         self.wait = True
         while self.wait:
@@ -151,7 +152,7 @@ class Communication:
         }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
-        self.client.publish(topic, payload=payload, qos=1)
+        self.sendMessage(payload, topic)
         self.wait = True
         while self.wait:
             continue
@@ -168,7 +169,7 @@ class Communication:
         }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
-        self.client.publish(topic, payload=payload, qos=1)
+        self.sendMessage(payload, topic)
 
     def sendTargetReached(self):
         payload = {
@@ -180,7 +181,7 @@ class Communication:
         }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
-        self.client.publish(topic, payload=payload, qos=1)
+        self.sendMessage(payload, topic)
         self.wait = True
         while self.wait:
             continue
@@ -195,11 +196,24 @@ class Communication:
         }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
-        self.client.publish(topic, payload=payload, qos=1)
+        self.sendMessage(payload, topic)
         self.wait = True
         while self.wait:
             continue
 
     def timeout(self):
         while time.time() - self.lastConnectionTime < 3:
+            continue
+
+    def sendMessage(self, payload: str, topic: str):
+        """
+        Send message to mothership
+        Example:
+            sendMessage("{"from" : "client", "type" : "ready"}", "explorer/217")
+        :param payload: String: payload in JSON of MQTT message
+        :param topic: String: topic of MQTT message
+        """
+        self.client.publish(topic, payload=payload, qos=1)
+        self.waitSendFinish = True
+        while self.waitSendFinish:
             continue
