@@ -230,7 +230,7 @@ class Follow:
         self.m1.wait_until_not_moving()
         return dirDict
 
-    def substractGamma(self, dirDict: Dict[Direction, bool], gamma: float):
+    def substractGammaFromDict(self, dirDict: Dict[Direction, bool], gamma: float):
         secDict = {}
         if gamma == Direction.EAST.value:
             secDict[Direction.NORTH] = dirDict[Direction.WEST]
@@ -249,6 +249,14 @@ class Follow:
             secDict[Direction.WEST] = dirDict[Direction.NORTH]
 
         return secDict
+
+    def substractGamma(self, gamma: float, offset: float):
+        if gamma == Direction.EAST.value:
+            return Direction.SOUTH
+        if gamma == Direction.SOUTH.value:
+            return Direction.WEST
+        if gamma == Direction.WEST.value:
+            return Direction.NORTH
 
     def selectPath(self, dirDict: Dict[Direction, bool]) -> Direction:
         """

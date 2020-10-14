@@ -169,7 +169,6 @@ def run():
                                        status="free")
                         follow.pathBlocked = False
 
-                print(planet.start, "planet start")
                 oldNodeX = planet.start[0][0]
                 oldNodeY = planet.start[0][1]
                 oldGamma = planet.start[1]
@@ -178,14 +177,15 @@ def run():
                 odo.gamma = oldGamma
 
                 paths = follow.findAttachedPaths()
-                dirDict = follow.substractGamma(paths, oldGamma)
-                randDir = follow.selectPath(paths)
+                dirDict = follow.substractGammaFromDict(paths, oldGamma)
+                randDirRel = follow.selectPath(paths)
+                randDirAbs = follow.selectPath(dirDict)
                 sleep(1)
-                print(dirDict, "\u001b[31mrandDir + value\u001b[0m", randDir, randDir.value)
-                follow.turnRightXTimes(randDir.value / 90)
-                print(dirDict, oldGamma, type(dirDict))
+                print(dirDict, "\u001b[31mrandDir + value\u001b[0m", randDirRel, randDirRel.value)
+                follow.turnRightXTimes(randDirRel.value / 90)
                 planet.setAttachedPaths((oldNodeX, oldNodeY), dirDict)
-                mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDir))
+
+                mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDirAbs))
 
                 # select one path
                 # send to server
@@ -193,22 +193,18 @@ def run():
                 # (turn to direction of server)
 
                 if isColor(currentColor, rgbRed, 25):
-                    print("RED")
+                    print("\u001b[31mRED\u001b[0m")
                     follow.leds(ev3.Leds.RED)
                 elif isColor(currentColor, rgbBlue, 25):
-                    print("BLUE")
+                    print("\u001b[34mBLUE\u001b[0m")
                     follow.leds(ev3.Leds.GREEN)
 
-                # )  # only needed as long dfs isn't implemented
-                # odo.posX
-                # odo.posY
-
             else:
-                # default line follow
 
-                follow.follow(optimal, 400)
+                follow.follow(optimal, 300)
 
                 if us.value() < 200:
+                    print("\u001b[31mPATH BLOCKED\u001b[0m")
                     follow.pathBlocked = True
                     m1.run_forever(speed_sp=200)
                     m2.run_forever(speed_sp=-200)
