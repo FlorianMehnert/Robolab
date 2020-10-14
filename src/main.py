@@ -8,7 +8,6 @@ from typing import Tuple, List
 
 import ev3dev.ev3 as ev3
 import paho.mqtt.client as mqtt
-from ev3dev.core import PowerSupply
 
 import specials
 from communication import Communication
@@ -25,8 +24,9 @@ m2: ev3.LargeMotor = ev3.LargeMotor('outC')
 cs: ev3.ColorSensor = ev3.ColorSensor()
 ts: ev3.TouchSensor = ev3.TouchSensor()
 gy: ev3.GyroSensor = ev3.GyroSensor()
-ps: PowerSupply = PowerSupply()
 us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
+sd: ev3.Sound = ev3.Sound()
+ps: ev3.PowerSupply = ev3.PowerSupply()
 
 print(f"current battery is {ps.measured_volts}")
 
@@ -36,7 +36,7 @@ def run():
     #
     # The deploy-script uses the variable "client" to stop the mqtt-client after your program stops or crashes.
     # Your script isn't able to close the client after crashing.
-    global client, updatedColorValues
+    global client
 
     client_id = '217' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
     client = mqtt.Client(client_id=client_id,  # Unique Client-ID to recognize our program
@@ -51,7 +51,6 @@ def run():
     logger = logging.getLogger('RoboLab')
 
     # THIS IS WHERE PARADISE BEGINS
-    # CODe
 
     planet = Planet()
     mqttc = Communication(client, logger, planet)
@@ -59,17 +58,19 @@ def run():
         Tuple[int, int]] = []
     # used to save all movement values gathered while line following for odometry calculations
 
-    follow = Follow(m1, m2, cs, ts, gy, movement)
+    gy.mode = 'GYRO-CAL'
+    gy.mode = 'GYRO-CAL'
+    gy.mode = 'GYRO-ANG'
+    follow = Follow(m1=m1, m2=m2, cs=cs, ts=ts, gy=gy, movement=movement, ps=ps, sd=sd)
     odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
     follow.reset()
 
-    oldM1: int = m1.position
-    oldM2: int = m2.position
     newM1 = 0
     newM2 = 0
 
     try:
-        mode = True
+
+        specials.menu(follow)
 
         global oldGamma
         global newGamma
@@ -85,45 +86,10 @@ def run():
         newNodeX = 0
         newNodeY = 0
 
-        print("starting")
-
-        while mode:
-            mode = input("mode?")
-            if mode == "wasd":
-                specials.wasd(m1, m2)
-            elif mode == "paths":
-                follow.findAttachedPaths()
-            # elif mode == "ir":
-            #     if rc:
-            #         specials.remoteControl(rc, m1, m2)
-            elif mode == "battery":
-                print(ps.measured_volts)
-            elif mode == "/help":
-                print("wasd, paths, battery, calibrate, sop, pid")
-            elif mode == "":
-                mode = False
-            elif mode == "sop":
-                while not ts.is_pressed:
-                    continue
-                mode = False
-            elif mode == "pid":
-                k = input("kp, ki, kp")
-                if k == "p":
-                    follow.kp = float(input("proportional?"))
-                elif k == "i":
-                    follow.ki = float(input("integral?"))
-                elif k == "d":
-                    follow.kd = float(input("derivate?"))
-            elif mode == "calibrate":
-                with open("/home/robot/src/values.txt", mode="w") as file:
-                    for i in follow.calibrate():
-                        file.write(f"{i}\n")
-            elif mode == "follow":
-                while True:
-                    follow.follow(optimal=171.5,baseSpeed=200)
-
         run = True
         while run:
+
+            # extracting colorvalues from values.txt
             colorValues = []
             with open("/home/robot/src/values.txt", mode="r") as file:
                 for line in file:
@@ -147,27 +113,41 @@ def run():
             currentColor = cs.bin_data("hhh")
 
             if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue, 25):
+                # discovers node
                 follow.stop()
 
                 if planet.newPlanet:
+                    # first node discovered
                     mqttc.sendReady()
                     mqttc.timeout()
+                    # TODO sleep?, 1000, 1000 seems a bit much
                     m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                     m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
 
                 else:
+                    # any other node discovered
+
+                    # odometry calculation
                     odo.calculateNewPosition(movement)
-                    newNodeX = int(odo.posX / 15)
-                    newNodeY = int(odo.posY / 15)
+
+                    # setting odometry X and Y to nodeX and nodeY
+                    newNodeX = int(odo.posX / 50)
+                    newNodeY = int(odo.posY / 50)
                     newGamma = follow.gammaToDirection(odo.gamma)
+
+                    # prints every position data
                     print(oldNodeX, oldNodeY, oldGamma, newNodeX, newNodeY, newGamma, "main else all node values")
+
                     if follow.pathBlocked:
-                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma),
+                        # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
+                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((oldNodeX, oldNodeY), oldGamma),
                                        status="blocked")
+                        follow.pathBlocked = False
+
                     else:
+                        # sends just discovered path
                         mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma),
                                        status="free")
-                        follow.pathBlocked = False
 
                 oldNodeX = planet.start[0][0]
                 oldNodeY = planet.start[0][1]
@@ -177,11 +157,15 @@ def run():
                 odo.gamma = oldGamma
 
                 paths = follow.findAttachedPaths()
+                paths = follow.removeDoubles(paths)
                 print("oldGamma and paths", oldGamma, paths)
-                dirList = follow.gammaRelToAbs(paths, oldGamma)
-                print("randDirRel")
+
+                dirList = follow.gammaRelToAbs(paths, newGamma)
+                dirList = follow.removeDoubles(dirList)
+                print("randDirRel", dirList)
+
                 randDirRel = follow.selectPath(paths)
-                print("randDirAbs")
+                print("randDirAbs", dirList)
                 randDirAbs = follow.selectPath(dirList)
                 sleep(1)
                 print("\u001b[31mrandDirRel, randDirAbs, oldGamma\u001b[0m", randDirRel, randDirAbs, oldGamma)

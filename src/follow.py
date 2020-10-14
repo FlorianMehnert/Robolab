@@ -5,9 +5,6 @@ from planet import Direction
 
 import ev3dev.ev3 as ev3
 
-from odometry import Odometry
-
-
 def isColor(currentColor: tuple, matchingColor: tuple, distance: int) -> bool:
     """
     currentColor -- rgb Tuple of the current color
@@ -24,22 +21,6 @@ def isColor(currentColor: tuple, matchingColor: tuple, distance: int) -> bool:
 
     return match
 
-
-def convPathsToDirection(dircts: Dict) -> int:
-    """
-    dircts -- directions dictionary with following structure: {North: bool, East: bool, South: bool, West:bool}
-    conversion function used in findAttachedPaths
-    """
-    if dircts[Direction.NORTH]:
-        return 0
-    elif dircts[Direction.EAST]:
-        return 1
-    elif dircts[Direction.SOUTH]:
-        return 2
-    elif dircts[Direction.WEST]:
-        return -1
-
-
 def isBlack(rgb: (int, int, int)):
     val = (rgb[0] + rgb[1] + rgb[2]) / 3
     if val > 100:
@@ -50,15 +31,18 @@ def isBlack(rgb: (int, int, int)):
 
 class Follow:
     def __init__(self, m1: ev3.LargeMotor, m2: ev3.LargeMotor, cs: ev3.ColorSensor, ts: ev3.TouchSensor,
-                 gy: ev3.GyroSensor, movement: list, rc: ev3.RemoteControl = None) -> None:
+                 gy: ev3.GyroSensor, movement: list, ps:ev3.PowerSupply, sd: ev3.Sound, rc: ev3.RemoteControl = None) -> None:
         self.m1 = m1
         self.m2 = m2
         self.cs = cs
         self.ts = ts
         self.gy = gy
-        self.rgbBlack = (34, 78, 33)
         self.rc = rc
+        self.ps = ps
+        self.sd = sd
         self.movement = movement
+
+        self.rgbBlack = (34, 78, 33)
         self.pathBlocked = False
         self.integral = 0
         self.previousError = 0
@@ -234,9 +218,18 @@ class Follow:
     def gammaRelToAbs(self, dirList: List[Direction], gamma: float):
         cnt = 0
         for i in dirList:
-            dirList[cnt] = Direction(int(i+int(gamma)))
-            (Direction((int(i.value + gamma)) % 360))
+            dirList[cnt] = Direction(i + int(gamma) % 360)
+            cnt += 1
         return dirList
+
+    def removeDoubles(self, dirList: List[Direction]):
+        doubles = []
+        for i in dirList:
+            if i in doubles:
+                continue
+            else:
+                doubles.append(i)
+        return doubles
 
     def selectPath(self, dirList: List[Direction]) -> Direction:
         """
@@ -252,9 +245,7 @@ class Follow:
             print("some path was not detected!")
             path = Direction.SOUTH
         else:
-            # chose random
-            dirList.remove(Direction)
-            path = random.choice(dirList)
+            path = Direction.NORTH
         print("\u001b[31mselected\u001b[0m", path)
         return path
 
