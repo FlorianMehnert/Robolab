@@ -89,8 +89,6 @@ def run():
         print("starting")
 
         while mode:
-            updatedColorValues = False
-
             mode = input("mode?")
             if mode == "wasd":
                 specials.wasd(m1, m2)
@@ -118,32 +116,32 @@ def run():
                 elif k == "d":
                     follow.kd = float(input("derivate?"))
             elif mode == "calibrate":
-                updatedColorValues = True
                 with open("/home/robot/src/values.txt", mode="w") as file:
                     for i in follow.calibrate():
                         file.write(f"{i}\n")
 
-                with open("/home/robot/src/values.txt", mode="r") as file:
-                    colorValues = []
-                    for line in file:
-                        if line == "\n":
-                            continue
-                        else:
-                            try:
-                                colorValues.append(float(line.replace("\n", "")))
-                            except Exception:
-                                colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
+
 
         run = True
         while run:
-            if updatedColorValues:
-                rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
-            else:
-                rgbRed = (160, 61, 27)
-                rgbBlue = (40, 152, 142)
-                rgbBlack = (34, 78, 33)
-                rgbWhite = (245, 392, 258)
-                optimal = 171.5
+            colorValues = []
+            with open("/home/robot/src/values.txt", mode="r") as file:
+                for line in file:
+                    if line == "\n":
+                        continue
+                    else:
+                        try:
+                            colorValues.append(float(line.replace("\n", "")))
+                        except Exception:
+                            colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
+
+            rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+
+            # rgbRed = (160, 61, 27)
+            # rgbBlue = (40, 152, 142)
+            # rgbBlack = (34, 78, 33)
+            # rgbWhite = (245, 392, 258)
+            # optimal = 171.5
 
             cs.mode = "RGB-RAW"
             currentColor = cs.bin_data("hhh")
@@ -165,7 +163,6 @@ def run():
                     newNodeX = int(odo.posX / 15)
                     newNodeY = int(odo.posY / 15)
                     newGamma = follow.gammaToDirection(odo.gamma)
-                    # mqttc.sendPath((((startX, startY),startDirection),(endX, endY), endDirection), )
                     mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((newNodeX, newNodeY), newGamma), status="free")
                     mqttc.timeout()
 
@@ -179,14 +176,18 @@ def run():
                 odo.gamma = oldGamma
                 print(oldNodeX, newNodeY, newNodeX, newNodeY, oldGamma, newGamma, "many values")
 
-                dirDict = follow.substractGamma(follow.findAttachedPaths(), oldGamma)
+                paths = follow.findAttachedPaths()
+                dirDict = follow.substractGamma(paths, oldGamma)
+                randDir = follow.selectPath(paths)
+                sleep(1)
+                print(dirDict, "\u001b[31mrandDir + value\u001b[0m", randDir, randDir.value)
+                follow.turnRightXTimes(randDir.value / 90)
                 print(dirDict, oldGamma, type(dirDict))
                 planet.setAttachedPaths((oldNodeX, oldNodeY), dirDict)
-                randDir = Direction(random.randrange(0, 270, 90))
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDir))
                 mqttc.timeout()
 
-                follow.turnRightXTimes(randDir / 90)
+
                 # select one path
                 # send to server
                 # apply server changes to gamma from start

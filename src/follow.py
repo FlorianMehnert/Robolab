@@ -1,3 +1,4 @@
+import random
 from time import sleep
 from typing import Dict, Tuple, List
 from planet import Direction
@@ -194,17 +195,20 @@ class Follow:
         if x == -1:
             degreeFor90 = degreeFor90 / 4 * 3
         while abs(self.m1.position) < abs(x * degreeFor90):
+            print(self.m1.position, degreeFor90 * x)
             sleep(0.1)
+        self.stop()
 
     def findAttachedPaths(self) -> Dict[Direction, bool]:
         """
         finds attached paths to discovered knots by turning 360° and repositions the robot to the next viable path
         """
+        print(self.gy.value(), "GYRO")
+
         dirDict = {Direction.NORTH: False, Direction.EAST: False, Direction.SOUTH: False, Direction.WEST: False}
 
         self.m1.stop(stop_action="brake")
         self.m2.stop(stop_action="brake")
-        print("move forward")
         self.m1.run_to_rel_pos(speed_sp=200, position_sp=230)
         self.m2.run_to_rel_pos(speed_sp=-200, position_sp=230)
 
@@ -228,7 +232,8 @@ class Follow:
                 dirDict[Direction.WEST] = True
             sleep(0.05)
 
-        print(dirDict)
+        self.stop()
+        self.m1.wait_until_not_moving()
         return dirDict
 
     def substractGamma(self, dirDict: Dict[Direction, bool], gamma: float):
@@ -251,14 +256,32 @@ class Follow:
 
         return secDict
 
-    def selectPath(self, dirDict: Dict[Direction, bool]) -> List[bool]:
+    def selectPath(self, dirDict: Dict[Direction, bool]) -> Direction:
         """
         selects one path from all discovered paths for one knot
         """
         paths = []
         for i in dirDict:
-            paths.append(dirDict[i])
-        return paths
+            if dirDict[i]:
+                print(i)
+
+                paths.append(i)
+        print(paths, "in selctPath in FOLLOW")
+        path: Direction = Direction.SOUTH
+        if paths.__contains__(Direction.NORTH) or paths.__contains__(Direction.EAST) or paths.__contains__(Direction.WEST):
+            while True:
+                rand = random.randrange(0, 3, 1)
+                if rand == 0:
+                    path = Direction.NORTH
+                elif rand == 1:
+                    path = Direction.WEST
+                elif rand == 2:
+                    path =  Direction.EAST
+
+                if dirDict[path]:
+                    break
+            print(dirDict, "\u001b[31mselected\u001b[0m", path)
+            return path
 
     def gammaToDirection(self, gamma):
         if gamma in range(316,360) or gamma in range(0, 45):
