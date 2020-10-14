@@ -61,7 +61,7 @@ def run(calibrate=False):
     gy.mode = 'GYRO-CAL'
     gy.mode = 'GYRO-ANG'
     follow = Follow(m1=m1, m2=m2, cs=cs, ts=ts, gy=gy, movement=movement, ps=ps, sd=sd)
-    odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2, )
+    odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
     follow.reset()
 
 

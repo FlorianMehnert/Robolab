@@ -5,9 +5,6 @@ import follow
 
 
 def blink():
-    """
-    lets LED flush as signal for obstacle detection
-    """
     for i in range(2):
         ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
         ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
@@ -86,11 +83,10 @@ def wasd(m1: ev3.LargeMotor, m2: ev3.LargeMotor) -> None:
             m2.stop()
 
 
-def menu(follow: follow, cal):
-    if cal:
-        mode = "calibrate"
-    else:
-        mode = input("mode?")
+
+
+def menu(follow: follow, ):
+    mode = input("mode?")
     if mode == "wasd":
         wasd(follow.m1, follow.m2)
     elif mode == "paths":
