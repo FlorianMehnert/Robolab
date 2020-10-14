@@ -1,5 +1,5 @@
 from time import sleep
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 from planet import Direction
 
 import ev3dev.ev3 as ev3
@@ -250,6 +250,15 @@ class Follow:
             secDict[Direction.WEST] = dirDict[Direction.NORTH]
 
         return secDict
+
+    def selectPath(self, dirDict: Dict[Direction, bool]) -> List[bool]:
+        """
+        selects one path from all discovered paths for one knot
+        """
+        paths = []
+        for i in dirDict:
+            paths.append(dirDict[i])
+        return paths
 
     def gammaToDirection(self, gamma):
         if gamma in range(316,360) or gamma in range(0, 45):

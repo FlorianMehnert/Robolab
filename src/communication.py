@@ -130,8 +130,13 @@ class Communication:
         while self.wait:
             continue
 
-    def sendPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
-                 status: str):
+    def sendPath(self,start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction], status: str):
+        """
+        sends selected path to server
+        start -- ((startX, startY), startDirection)
+        target -- ((endX, endY), endDirection)
+        status -- either "free"
+        """
         payload = { "from": "client",
                     "type": "path",
                     "payload": {
