@@ -118,6 +118,9 @@ def run():
                 with open("/home/robot/src/values.txt", mode="w") as file:
                     for i in follow.calibrate():
                         file.write(f"{i}\n")
+            elif mode == "follow":
+                while True:
+                    follow.follow(optimal=171.5,baseSpeed=200)
 
         run = True
         while run:
@@ -209,7 +212,7 @@ def run():
             else:
                 # default line follow
 
-                follow.follow(optimal, 350, odo)
+                follow.follow(optimal, 100)
 
                 if us.value() < 200:
                     follow.pathBlocked = True

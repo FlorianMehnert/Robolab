@@ -64,6 +64,8 @@ class Follow:
         self.rc = rc
         self.movement = movement
         self.pathBlocked = False
+        self.integral = 0
+        self.previousError = 0
 
         self.kp = 0.8
         self.ki = 0.01
@@ -157,18 +159,17 @@ class Follow:
 
         return rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal
 
-    def follow(self, optimal, baseSpeed, odo: Odometry):
+    def follow(self, optimal, baseSpeed):
         """
         currently p-Controller
         optimal -- medium value between calibrated white and black
         baseSpeed -- how fast should the robot go
         """
-        integral = 0
-        previousError = 0
         error = optimal - self.cs.value()
-        integral += error
-        derivate = error - previousError
-        output = self.kp * error + self.ki * integral + self.kd * derivate
+        self.integral += error
+        derivate = error - self.previousError
+        output = self.kp * error + self.ki * self.integral + self.kd * derivate
+        previousError = error
         self.m1.run_forever(speed_sp=baseSpeed + output)
         self.m2.run_forever(speed_sp=baseSpeed - output)
 
