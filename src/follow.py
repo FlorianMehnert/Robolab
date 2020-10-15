@@ -164,7 +164,7 @@ class Follow:
         if x == 0:
             return
 
-        degreeFor90 = 275
+        degreeFor90 = 280
         speed = 200
 
         if x in (1, -1):

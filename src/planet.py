@@ -316,7 +316,10 @@ class Planet:
                 (c, d) = position
                 if abs((a + b) - (c - d)) <= compare:
                     newCoord = key
-        if newCoord == []:
+                    compare = abs((a + b) - (c - d))
+        if not newCoord:
+
             return  # map explored
         else:
-            return self.shortestPath(position, newCoord)
+            newCoordTupl = (newCoord[0], newCoord[1])
+            return self.shortestPath(position, newCoordTupl)

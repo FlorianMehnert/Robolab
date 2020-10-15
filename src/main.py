@@ -64,7 +64,6 @@ def run(calibrate=False):
     odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
     follow.reset()
 
-
     try:
 
         specials.menu(follow, calibrate)
@@ -136,7 +135,8 @@ def run(calibrate=False):
                     newGamma = follow.gammaToDirection(odo.gamma)
 
                     # prints every position data
-                    print(f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.magenta}serverDirection ={specials.colorCodes.reset} {oldGamma}, odoX = {newNodeX}, odoY = {newNodeY}, {specials.colorCodes.magenta}odoDirection ={specials.colorCodes.reset} {newGamma}")
+                    print(
+                        f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}serverDirection = {specials.colorCodes.reset} {oldGamma}, odoX = {newNodeX}, odoY = {newNodeY}, {specials.colorCodes.red}odoDirection ={specials.colorCodes.reset} {newGamma}")
 
                     if follow.pathBlocked:
                         # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
@@ -164,9 +164,12 @@ def run(calibrate=False):
                 dirList = follow.gammaRelToAbs(paths, newGamma)  # new gamma needs to be correctly calculated by odo
                 dirList = follow.removeDoubles(dirList)
 
+                # TODO change selection to backtracking
                 randDirRel: Direction = follow.selectPath(paths)
-                randDirAbs: Direction = Direction((randDirRel.value + int(newGamma.value))%360)  # randDirRel + current absolute angle
-                oldGamma = Direction((oldGamma + randDirAbs)%360)
+                randDirAbs: Direction = Direction((randDirRel.value + int(newGamma.value)) % 360)
+                # randDirRel + current absolute angle
+
+                oldGamma = Direction((oldGamma + randDirAbs) % 360)
                 print("paths, dirList", paths, dirList)
                 print("randomDirection Rel and Abs", randDirRel, randDirAbs)
 
@@ -194,7 +197,7 @@ def run(calibrate=False):
 
                 follow.follow(optimal, 250)
 
-                if us.value() < 200:
+                if us.value() < 300:
                     print("\u001b[31mPATH BLOCKED\u001b[0m")
                     follow.pathBlocked = True
                     blink()
@@ -237,7 +240,8 @@ def CtrlCHandler(signm, frame):
     exit(0)
 
 
-# signal.signal(signal.SIGINT, CtrlCHandler) #only useful when starting robot per ssh
+# signal.signal(signal.SIGINT, CtrlCHandler)
+# only useful when starting robot per ssh
 
 # PLS EDIT
 if __name__ == '__main__':
