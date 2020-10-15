@@ -1,8 +1,7 @@
-import random
 from time import sleep
 from typing import Dict, Tuple, List
 from planet import Direction
-
+import random
 import ev3dev.ev3 as ev3
 
 
@@ -176,7 +175,8 @@ class Follow:
             self.m2.run_forever(speed_sp=-speed)
 
         self.m1.position = 0
-
+        if x == -1:
+            degreeFor90 = degreeFor90/8*7
         while abs(self.m1.position) < abs(x * degreeFor90):
             sleep(0.1)
         self.stop()
@@ -238,8 +238,6 @@ class Follow:
         """
         selects one path from all discovered paths for one knot
         """
-        further = False
-        path = None
 
         if len(dirList) == 1 and Direction.SOUTH in dirList:
             path = Direction.SOUTH
@@ -248,7 +246,8 @@ class Follow:
             print("some path was not detected!")
             path = Direction.SOUTH
         else:
-            path = Direction.NORTH
+            dirList.remove(Direction.SOUTH)
+            path = random.choice(dirList)
         print("\u001b[31mselected\u001b[0m", path)
         return path
 

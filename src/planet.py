@@ -96,6 +96,8 @@ class Planet:
         return
 
     def setAttachedPaths(self, node: Tuple[int, int], dirList: List[Direction]):
+        if node  not in self.paths:
+            self.addNode(node)
         for dir in self.paths[node]:
             if dir in dirList:
                 self.addPath((node, dir), (node, dir), 0)

@@ -94,13 +94,13 @@ def run(calibrate=False):
                         colorValues.append(float(line.replace("\n", "")))
                     except Exception:
                         colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
-            rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+        # rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
 
-            # rgbRed = (160, 61, 27)
-            # rgbBlue = (40, 152, 142)
-            # rgbBlack = (34, 78, 33)
-            # rgbWhite = (245, 392, 258)
-            # optimal = 171.5
+        rgbRed = (160, 61, 27)
+        rgbBlue = (40, 152, 142)
+        rgbBlack = (34, 78, 33)
+        rgbWhite = (245, 392, 258)
+        optimal = 171.5
 
         run = True
         while run:
@@ -163,10 +163,14 @@ def run(calibrate=False):
 
                 randDirRel = follow.selectPath(paths)
                 randDirAbs = Direction(randDirRel.value + int(newGamma.value))  # randDirRel + current absolute angle
+                oldGamma += randDirAbs
+                print("paths, dirList", paths, dirList)
+                print("randomDirection Rel and Abs", randDirRel, randDirAbs)
 
                 sleep(1)
 
                 follow.turnRightXTimes(randDirRel.value / 90)
+                print(dirList)
                 planet.setAttachedPaths((oldNodeX, oldNodeY), dirList)
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDirAbs))
 

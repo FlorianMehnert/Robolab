@@ -14,6 +14,10 @@ class Odometry:
         self.gamma: float = gamma
         self.posX: float = posX
         self.posY: float = posY
+        self.newM1 = 0
+        self.newM2 = 0
+        self.oldM1 = 0
+        self.oldM2 = 0
 
     def calculatePart(self, dR: float, dL: float):
         """
@@ -37,6 +41,6 @@ class Odometry:
 
     def calculateNewPosition(self, moves: List[Tuple[int, int]]):
         for i in moves:
-            self.calculatePart(i[0]*9.424/360, i[1]*9.424/360)
+            self.calculatePart(i[0]/360*9.424, i[1]/360*9.424)
         print(self.posX, self.posY, self.gamma*180/math.pi, "odometry calculated new position")
 
