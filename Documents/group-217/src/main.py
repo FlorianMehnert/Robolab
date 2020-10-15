@@ -167,7 +167,7 @@ def run(calibrate=False):
                 """
                 if all nearby paths = discovered -> getNewPath(current position)
                 follow paths given by getNewPath like shortestPath
-                explore unknown path at target position
+                explore unknown path at target
                 """
 
                 sleep(1)
