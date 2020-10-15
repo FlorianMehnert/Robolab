@@ -2,6 +2,7 @@
 
 import unittest
 from planet import Direction, Planet
+from typing import List, Tuple, Dict, Union
 
 
 class ExampleTestPlanet(unittest.TestCase):
@@ -44,7 +45,6 @@ class TestRoboLabPlanet(unittest.TestCase):
         Instantiates the planet data structure and fills it with paths
 
         MODEL YOUR TEST PLANET HERE (if you'd like):
-
         """
         # Initialize your data structure here
         self.planet = Planet()
@@ -59,11 +59,11 @@ class TestRoboLabPlanet(unittest.TestCase):
 
     def test_integrity(self):
         """
-        This test should check that the dictionary returned by "planet.get_paths()" matches the expected structure
+        This test should check that the dictionary returned by "planet.getPaths()" matches the expected structure
         """
         assert isinstance(self.planet.getPaths(), dict) , "wrong type for pathdict"
 
-    def test_empty_planet(self):
+    def test_emptyPlanet(self):
         """
         This test should check that an empty planet really is empty
         """
