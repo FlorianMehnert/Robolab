@@ -94,13 +94,15 @@ def run(calibrate=False):
                         colorValues.append(float(line.replace("\n", "")))
                     except Exception:
                         colorValues.append(follow.convStrToRGB(line.replace("\n", "")))
-        # rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
 
-        rgbRed = (160, 61, 27)
-        rgbBlue = (40, 152, 142)
-        rgbBlack = (34, 78, 33)
-        rgbWhite = (245, 392, 258)
-        optimal = 171.5
+        try:
+            rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal = colorValues
+        except ValueError:
+            rgbRed = (160, 61, 27)
+            rgbBlue = (40, 152, 142)
+            rgbBlack = (34, 78, 33)
+            rgbWhite = (245, 392, 258)
+            optimal = 171.5
 
         run = True
         while run:
@@ -128,14 +130,13 @@ def run(calibrate=False):
 
                     # odometry calculation
                     odo.calculateNewPosition(movement)
-
                     # setting odometry X and Y to nodeX and nodeY
                     newNodeX = int(odo.posX / 50)
                     newNodeY = int(odo.posY / 50)
                     newGamma = follow.gammaToDirection(odo.gamma)
 
                     # prints every position data
-                    print(oldNodeX, oldNodeY, oldGamma, newNodeX, newNodeY, newGamma, "main else all node values")
+                    print(f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.magenta}serverDirection ={specials.colorCodes.reset} {oldGamma}, odoX = {newNodeX}, odoY = {newNodeY}, {specials.colorCodes.magenta}odoDirection ={specials.colorCodes.reset} {newGamma}")
 
                     if follow.pathBlocked:
                         # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
@@ -191,7 +192,7 @@ def run(calibrate=False):
 
             else:
 
-                follow.follow(optimal, 300)
+                follow.follow(optimal, 250)
 
                 if us.value() < 200:
                     print("\u001b[31mPATH BLOCKED\u001b[0m")
