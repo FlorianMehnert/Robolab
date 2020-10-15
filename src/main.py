@@ -112,14 +112,16 @@ def run(calibrate=False):
                 # discovers node
                 follow.stop()
                 follow.stop()
-
+                print(odo.gamma)
                 if planet.newPlanet:
                     # first node discovered
                     mqttc.sendReady()
                     mqttc.timeout()
+
                     # TODO sleep?, 1000, 1000 seems a bit much
                     m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                     m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
+
 
                 else:
                     # any other node discovered
@@ -161,15 +163,16 @@ def run(calibrate=False):
                 dirList = follow.gammaRelToAbs(paths, newGamma)  # new gamma needs to be correctly calculated by odo
                 dirList = follow.removeDoubles(dirList)
 
-                randDirRel = follow.selectPath(paths)
-                randDirAbs = Direction(randDirRel.value + int(newGamma.value))  # randDirRel + current absolute angle
-                oldGamma += randDirAbs
+                randDirRel: Direction = follow.selectPath(paths)
+                randDirAbs: Direction = Direction((randDirRel.value + int(newGamma.value))%360)  # randDirRel + current absolute angle
+                oldGamma = Direction((oldGamma + randDirAbs)%360)
                 print("paths, dirList", paths, dirList)
                 print("randomDirection Rel and Abs", randDirRel, randDirAbs)
 
                 sleep(1)
 
                 follow.turnRightXTimes(randDirRel.value / 90)
+                odo.gamma = randDirAbs
                 print(dirList)
                 planet.setAttachedPaths((oldNodeX, oldNodeY), dirList)
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDirAbs))

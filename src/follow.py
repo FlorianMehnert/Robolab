@@ -164,7 +164,7 @@ class Follow:
         if x == 0:
             return
 
-        degreeFor90 = 272
+        degreeFor90 = 275
         speed = 200
 
         if x in (1, -1):
@@ -188,8 +188,8 @@ class Follow:
 
         self.m1.stop(stop_action="brake")
         self.m2.stop(stop_action="brake")
-        self.m1.run_to_rel_pos(speed_sp=200, position_sp=230)
-        self.m2.run_to_rel_pos(speed_sp=-200, position_sp=230)
+        self.m1.run_to_rel_pos(speed_sp=200, position_sp=270)
+        self.m2.run_to_rel_pos(speed_sp=-200, position_sp=270)
 
         self.m1.wait_until_not_moving()
 
@@ -199,7 +199,7 @@ class Follow:
         self.m1.position = 0
         self.m2.position = 0
 
-        while self.m1.position < 1015:
+        while self.m1.position < 1100:
             binData = self.cs.bin_data("hhh")
             if (self.m1.position in range(0, 135) or self.m1.position in range(980, 1200)) and isBlack(binData):
                 dirList.append(Direction.NORTH)
@@ -217,11 +217,12 @@ class Follow:
         return dirList
 
     def gammaRelToAbs(self, dirList: List[Direction], gamma: Direction):
+        dList = dirList
         cnt = 0
-        for i in dirList:
-            dirList[cnt] = Direction(i + int(gamma.value) % 360)
+        for i in dList:
+            dList[cnt] = Direction((i + int(gamma.value))%360)
             cnt += 1
-        return dirList
+        return dList
 
     def removeDoubles(self, dirList: List[Direction]):
         doubles = []
@@ -244,7 +245,11 @@ class Follow:
             print("some path was not detected!")
             path = Direction.SOUTH
         else:
-            dirList.remove(Direction.SOUTH)
+            print("SELECT PATH DIR LIST", dirList)
+            try:
+                dirList.remove(Direction.SOUTH)
+            except ValueError:
+                pass
             path = random.choice(dirList)
         print("\u001b[31mselected\u001b[0m", path)
         return path
