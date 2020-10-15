@@ -5,6 +5,15 @@ from enum import IntEnum, unique
 from typing import List, Tuple, Dict, Union
 
 
+Weight = int
+"""
+Weight of a given path (received from the server)
+
+Value:  -1 if blocked path
+        >0 for all other paths
+        never 0
+"""
+
 @unique
 class Direction(IntEnum):
     """ Directions in shortcut """
