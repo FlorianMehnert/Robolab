@@ -4,7 +4,6 @@
 from enum import IntEnum, unique
 from typing import List, Tuple, Dict, Union
 
-
 Weight = int
 """
 Weight of a given path (received from the server)
@@ -14,6 +13,7 @@ Value:  -1 if blocked path
         never 0
 """
 
+
 @unique
 class Direction(IntEnum):
     """ Directions in shortcut """
@@ -21,6 +21,7 @@ class Direction(IntEnum):
     EAST = 90
     SOUTH = 180
     WEST = 270
+
 
 class Planet:
     """
@@ -63,26 +64,26 @@ class Planet:
         # no existing path
         if weight == -3 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (self.paths[start[0]][start[1]][0], self.paths[start[0]][start[1]][1], -3)
-            #print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
+            # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
         # existing path but no more information
         elif weight == 0 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (self.paths[start[0]][start[1]][0], self.paths[start[0]][start[1]][1], -1)
-            #print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
+            # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
         # blocked path
         elif weight == -1:
             # target known and not stored
             if not self.paths[start[0]][start[1]][0] and start != target:
                 self.paths[start[0]][start[1]] = (target[0], target[1], -1)
                 self.paths[target[0]][target[1]][0] = (start[0], start[1], -1)
-                #print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
+                # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
             else:
                 self.paths[start[0]][start[1]] = (
-                self.paths[start[0]][start[1]][0], self.paths[start[0]][start[1]][1], -1)
-                #print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
+                    self.paths[start[0]][start[1]][0], self.paths[start[0]][start[1]][1], -1)
+                # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
         elif weight > 0:
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
-            self.paths[target[0]][target[1]][0] = (start[0], start[1], weight)
-            #print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
+            self.paths[target[0]][target[1]] = (start[0], start[1], weight)
+            # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
         return
 
     def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
@@ -96,7 +97,7 @@ class Planet:
         return
 
     def setAttachedPaths(self, node: Tuple[int, int], dirList: List[Direction]):
-        if node  not in self.paths:
+        if node not in self.paths:
             self.addNode(node)
         for dir in self.paths[node]:
             if dir in dirList:

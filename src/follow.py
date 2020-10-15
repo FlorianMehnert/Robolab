@@ -175,8 +175,6 @@ class Follow:
             self.m2.run_forever(speed_sp=-speed)
 
         self.m1.position = 0
-        if x == -1:
-            degreeFor90 = degreeFor90/8*7
         while abs(self.m1.position) < abs(x * degreeFor90):
             sleep(0.1)
         self.stop()
@@ -201,7 +199,7 @@ class Follow:
         self.m1.position = 0
         self.m2.position = 0
 
-        while self.m1.position < 1115:
+        while self.m1.position < 1015:
             binData = self.cs.bin_data("hhh")
             if (self.m1.position in range(0, 135) or self.m1.position in range(980, 1200)) and isBlack(binData):
                 dirList.append(Direction.NORTH)
