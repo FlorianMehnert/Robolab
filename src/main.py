@@ -172,6 +172,11 @@ def run(calibrate=False):
                 oldGamma = Direction((oldGamma + randDirAbs) % 360)
                 print("paths, dirList", paths, dirList)
                 print("randomDirection Rel and Abs", randDirRel, randDirAbs)
+                """
+                if every path at the currrent node = discovered -> getNewPath(current position)
+                follow paths like shortestpath to target
+                explore unknown path at target
+                """
 
                 sleep(1)
 

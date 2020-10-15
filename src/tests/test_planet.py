@@ -35,7 +35,7 @@ class ExampleTestPlanet(unittest.TestCase):
 
         Result: Target is not reachable
         """
-        self.assertIsNone(self.planet.shortest_path((0, 0), (1, 2)))
+        self.assertIsNone(self.planet.shortestPath((0, 0), (1, 2)))
 
 
 class TestRoboLabPlanet(unittest.TestCase):
@@ -48,19 +48,26 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         # Initialize your data structure here
         self.planet = Planet()
+        self.planet.paths = {}
+        self.planet.addPath(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 1)
+        self.planet.addPath(((0, 1), Direction.WEST), ((0, 0), Direction.WEST), 2)
+        self.planet.addPath(((0, 1), Direction.NORTH), ((1, 1), Direction.SOUTH), 3)
+        self.planet.addPath(((1, 1), Direction.WEST), ((0, 1), Direction.EAST), 4)
+        self.planet.addPath(((1, 1), Direction.NORTH), ((2, 1), Direction.EAST), 4)
+        self.planet.addPath(((1, 1), Direction.EAST), ((2, 1), Direction.WEST), 4)
         # self.planet.add_path(...)
 
     def test_integrity(self):
         """
         This test should check that the dictionary returned by "planet.get_paths()" matches the expected structure
         """
-        self.fail('implement me!')
+        assert isinstance(self.planet.getPaths(), dict) , "wrong type for pathdict"
 
     def test_empty_planet(self):
         """
         This test should check that an empty planet really is empty
         """
-        self.fail('implement me!')
+        assert (self.planet.paths == {}) , "empty planet not empty"
 
     def test_target(self):
         """
@@ -68,13 +75,13 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Requirement: Minimum distance is three nodes (two paths in list returned)
         """
-        self.fail('implement me!')
+        assert (self.planet.shortestPath([0,0],[1,1]) == [None, [((0, 0), Direction.NORTH), ((0, 1), Direction.NORTH)]]), "s.p.a. doesnt work"
 
     def test_target_not_reachable(self):
         """
         This test should check that a target outside the map or at an unexplored node is not reachable
         """
-        self.fail('implement me!')
+        assert self.planet.paths[((5, 5), Direction.NORTH)] == None, "target_not_reachable_test failed"
 
     def test_same_length(self):
         """
@@ -83,7 +90,7 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Requirement: Minimum of two paths with same cost exists, only one is returned by the logic implemented
         """
-        self.fail('implement me!')
+        assert self.planet.shortestPath([1,1],[2,1]) == ([None, ((1, 1), Direction.NORTH)] or [None, ((1, 1), Direction.EAST)]), "same length fail"
 
     def test_target_with_loop(self):
         """
@@ -92,7 +99,7 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is reachable
         """
-        self.fail('implement me!')
+        assert self.planet.shortestPath([0,0],[0,1]) == [None, ((0, 0), Direction.NORTH)], "s.p.a. got stuck between 2 points"
 
     def test_target_not_reachable_with_loop(self):
         """
@@ -101,7 +108,7 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is not reachable
         """
-        self.fail('implement me!')
+        assert self.planet.shortestPath([0,0], [5,5]) == 0, "s.p.a.: target is unreachable"
 
 
 if __name__ == "__main__":
