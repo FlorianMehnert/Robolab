@@ -61,7 +61,7 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         This test should check that the dictionary returned by "planet.getPaths()" matches the expected structure
         """
-        assert isinstance(self.planet.getPaths(), type.DictType) , "wrong type for pathdict"
+        assert isinstance(self.planet.getPaths(), dict) , "wrong type for pathdict"
 
     def test_emptyPlanet(self):
         """
