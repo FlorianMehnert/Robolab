@@ -85,8 +85,11 @@ def wasd(m1: ev3.LargeMotor, m2: ev3.LargeMotor) -> None:
 
 
 
-def menu(follow: follow, ):
-    mode = input("mode?")
+def menu(follow: follow, calibrate):
+    if calibrate:
+        mode = "calibrate"
+    else:
+        mode = input("mode?")
     if mode == "wasd":
         wasd(follow.m1, follow.m2)
     elif mode == "paths":

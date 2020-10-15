@@ -76,8 +76,8 @@ def run(calibrate=False):
         global newNodeX
         global newNodeY
 
-        oldGamma: Direction = Direction.NORTH
-        newGamma: Direction = Direction.NORTH
+        oldGamma = Direction.NORTH
+        newGamma = Direction.NORTH
         oldNodeX = 0
         oldNodeY = 0
         newNodeX = 0
