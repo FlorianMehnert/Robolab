@@ -464,6 +464,29 @@ class Planet:
         else:
             return
 
+    def getDirectionDjikstraList(self):
+        unknownNode: Dict = self.getPathsDetectedUnknown()
+        if unknownNode == {}:
+            return None
+        unknownNode: List = unknownNode.keys()
+        unknownNodeDistance: Dict = {}
+        unknownNodeDir: Dict = {}
+        for node in unknownNode:
+            pathSteps: List = self.shortestPathTutor(self.start[0], node)
+            if pathSteps is None:
+                continue
+            weight = 0
+            for step in pathSteps:
+                weight += self.paths[step[0]][step[1]][2]
+            if weight > 0:
+                unknownNodeDistance[node] = weight
+                unknownNodeDir[node] = pathSteps[0][1]
+        distance = sorted(unknownNodeDistance.values())[0]
+        for node in unknownNodeDistance:
+            if unknownNodeDistance[node] == distance:
+                return unknownNodeDir[node]
+        return None
+
     def getNextDirection(self) -> Direction:
         """
         Return next direction.
@@ -478,3 +501,6 @@ class Planet:
         if nextDir is None:
             print("nextDir =",self.DFS(), "stack =", self.stack)
             return self.DFS()
+            #nextDir = self.DFS()
+            #nextDir = self.getDirectionDjikstraList()
+        return nextDir
