@@ -318,9 +318,14 @@ class Planet:
             return self.shortestPath(position, newCoord)
 
     def DFS(self) -> Direction:
+        for path in self.stack:
+            if path[3] != 0 or path[3] != -2:
+                self.stack.remove(path)
+
         paths = self.getPaths()
         for path in paths.values():
             for i in path.values():
                 if i not in self.stack and i[3] == 0 or i[3] == -2:
                     self.stack.append(i)
+
         return self.stack[-1][3]
