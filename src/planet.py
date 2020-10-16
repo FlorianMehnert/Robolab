@@ -142,7 +142,7 @@ class Planet:
         for node in self.paths:
             pathdict[node] = {}
             for dir in self.paths[node]:
-                if dir[2] > 0:
+                if self.paths[node][dir][2] > 0:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
@@ -317,9 +317,7 @@ class Planet:
                 if abs((a + b) - (c - d)) <= compare:
                     newCoord = key
                     compare = abs((a + b) - (c - d))
-        if not newCoord:
-
+        if newCoord == []:
             return  # map explored
         else:
-            newCoordTupl = (newCoord[0], newCoord[1])
-            return self.shortestPath(position, newCoordTupl)
+            return self.shortestPath(position, newCoord)

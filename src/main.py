@@ -72,10 +72,14 @@ def run(calibrate=False):
         global oldOrientation
         global oldNodeX
         global oldNodeY
+        global newNodeX
+        global newNodeY
 
         oldOrientation = Direction.NORTH
         oldNodeX = 0
         oldNodeY = 0
+        newNodeX = 0
+        newNodeY = 0
 
         # extracting colorvalues from values.txt
         colorValues = []
@@ -133,6 +137,7 @@ def run(calibrate=False):
                     odo.calculateNewPosition(movement)
                     # updates odo.poX, odo.posY, odo.gamma
 
+                    # prints every position data
                     print(
                         f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}serverDirection = {specials.colorCodes.reset} {oldOrientation}, odoX = {odo.posX}, odoY = {odo.posY}, {specials.colorCodes.red}odoDirection ={specials.colorCodes.reset} {odo.gamma}")
 
@@ -197,7 +202,6 @@ def run(calibrate=False):
                 # might cause planet update which leads to us needing to update our internal orientation
                 planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDirAbs))
-                mqttc.timeout()
 
                 print(f"randDirAbs = {randDirAbs}, planetDirection = {planet.start[1]}")
                 randDirRel = (randDirAbs - oldOrientation) % 360
@@ -224,10 +228,10 @@ def run(calibrate=False):
             else:
 
                 follow.follow(optimal, 250)
+
                 if us.value() < 300:
                     print("\u001b[31mPATH BLOCKED\u001b[0m")
                     follow.pathBlocked = True
-                    follow.stop()
                     blink()
                     sleep(1)
 
