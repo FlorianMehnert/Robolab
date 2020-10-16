@@ -142,6 +142,45 @@ class Planet:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
+    def getPathsFreeBlockedDetected(self):
+        """
+        Get all free, blocked and detected path
+        :return: Dict
+        """
+        pathdict = {}
+        for node in self.paths:
+            pathdict[node] = {}
+            for dir in self.paths[node]:
+                if dir[2] > -1:
+                    pathdict[node][dir] = self.paths[node][dir]
+        return pathdict
+
+    def getPathsFreeDetected(self):
+        """
+        Get all free and detected path
+        :return: Dict
+        """
+        pathdict = {}
+        for node in self.paths:
+            pathdict[node] = {}
+            for dir in self.paths[node]:
+                if dir[2] > 0:
+                    pathdict[node][dir] = self.paths[node][dir]
+        return pathdict
+
+    def getPathsDetectedUnknown(self):
+        """
+        Get all detected and unknown path
+        :return: Dict
+        """
+        pathdict = {}
+        for node in self.paths:
+            pathdict[node] = {}
+            for dir in self.paths[node]:
+                if dir[2] in (0, -2):
+                    pathdict[node][dir] = self.paths[node][dir]
+        return pathdict
+
     def getTargets(self, direction, target):  # dict in dict
         try:
             helpdict[direction] = (target)
