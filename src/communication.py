@@ -68,6 +68,8 @@ class Communication:
                 self.client.subscribe("planet/" + self.planet.getName() + "/" + self.group, qos=1)
                 self.logger.debug("Planet name: " + self.planet.getName())
                 self.planet.setStart((payload["startX"], payload["startY"]), payload["startOrientation"])
+                startPathDir = (payload["startOrientation"] + 180) % 360
+                self.planet.addPath(((payload["startX"], payload["startY"]), startPathDir), ((payload["startX"], payload["startY"]), startPathDir), -1)
 
                 print(f"robot starts at: {self.planet.start}")
                 self.wait = False
