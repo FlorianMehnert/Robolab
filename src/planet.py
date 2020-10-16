@@ -195,6 +195,17 @@ class Planet:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
+    def getTarget(self) -> Tuple[int, int]:
+        """
+        Get target on planet.
+
+        Examples:
+            getTarget() returns: (3, 7)
+            getTarget() returns: None
+        : return: 2-Tuple[int, int]
+        """
+        return self.target
+
     def setTarget(self, node: Tuple[int, int]):
         """
         Set target on planet.
