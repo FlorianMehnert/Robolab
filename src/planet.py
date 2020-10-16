@@ -175,7 +175,7 @@ class Planet:
         pathdict = {}
         for node in self.paths:
             for dir in self.paths[node]:
-                if elf.paths[node][dir][2] > 0:
+                if self.paths[node][dir][2] > 0:
                     if node not in pathdict:
                         pathdict[node] = {}
                     pathdict[node][dir] = self.paths[node][dir]
