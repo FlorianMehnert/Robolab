@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import logging
+import math
 import os
 import uuid
 from time import sleep
@@ -68,19 +69,13 @@ def run(calibrate=False):
 
         specials.menu(follow, calibrate)
 
-        global oldGamma
-        global newGamma
+        global oldOrientation
         global oldNodeX
         global oldNodeY
-        global newNodeX
-        global newNodeY
 
-        oldGamma = Direction.NORTH
-        newGamma = Direction.NORTH
+        oldOrientation = Direction.NORTH
         oldNodeX = 0
         oldNodeY = 0
-        newNodeX = 0
-        newNodeY = 0
 
         # extracting colorvalues from values.txt
         colorValues = []
@@ -104,6 +99,7 @@ def run(calibrate=False):
             optimal = 171.5
 
         run = True
+        nodeCount = 0
         while run:
 
             cs.mode = "RGB-RAW"
@@ -111,80 +107,104 @@ def run(calibrate=False):
 
             if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue, 25):
                 # discovers node
+                nodeCount += 1
                 follow.stop()
                 follow.stop()
-                print(odo.gamma)
+                print(
+                    f"{specials.colorCodes.red}{nodeCount}.node{specials.colorCodes.reset}")
                 if planet.newPlanet:
                     # first node discovered
                     mqttc.sendReady()
                     mqttc.timeout()
 
                     # TODO sleep?, 1000, 1000 seems a bit much
+                    sleep(1)
+
+                    # only works because while loops is very fast... the faster the while the slower the less does the robot roll
+                    # TODO: fix m1 and m2 only getting stopped by follow and wait for m1/m2 to stop
                     m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                     m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
-
+                    print(
+                        f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}serverDirection = {specials.colorCodes.reset} {oldOrientation}, odoX = {odo.posX}, odoY = {odo.posY}, {specials.colorCodes.red}odoDirection ={specials.colorCodes.reset} {odo.gamma}")
 
                 else:
                     # any other node discovered
 
-                    # odometry calculation
                     odo.calculateNewPosition(movement)
-                    # setting odometry X and Y to nodeX and nodeY
-                    newNodeX = int(odo.posX / 50)
-                    newNodeY = int(odo.posY / 50)
-                    newGamma = follow.gammaToDirection(odo.gamma)
+                    # updates odo.poX, odo.posY, odo.gamma
 
-                    # prints every position data
                     print(
-                        f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}serverDirection = {specials.colorCodes.reset} {oldGamma}, odoX = {newNodeX}, odoY = {newNodeY}, {specials.colorCodes.red}odoDirection ={specials.colorCodes.reset} {newGamma}")
+                        f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}serverDirection = {specials.colorCodes.reset} {oldOrientation}, odoX = {odo.posX}, odoY = {odo.posY}, {specials.colorCodes.red}odoDirection ={specials.colorCodes.reset} {odo.gamma}")
 
                     if follow.pathBlocked:
                         # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
-                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma), ((oldNodeX, oldNodeY), oldGamma),
+                        mqttc.sendPath(((oldNodeX, oldNodeY), oldOrientation), ((oldNodeX, oldNodeY), oldOrientation),
                                        status="blocked")
                         follow.pathBlocked = False
 
                     else:
                         # sends just discovered path
-                        mqttc.sendPath(((oldNodeX, oldNodeY), oldGamma),
-                                       ((newNodeX, newNodeY), Direction((newGamma.value + 180) % 360)),
+                        mqttc.sendPath(((oldNodeX, oldNodeY), oldOrientation),
+                                       ((round(odo.posX), round(odo.posY)), Direction((odo.gamma + 180) % 360)),
                                        status="free")
 
-                # applying server data to old position and odometry
+                # updated planet data: current position + facing
                 oldNodeX = planet.start[0][0]
                 oldNodeY = planet.start[0][1]
-                oldGamma = planet.start[1]  # direction already gets turned
-                odo.posX = oldNodeX
-                odo.posY = oldNodeY
-                odo.gamma = oldGamma
+                oldOrientation = planet.start[1]
 
-                paths = follow.findAttachedPaths()
-                paths = follow.removeDoubles(paths)
+                # syncing odometry with server data
+                odo.posX = planet.start[0][0]
+                odo.posY = planet.start[0][1]
+                odo.gamma = planet.start[1]
 
-                dirList = follow.gammaRelToAbs(paths, newGamma)  # new gamma needs to be correctly calculated by odo
-                dirList = follow.removeDoubles(dirList)
+                # scan knots
+                relativePaths = follow.findAttachedPaths()
+                absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
 
                 # TODO change selection to backtracking
-                randDirRel: Direction = follow.selectPath(paths)
-                randDirAbs: Direction = Direction((randDirRel.value + int(newGamma.value)) % 360)
-                # randDirRel + current absolute angle
 
-                oldGamma = Direction((oldGamma + randDirAbs) % 360)
-                print("paths, dirList", paths, dirList)
-                print("randomDirection Rel and Abs", randDirRel, randDirAbs)
+                randDirAbs = Direction.NORTH
+                randDirRel = Direction.NORTH
 
-                sleep(1)
+                # removes random factor
+                while True:
+                    # selects one path from scanned directions
+                    randDirRel: Direction = follow.selectPath(relativePaths)
 
-                follow.turnRightXTimes(randDirRel.value / 90)
-                odo.gamma = randDirAbs
-                print(dirList)
-                planet.setAttachedPaths((oldNodeX, oldNodeY), dirList)
+                    # adds current odo view-angle to randDirRel
+                    randDirAbs: Direction = Direction((randDirRel.value + round(odo.gamma)) % 360)
+
+                    print(f"{specials.colorCodes.red}selected: {randDirRel}{specials.colorCodes.reset}, "
+                          f"{specials.colorCodes.blue}absolute: {randDirAbs}{specials.colorCodes.reset}")
+
+                    print(f"{specials.colorCodes.cyan}relPaths = {specials.colorCodes.reset}{relativePaths}\n"
+                          f"{specials.colorCodes.cyan}absPaths = {specials.colorCodes.reset}{absolutePaths}")
+                    print(f"{specials.colorCodes.yellow}randDirRel = {randDirRel}{specials.colorCodes.reset} "
+                          f"{specials.colorCodes.yellow}and randDirAbs = {randDirAbs}{specials.colorCodes.reset}")
+
+                    sleep(1)
+
+                    print(f"I want to turn for {randDirRel}°")
+                    pathDirection = input("is it ok? (press y|yes|\x1B[3m)Enter\x1B[23m")
+                    if pathDirection == "y" or pathDirection == "" or pathDirection == "yes":
+                        break
+                    else:
+                        continue
+
+                print(f"I selected {randDirAbs} as AbsAngle and {randDirRel} as RelAngle")
+                # sends selected path
+                # might cause planet update which leads to us needing to update our internal orientation
+                planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDirAbs))
+                mqttc.timeout()
 
-                # select one path
-                # send to server
-                # apply server changes to gamma from start
-                # (turn to direction of server)
+                print(f"randDirAbs = {randDirAbs}, planetDirection = {planet.start[1]}")
+                randDirRel = (randDirAbs - oldOrientation) % 360
+                oldOrientation = randDirAbs
+
+                follow.turnRightXTimes(randDirRel / 90)
+                odo.gamma = math.radians(randDirAbs)
 
                 if isColor(currentColor, rgbRed, 25):
                     print("\u001b[31mRED\u001b[0m")
@@ -193,26 +213,30 @@ def run(calibrate=False):
                     print("\u001b[34mBLUE\u001b[0m")
                     follow.leds(ev3.Leds.GREEN)
 
+                odo.oldM1 = 0
+                odo.oldM2 = 0
+                odo.newM1 = 0
+                odo.newM2 = 0
+                m1.position = 0
+                m2.position = 0
+                movement = []
+
             else:
 
                 follow.follow(optimal, 250)
-
                 if us.value() < 300:
                     print("\u001b[31mPATH BLOCKED\u001b[0m")
                     follow.pathBlocked = True
+                    follow.stop()
                     blink()
                     sleep(1)
 
                     m1.run_forever(speed_sp=200)
                     m2.run_forever(speed_sp=-200)
-                    m1.position = 0
 
-                    while m1.position < 550:
-                        odo.oldM1 = odo.newM1
-                        odo.oldM2 = odo.newM2
-                        odo.newM1 = m1.position
-                        odo.newM2 = m2.position
-                        movement.append((odo.newM1 - odo.oldM1, odo.newM2 - odo.oldM2))
+                    follow.turnRightXTimes(2)
+                    odo.gamma = Direction(odo.gamma + Direction.SOUTH)
+
                     follow.stop()
                     follow.stop()
 
