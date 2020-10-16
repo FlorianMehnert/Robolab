@@ -111,9 +111,6 @@ class Planet:
             else:
                 self.addPath((node, dir), (node, dir), -3)
 
-
-
-
     def addNode(self, node: Tuple[int, int]):
         """
         Add new node in path dictionary with unknown path status
@@ -150,9 +147,10 @@ class Planet:
         """
         pathdict = {}
         for node in self.paths:
-            pathdict[node] = {}
             for dir in self.paths[node]:
                 if self.paths[node][dir][2] > 0:
+                    if node not in pathdict:
+                        pathdict[node] = {}
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
@@ -176,9 +174,10 @@ class Planet:
         """
         pathdict = {}
         for node in self.paths:
-            pathdict[node] = {}
             for dir in self.paths[node]:
-                if self.paths[node][dir][2] > 0:
+                if elf.paths[node][dir][2] > 0:
+                    if node not in pathdict:
+                        pathdict[node] = {}
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
@@ -189,9 +188,10 @@ class Planet:
         """
         pathdict = {}
         for node in self.paths:
-            pathdict[node] = {}
             for dir in self.paths[node]:
                 if self.paths[node][dir][2] in (0, -2):
+                    if node not in pathdict:
+                        pathdict[node] = {}
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
