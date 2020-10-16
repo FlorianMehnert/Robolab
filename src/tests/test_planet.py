@@ -66,28 +66,72 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         This test should check that the dictionary returned by "planet.getPaths()" matches the expected structure
         """
-        assert (self.planet.getPaths() == {
+        print(self.planet.paths[(0, 0)])
+        self.assertEqual(self.planet.paths[(0, 0)], {
+                Direction.NORTH: ((0, 1), Direction.SOUTH, 1),
+                Direction.EAST: ((0, 0), 90, -1),
+                Direction.SOUTH: ((0, 0), 180, -3),
+                Direction.WEST: ((0, 1), Direction.WEST, 2)
+                }, "Failed integrity of Node (0, 0)")
+        self.assertEqual(self.planet.paths[(0, 1)], {
+                Direction.NORTH: ((1, 1), Direction.SOUTH, 3),
+                Direction.EAST: ((1, 1), Direction.WEST, 4),
+                Direction.SOUTH: ((0, 0), Direction.NORTH, 1),
+                Direction.WEST: ((0, 0), Direction.WEST, 2)
+            }, "Failed integrity of Node (0, 1)")
+        self.assertEqual(self.planet.paths[(1, 1)], {
+                Direction.NORTH: ((2, 1), Direction.EAST, 4),
+                Direction.EAST: ((2, 1), Direction.WEST, 4),
+                Direction.SOUTH: ((0, 1), Direction.NORTH, 3),
+                Direction.WEST: ((0, 1), Direction.EAST, 4)
+            }, "Failed integrity of Node (1, 1)")
+        self.assertEqual(self.planet.paths[(2, 1)], {
+                Direction.NORTH: ((2, 1), Direction.NORTH, -3),
+                Direction.EAST: ((1, 1), Direction.NORTH, 4),
+                Direction.SOUTH: ((2, 1), Direction.SOUTH, 0),
+                Direction.WEST: ((1, 1), Direction.EAST, 4)
+            }, "Failed integrity of Node (2, 1)")
+        self.assertEqual(self.planet.paths[(3, 3)], {
+                Direction.NORTH: ((), 0, -2),
+                Direction.EAST: ((3, 4), Direction.WEST, 3),
+                Direction.SOUTH: ((), 0, -2),
+                Direction.WEST: ((), 0, -2)
+            }, "Failed integrity of Node (3, 3)")
+        self.assertEqual(self.planet.paths[(3, 4)], {
+                Direction.NORTH: ((), 0, -2),
+                Direction.EAST: ((), 0, -2),
+                Direction.SOUTH: ((), 0, -2),
+                Direction.WEST: ((3, 3), Direction.EAST, 3)
+            }, "Failed integrity of Node (3, 4)")
+
+        self.assertEqual(self.planet.getPaths(), {
             (0, 0): {
                 Direction.NORTH: ((0, 1), Direction.SOUTH, 1),
                 Direction.WEST: ((0, 1), Direction.WEST, 2)
                 },
             (0, 1): {
-                Direction.WEST: ((0, 0), Direction.WEST, 2),
-                Direction.SOUTH: ((0, 0), Direction.NORTH, 1),
                 Direction.NORTH: ((1, 1), Direction.SOUTH, 3),
-                Direction.EAST: ((1, 1), Direction.WEST, 4)
+                Direction.EAST: ((1, 1), Direction.WEST, 4),
+                Direction.SOUTH: ((0, 0), Direction.NORTH, 1),
+                Direction.WEST: ((0, 0), Direction.WEST, 2)
             },
             (1, 1): {
-                Direction.SOUTH: ((0, 1), Direction.NORTH, 3),
-                Direction.WEST: ((0, 1), Direction.EAST, 4),
                 Direction.NORTH: ((2, 1), Direction.EAST, 4),
-                Direction.EAST: ((2, 1), Direction.WEST, 4)
+                Direction.EAST: ((2, 1), Direction.WEST, 4),
+                Direction.SOUTH: ((0, 1), Direction.NORTH, 3),
+                Direction.WEST: ((0, 1), Direction.EAST, 4)
             },
             (2, 1): {
                 Direction.EAST: ((1, 1), Direction.NORTH, 4),
                 Direction.WEST: ((1, 1), Direction.EAST, 4)
+            },
+            (3, 3): {
+                Direction.EAST: ((3, 4), Direction.WEST, 3)
+            },
+            (3, 4): {
+                Direction.WEST: ((3, 3), Direction.EAST, 3)
             }
-        })
+        }, "Failed integrity of getPaths()")
 
     def test_emptyPlanet(self):
         """
