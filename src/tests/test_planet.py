@@ -153,7 +153,7 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         This test should check that a target outside the map or at an unexplored node is not reachable
         """
-        assert self.planet.paths[((5, 5), Direction.NORTH)] == None, "target_not_reachable_test failed"
+        self.assertIsNone(self.planet.shortestPathTutor((0, 0), (3, 3)), "target_not_reachable_test failed")
 
     def test_same_length(self):
         """
