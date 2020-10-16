@@ -36,6 +36,7 @@ class Planet:
         self.planetname = ""
         self.start = None  # Tuple[Tuple[int, int], Direction]
         self.newPlanet = True
+        self.stack: List[Tuple[Tuple[int, int], Direction, int]] = []
 
     def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                 weight: int):
@@ -315,3 +316,11 @@ class Planet:
             return  # map explored
         else:
             return self.shortestPath(position, newCoord)
+
+    def DFS(self) -> Direction:
+        paths = self.getPaths()
+        for path in paths.values():
+            for i in path.values():
+                if i not in self.stack and i[3] == 0 or i[3] == -2:
+                    self.stack.append(i)
+        return self.stack[-1][3]
