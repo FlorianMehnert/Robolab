@@ -59,7 +59,7 @@ class Communication:
         msgFrom = payload["from"]
         msgType = payload["type"]
         #print(json.dumps(payload, indent=2))
-        print(msgFrom, msgType, "on_message")
+        # print(msgFrom, msgType, "on_message")
 
         if msgFrom == "server":
             payload = payload["payload"]
@@ -69,7 +69,7 @@ class Communication:
                 self.logger.debug("Planet name: " + self.planet.getName())
                 self.planet.setStart((payload["startX"], payload["startY"]), payload["startOrientation"])
 
-                print(self.planet.start, " O")
+                print(f"robot starts at: {self.planet.start}")
                 self.wait = False
             elif msgType == "path":
                 self.planet.addPath(((payload["startX"], payload["startY"]), payload["startDirection"]),

@@ -184,43 +184,43 @@ class Follow:
         finds attached paths to discovered knots by turning 360° and repositions the robot to the next viable path
         """
 
-        dirList: List[Direction] = []
-
-        self.m1.stop(stop_action="brake")
-        self.m2.stop(stop_action="brake")
+        self.stop()
         self.m1.run_to_rel_pos(speed_sp=200, position_sp=270)
         self.m2.run_to_rel_pos(speed_sp=-200, position_sp=270)
-
         self.m1.wait_until_not_moving()
-
-        self.m1.run_forever(speed_sp=250)
-        self.m2.run_forever(speed_sp=-250)
-
         self.m1.position = 0
         self.m2.position = 0
+        self.m1.run_forever(speed_sp=270)
+        self.m2.run_forever(speed_sp=-270)
+
+        dirList: List[Direction] = []
+        pathArray: List[int] = []
 
         while self.m1.position < 1100:
             binData = self.cs.bin_data("hhh")
-            if (self.m1.position in range(0, 135) or self.m1.position in range(980, 1200)) and isBlack(binData):
-                dirList.append(Direction.NORTH)
-            elif self.m1.position in range(143, 413) and isBlack(binData):
-                dirList.append(Direction.EAST)
-            elif self.m1.position in range(422, 692) and isBlack(binData):
-                dirList.append(Direction.SOUTH)
-            elif self.m1.position in range(701, 971) and isBlack(binData):
-                dirList.append(Direction.WEST)
+            if isBlack(binData):
+                pathArray.append(self.m1.position)
 
-            sleep(0.05)
+        for i in pathArray:
+            if (i in range(0,100) or i in range(1000,1100)) and Direction.NORTH not in dirList:
+                dirList.append(Direction.NORTH)
+            elif i in range(175,375) and Direction.EAST not in dirList:
+                dirList.append(Direction.EAST)
+            elif i in range(450,650) and Direction.SOUTH not in dirList:
+                dirList.append(Direction.SOUTH)
+            elif i in range(725, 925) and Direction.WEST not in dirList:
+                dirList.append(Direction.WEST)
 
         self.stop()
         self.m1.wait_until_not_moving()
+        print(f"in findAttachedPaths =  {dirList}")
         return dirList
 
-    def gammaRelToAbs(self, dirList: List[Direction], gamma: Direction):
-        dList = dirList
+    def gammaRelToAbs(self, dirList: List[Direction], gamma: int):
+        dList = dirList[:]
         cnt = 0
-        for i in dList:
-            dList[cnt] = Direction((i + int(gamma.value))%360)
+        for dir in dList:
+            dList[cnt] = Direction((dir + gamma)%360)
             cnt += 1
         return dList
 
@@ -237,30 +237,20 @@ class Follow:
         """
         selects one path from all discovered paths for one knot
         """
+        dirList1 = dirList
 
-        if len(dirList) == 1 and Direction.SOUTH in dirList:
+        print(f"in selectPath dirList is: {dirList1}")
+        if len(dirList1) == 1 and Direction.SOUTH in dirList1:
             path = Direction.SOUTH
-        elif len(dirList) == 0:
+        elif len(dirList1) == 0:
             # should never happen
             print("some path was not detected!")
             path = Direction.SOUTH
         else:
-            print("SELECT PATH DIR LIST", dirList)
             try:
-                dirList.remove(Direction.SOUTH)
+                dirList1.remove(Direction.SOUTH)
             except ValueError:
                 pass
-            path = random.choice(dirList)
-        print("\u001b[31mselected\u001b[0m", path)
+            path = random.choice(dirList1)
         return path
 
-    def gammaToDirection(self, gamma):
-        gamma = abs(round(gamma))
-        if gamma in range(316, 360) or gamma in range(0, 45):
-            return Direction.NORTH
-        elif gamma in range(46, 135):
-            return Direction.EAST
-        elif gamma in range(136, 225):
-            return Direction.SOUTH
-        elif gamma in range(226, 315):
-            return Direction.WEST

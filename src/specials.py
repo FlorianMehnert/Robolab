@@ -2,6 +2,8 @@ from time import sleep
 from enum import Enum
 import ev3dev.ev3 as ev3
 import follow
+# import odometry
+from planet import Direction
 
 
 def blink():
@@ -147,3 +149,28 @@ class colorCodes(str, Enum):
     cyan = "\u001b[36m"
     white = "\u001b[37m"
     reset = "\u001b[0m"
+    bblack = "\u001b[40m"
+    bred = "\u001b[41m"
+    bgreen = "\u001b[42m"
+    byellow = "\u001b[43m"
+    bblue = "\u001b[44m"
+    bmagenta = "\u001b[45m"
+    bcyan = "\u001b[46m"
+    bwhite = "\u001b[47m"
+
+
+if __name__ == '__main__':
+    import odometry
+    newOrientation = Direction.SOUTH
+    follow = follow.Follow(m1=None, m2=None, cs=None, ts=None, gy=None, movement=None, ps=None, sd=None)
+    odo = odometry.Odometry(gamma=0, posX=0, posY=0, movement=None, distBtwWheels=9.2)
+    paths = [Direction.NORTH, Direction.EAST, Direction.SOUTH]
+
+    dirList = follow.gammaRelToAbs(paths, newOrientation)  # new gamma needs to be correctly calculated by odo
+    dirList = follow.removeDoubles(dirList)
+
+    # TODO change selection to backtracking
+    randDirRel: Direction = follow.selectPath(paths)
+    randDirAbs: Direction = Direction((randDirRel.value + int(newOrientation.value)) % 360)
+
+    print(f"randDirAbs = {randDirAbs}, randDirRel = {randDirRel}, dirList = {dirList}")
