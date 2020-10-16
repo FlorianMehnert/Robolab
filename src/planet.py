@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 # Attention: Do not import the ev3dev.ev3 module in this file
+import math
 from enum import IntEnum, unique
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union, Optional
 
 Weight = int
 """
@@ -316,6 +317,85 @@ class Planet:
             return  # map explored
         else:
             return self.shortestPath(position, newCoord)
+
+    def shortestPathTutor(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
+        List[Tuple[Tuple[int, int], Direction]]]:
+        """
+        Returns a shortest path between two nodes
+        *** Method from Tutor Planet ***
+        examples:
+            shortest_path((0,0), (2,2)) returns: [((0, 0), Direction.EAST), ((1, 0), Direction.NORTH)]
+            shortest_path((0,0), (1,2)) returns: None
+        :param start: 2-Tuple
+        :param target: 2-Tuple
+        :return: List, Direction
+        """
+        if target == start:
+            return []
+
+        distance: Dict[Tuple[int, int], int] = dict()
+        predecessor: Dict[Tuple[int, int], Tuple[int, int]] = dict()
+        all_paths = self.getPaths()
+        unchecked_verts = set(all_paths.keys())
+
+        if target not in unchecked_verts:
+            return None
+
+        self.initDictsTutor(start, distance, predecessor, unchecked_verts)
+        while unchecked_verts:
+            cur_vertex = None
+            min_dist = math.inf
+            for tup in unchecked_verts:
+                if distance[tup] < min_dist:
+                    min_dist = distance[tup]
+                    cur_vertex = tup
+
+            unchecked_verts.remove(cur_vertex)
+            if cur_vertex == target:
+                break
+            for neighbor in self.getNeighborTutor(cur_vertex, all_paths):
+                if neighbor[0] in unchecked_verts:
+                    self.updateDistanceTutor(cur_vertex, neighbor, distance, predecessor)
+        return self.buildShortestPathTutor(target, predecessor, all_paths)
+
+    def initDictsTutor(self, start, distance, predecessor, unchecked_verts):
+        # *** Method from Tutor Planet ***
+        for tup in unchecked_verts:
+            distance[tup] = math.inf
+            predecessor[tup] = None
+        distance[start] = 0
+
+    def getNeighborTutor(self, cur_vertex, all_paths):
+        # *** Method from Tutor Planet ***
+        return {(tup, weight) for tup, _, weight in all_paths[cur_vertex].values()}
+
+    def updateDistanceTutor(self, cur_vertex, neighbor, distance, predecessor):
+        # *** Method from Tutor Planet ***
+        alternative_dist = distance[cur_vertex] + neighbor[1]
+        if alternative_dist < distance[neighbor[0]]:
+            distance[neighbor[0]] = alternative_dist
+            predecessor[neighbor[0]] = cur_vertex
+
+    def buildShortestPathTutor(self, target, predecessor, all_paths):
+        # *** Method from Tutor Planet ***
+        work_path = [target]
+        path: Optional[List[Tuple[Tuple[int, int], Direction]]] = []
+        cur_vertex = target
+        while predecessor[cur_vertex] is not None:
+            cur_vertex = predecessor[cur_vertex]
+            work_path.insert(0, cur_vertex)
+        for i in range(len(work_path) - 1):
+            tup = work_path[i]
+            best_direction = None
+            best_weight = math.inf
+            for direction in all_paths[tup].keys():
+                cur_tup = all_paths[tup][direction]
+                if cur_tup[0] == work_path[i + 1]:
+                    if cur_tup[2] < best_weight:
+                        best_weight = cur_tup[2]
+                        best_direction = direction
+            path.append((tup, best_direction))
+        return path
 
     def DFS(self) -> Direction:
         for path in self.stack:
