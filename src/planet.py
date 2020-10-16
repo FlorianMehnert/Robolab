@@ -63,11 +63,11 @@ class Planet:
 
         # no existing path
         if weight == -3 and self.paths[start[0]][start[1]][2] == -2:
-            self.paths[start[0]][start[1]] = (self.paths[start[0]][start[1]][0], self.paths[start[0]][start[1]][1], -3)
+            self.paths[start[0]][start[1]] = (start[0], start[1], -3)
             # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
         # existing path but no more information
         elif weight == 0 and self.paths[start[0]][start[1]][2] == -2:
-            self.paths[start[0]][start[1]] = (self.paths[start[0]][start[1]][0], self.paths[start[0]][start[1]][1], -1)
+            self.paths[start[0]][start[1]] = (start[0], start[1], 0)
             # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
         # blocked path
         elif weight == -1:
