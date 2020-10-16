@@ -38,8 +38,8 @@ class Planet:
         self.target = None
         self.paths: Set[Tuple[Tuple[Tuple[int, int], Direction], Tuple[Tuple[int, int], Direction], Weight]] = set()
 
-    def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
-                 weight: int):
+    def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
+                weight: int):
         """
          Adds a bidirectional path defined between the start and end coordinates to the map and assigns the weight to it
         example:
@@ -52,7 +52,7 @@ class Planet:
         self.paths.add((start, target, weight))
         self.paths.add((target, start, weight))
 
-    def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
+    def getPaths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
         Returns all paths
         example:
@@ -77,7 +77,7 @@ class Planet:
             path_dict[path[0][0]][path[0][1]] = (path[1][0], path[1][1], path[2])
         return path_dict
 
-    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
+    def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
         List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
@@ -93,13 +93,13 @@ class Planet:
 
         distance: Dict[Tuple[int, int], int] = dict()
         predecessor: Dict[Tuple[int, int], Tuple[int, int]] = dict()
-        all_paths = self.get_paths()
+        all_paths = self.getPaths()
         unchecked_verts = set(all_paths.keys())
 
         if target not in unchecked_verts:
             return None
 
-        self.init_dicts(start, distance, predecessor, unchecked_verts)
+        self.initDicts(start, distance, predecessor, unchecked_verts)
         while unchecked_verts:
             cur_vertex = None
             min_dist = math.inf
@@ -111,27 +111,27 @@ class Planet:
             unchecked_verts.remove(cur_vertex)
             if cur_vertex == target:
                 break
-            for neighbor in self.get_neighbor(cur_vertex, all_paths):
+            for neighbor in self.getNeighbor(cur_vertex, all_paths):
                 if neighbor[0] in unchecked_verts:
-                    self.update_distance(cur_vertex, neighbor, distance, predecessor)
-        return self.build_shortest_path(target, predecessor, all_paths)
+                    self.updateDistance(cur_vertex, neighbor, distance, predecessor)
+        return self.buildShortestPath(target, predecessor, all_paths)
 
-    def init_dicts(self, start, distance, predecessor, unchecked_verts):
+    def initDicts(self, start, distance, predecessor, unchecked_verts):
         for tup in unchecked_verts:
             distance[tup] = math.inf
             predecessor[tup] = None
         distance[start] = 0
 
-    def get_neighbor(self, cur_vertex, all_paths):
+    def getNeighbor(self, cur_vertex, all_paths):
         return {(tup, weight) for tup, _, weight in all_paths[cur_vertex].values()}
 
-    def update_distance(self, cur_vertex, neighbor, distance, predecessor):
+    def updateDistance(self, cur_vertex, neighbor, distance, predecessor):
         alternative_dist = distance[cur_vertex] + neighbor[1]
         if alternative_dist < distance[neighbor[0]]:
             distance[neighbor[0]] = alternative_dist
             predecessor[neighbor[0]] = cur_vertex
 
-    def build_shortest_path(self, target, predecessor, all_paths):
+    def buildShortestPath(self, target, predecessor, all_paths):
         work_path = [target]
         path: Optional[List[Tuple[Tuple[int, int], Direction]]] = []
         cur_vertex = target
