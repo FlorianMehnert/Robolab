@@ -72,14 +72,8 @@ class Planet:
         # blocked path
         elif weight == -1:
             # target known and not stored
-            if not self.paths[start[0]][start[1]][0] and start != target:
-                self.paths[start[0]][start[1]] = (target[0], target[1], -1)
-                self.paths[target[0]][target[1]][0] = (start[0], start[1], -1)
-                # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
-            else:
-                self.paths[start[0]][start[1]] = (
-                    self.paths[start[0]][start[1]][0], self.paths[start[0]][start[1]][1], -1)
-                # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
+            self.paths[start[0]][start[1]] = (target[0], target[1], -1)
+            # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
         elif weight > 0:
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
             self.paths[target[0]][target[1]] = (start[0], start[1], weight)
