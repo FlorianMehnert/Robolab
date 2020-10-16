@@ -88,7 +88,9 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         This test should check that an empty planet really is empty
         """
-        assert (self.planet.paths == {}) , "empty planet not empty"
+        newPlanet = Planet()
+        emptyDict = {}
+        self.assertEqual(newPlanet.getPaths(), emptyDict, "empty planet not empty")
 
     def test_target(self):
         """
