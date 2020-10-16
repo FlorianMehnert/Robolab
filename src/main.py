@@ -167,48 +167,29 @@ def run(calibrate=False):
                 relativePaths = follow.findAttachedPaths()
                 absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
 
-                # TODO change selection to backtracking
+                # adds current odo view-angle to dirRel
+                dirAbs: Direction = planet.getNextDirection()
+                dirRel: Direction = Direction((dirAbs.value + round(odo.gamma)) % 360)
 
-                randDirAbs = Direction.NORTH
-                randDirRel = Direction.NORTH
+                print(f"{specials.colorCodes.red}selected: {dirRel}{specials.colorCodes.reset}, "
+                      f"{specials.colorCodes.blue}absolute: {dirAbs}{specials.colorCodes.reset}")
 
-                # removes random factor
-                while True:
-                    # selects one path from scanned directions
-                    randDirRel: Direction = follow.selectPath(relativePaths)
+                print(f"{specials.colorCodes.cyan}relPaths = {specials.colorCodes.reset}{relativePaths}\n"
+                      f"{specials.colorCodes.cyan}absPaths = {specials.colorCodes.reset}{absolutePaths}")
+                print(f"{specials.colorCodes.yellow}dirRel = {dirRel}{specials.colorCodes.reset} "
+                      f"{specials.colorCodes.yellow}and dirAbs = {dirAbs}{specials.colorCodes.reset}")
 
-                    # adds current odo view-angle to randDirRel
-                    randDirAbs: Direction = Direction((randDirRel.value + round(odo.gamma)) % 360)
-
-                    print(f"{specials.colorCodes.red}selected: {randDirRel}{specials.colorCodes.reset}, "
-                          f"{specials.colorCodes.blue}absolute: {randDirAbs}{specials.colorCodes.reset}")
-
-                    print(f"{specials.colorCodes.cyan}relPaths = {specials.colorCodes.reset}{relativePaths}\n"
-                          f"{specials.colorCodes.cyan}absPaths = {specials.colorCodes.reset}{absolutePaths}")
-                    print(f"{specials.colorCodes.yellow}randDirRel = {randDirRel}{specials.colorCodes.reset} "
-                          f"{specials.colorCodes.yellow}and randDirAbs = {randDirAbs}{specials.colorCodes.reset}")
-
-                    sleep(1)
-
-                    print(f"I want to turn for {randDirRel}°")
-                    pathDirection = input("is it ok? (press y|yes|\x1B[3m)Enter\x1B[23m")
-                    if pathDirection == "y" or pathDirection == "" or pathDirection == "yes":
-                        break
-                    else:
-                        continue
-
-                print(f"I selected {randDirAbs} as AbsAngle and {randDirRel} as RelAngle")
                 # sends selected path
                 # might cause planet update which leads to us needing to update our internal orientation
                 planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
-                mqttc.sendPathSelect(((oldNodeX, oldNodeY), randDirAbs))
+                mqttc.sendPathSelect(((oldNodeX, oldNodeY), dirAbs))
 
-                print(f"randDirAbs = {randDirAbs}, planetDirection = {planet.start[1]}")
-                randDirRel = (randDirAbs - oldOrientation) % 360
-                oldOrientation = randDirAbs
+                print(f"dirAbs = {dirAbs}, planetDirection = {planet.start[1]}")
+                dirRel = (dirAbs - oldOrientation) % 360
+                oldOrientation = dirAbs
 
-                follow.turnRightXTimes(randDirRel / 90)
-                odo.gamma = math.radians(randDirAbs)
+                follow.turnRightXTimes(dirRel / 90)
+                odo.gamma = math.radians(dirAbs)
 
                 if isColor(currentColor, rgbRed, 25):
                     print("\u001b[31mRED\u001b[0m")
