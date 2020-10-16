@@ -1,9 +1,8 @@
 from time import sleep
 from enum import Enum
+
 import ev3dev.ev3 as ev3
 import follow
-# import odometry
-from planet import Direction
 
 
 def blink():
@@ -85,7 +84,7 @@ def wasd(m1: ev3.LargeMotor, m2: ev3.LargeMotor) -> None:
             m2.stop()
 
 
-def menu(follow: follow, calibrate):
+def menu(follow: follow, calibrate: bool, sound: ev3.Sound):
     if calibrate:
         mode = "calibrate"
     else:
@@ -113,6 +112,8 @@ def menu(follow: follow, calibrate):
         with open("/home/robot/src/values.txt", mode="w") as file:
             for i in follow.calibrate():
                 file.write(f"{i}\n")
+    elif mode == "beep":
+        sound.beep()
     elif mode == "follow":
         while True:
             follow.follow(optimal=171.5, baseSpeed=200)
@@ -157,20 +158,3 @@ class colorCodes(str, Enum):
     bmagenta = "\u001b[45m"
     bcyan = "\u001b[46m"
     bwhite = "\u001b[47m"
-
-
-if __name__ == '__main__':
-    import odometry
-    newOrientation = Direction.SOUTH
-    follow = follow.Follow(m1=None, m2=None, cs=None, ts=None, gy=None, movement=None, ps=None, sd=None)
-    odo = odometry.Odometry(gamma=0, posX=0, posY=0, movement=None, distBtwWheels=9.2)
-    paths = [Direction.NORTH, Direction.EAST, Direction.SOUTH]
-
-    dirList = follow.gammaRelToAbs(paths, newOrientation)  # new gamma needs to be correctly calculated by odo
-    dirList = follow.removeDoubles(dirList)
-
-    # TODO change selection to backtracking
-    randDirRel: Direction = follow.selectPath(paths)
-    randDirAbs: Direction = Direction((randDirRel.value + int(newOrientation.value)) % 360)
-
-    print(f"randDirAbs = {randDirAbs}, randDirRel = {randDirRel}, dirList = {dirList}")

@@ -67,7 +67,7 @@ def run(calibrate=False):
 
     try:
 
-        specials.menu(follow, calibrate)
+        specials.menu(follow, calibrate, sd)
 
         global oldOrientation
         global oldNodeX
@@ -120,8 +120,6 @@ def run(calibrate=False):
                     # first node discovered
                     mqttc.sendReady()
                     mqttc.timeout()
-
-                    # TODO sleep?, 1000, 1000 seems a bit much
                     sleep(1)
 
                     # only works because while loops is very fast... the faster the while the slower the less does the robot roll
@@ -129,17 +127,23 @@ def run(calibrate=False):
                     m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                     m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                     print(
-                        f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}serverDirection = {specials.colorCodes.reset} {oldOrientation}, odoX = {odo.posX}, odoY = {odo.posY}, {specials.colorCodes.red}odoDirection ={specials.colorCodes.reset} {odo.gamma}")
+                        f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}"
+                        f"serverDirection = {specials.colorCodes.reset} {oldOrientation}, "
+                        f"odoX = {odo.posX}, odoY = {odo.posY}, {specials.colorCodes.red}"
+                        f"odoDirection ={specials.colorCodes.reset} {odo.gamma}")
 
                 else:
-                    # any other node discovered
 
+                    # any other node discovered
                     odo.calculateNewPosition(movement)
                     # updates odo.poX, odo.posY, odo.gamma
 
                     # prints every position data
                     print(
-                        f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}serverDirection = {specials.colorCodes.reset} {oldOrientation}, odoX = {odo.posX}, odoY = {odo.posY}, {specials.colorCodes.red}odoDirection ={specials.colorCodes.reset} {odo.gamma}")
+                        f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}"
+                        f"serverDirection = {specials.colorCodes.reset} {oldOrientation}, "
+                        f"odoX = {odo.posX}, odoY = {odo.posY}, {specials.colorCodes.red}"
+                        f"odoDirection ={specials.colorCodes.reset} {odo.gamma}")
 
                     if follow.pathBlocked:
                         # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
@@ -166,8 +170,6 @@ def run(calibrate=False):
                 # scan knots
                 relativePaths = follow.findAttachedPaths()
                 absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
-
-                # TODO change selection to backtracking
 
                 randDirAbs = Direction.NORTH
                 randDirRel = Direction.NORTH
@@ -229,7 +231,8 @@ def run(calibrate=False):
 
                 follow.follow(optimal, 250)
 
-                if us.value() < 300:
+                if us.value() < 200:
+                    sd.beep()
                     print("\u001b[31mPATH BLOCKED\u001b[0m")
                     follow.pathBlocked = True
                     blink()
@@ -249,35 +252,14 @@ def run(calibrate=False):
                 odo.newM1 = m1.position
                 odo.newM2 = m2.position
                 movement.append((odo.newM1 - odo.oldM1, odo.newM2 - odo.oldM2))
-
-    except NotADirectoryError as exc:
-        print(exc)
-        try:
-            m1.stop()
-            m2.stop()
-            return
-        except OSError:
-            print("some part is missing")
-            return
-
-
-def CtrlCHandler(signm, frame):
-    print("\nCtrl-C pressed")
-    m1.stop()
-    m2.stop()
-    exit(0)
-
-
-# signal.signal(signal.SIGINT, CtrlCHandler)
-# only useful when starting robot per ssh
+    except OSError:
+        print("some part is missing")
 
 # PLS EDIT
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--calibrate", action="store_true")
     args = parser.parse_args()
 
-    if args.calibrate:
-        run(calibrate=True)
-    else:
-        run(calibrate=False)
+    run(calibrate=args.calibrate)
