@@ -142,7 +142,7 @@ class Planet:
         for node in self.paths:
             pathdict[node] = {}
             for dir in self.paths[node]:
-                if dir[2] > 0:
+                if self.paths[node][dir][2] > 0:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
