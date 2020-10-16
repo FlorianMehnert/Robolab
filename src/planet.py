@@ -349,7 +349,8 @@ class Planet:
                 if distance[tup] < min_dist:
                     min_dist = distance[tup]
                     cur_vertex = tup
-
+            if cur_vertex is None:
+                return None
             unchecked_verts.remove(cur_vertex)
             if cur_vertex == target:
                 break
