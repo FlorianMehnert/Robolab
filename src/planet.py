@@ -410,3 +410,17 @@ class Planet:
                     self.stack.append(i)
 
         return self.stack[-1][3]
+
+    def getNextDirection(self) -> Direction:
+        """
+        Return next direction.
+        return: Direction
+        """
+        nextDir = None
+        if self.target is not None:
+            shortestPath = self.buildShortestPath(self.target, self.start[0])
+            if shortestPath is not None:
+                nextDir = shortestPath[0][1]
+        if nextDir is None:
+            nextDir = self.DFS()
+        return nextDir
