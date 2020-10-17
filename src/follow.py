@@ -254,12 +254,14 @@ class Follow:
             else:
                 self.stop()
 
-    def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = ""):
+    def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = "NOCALIBRATE"):
         if calibrate:
             mode = "calibrate"
         while True:
+            if mode == "NOCALIBRATE":
+                pass
             if mode == "":
-                continue
+                break
             if mode == "wasd":
                 self.wasd()
             elif mode == "follow":
