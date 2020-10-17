@@ -130,9 +130,10 @@ class Communication:
     def sendReady(self):
         payload = {"from" : "client", "type" : "ready"}
         payload = json.dumps(payload)
+        print("Send Ready")
+        self.wait = True
         self.sendMessage(payload, "explorer/" + self.group)
         self.planet.newPlanet = False
-        self.wait = True
         while self.wait:
             continue
         self.timeout()
@@ -158,8 +159,8 @@ class Communication:
         }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
-        self.sendMessage(payload, topic)
         self.wait = True
+        self.sendMessage(payload, topic)
         while self.wait:
             continue
         self.timeout()
@@ -189,8 +190,8 @@ class Communication:
         }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
-        self.sendMessage(payload, topic)
         self.wait = True
+        self.sendMessage(payload, topic)
         while self.wait:
             continue
         self.timeout()
@@ -205,8 +206,8 @@ class Communication:
         }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.getName() + "/" + self.group
-        self.sendMessage(payload, topic)
         self.wait = True
+        self.sendMessage(payload, topic)
         while self.wait:
             continue
         self.timeout()
