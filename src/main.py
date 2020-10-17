@@ -157,6 +157,15 @@ def run(calibrate=False):
                                        ((round(odo.posX), round(odo.posY)), Direction((odo.gamma + 180) % 360)),
                                        status="free")
 
+                # Target reached
+                if planet.target is not None:
+                    if planet.target == planet.start[0]:
+                        mqttc.sendTargetReached()
+                        print("Target reached")
+                        pprint(planet.paths, indent=2)
+                        sd.beep()
+                        break
+
                 # updated planet data: current position + facing
                 oldNodeX = planet.start[0][0]
                 oldNodeY = planet.start[0][1]
