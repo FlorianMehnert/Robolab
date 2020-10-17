@@ -188,8 +188,8 @@ class Follow:
         """
 
         self.stop()
-        self.m1.run_to_rel_pos(speed_sp=200, position_sp=270)
-        self.m2.run_to_rel_pos(speed_sp=-200, position_sp=270)
+        self.m1.run_to_rel_pos(speed_sp=200, position_sp=280)
+        self.m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
         self.m1.wait_until_not_moving()
         self.m1.position = 0
         self.m2.position = 0
