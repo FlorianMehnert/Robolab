@@ -194,15 +194,10 @@ def run(calibrate=False):
                     sd.beep()
                     break
 
-                dirRel: Direction = odo.gammaToDirection(dirAbs + odo.gamma)
+                dirRel: Direction = odo.gammaToDirection(dirAbs + round(odo.gamma))
 
                 print(f"{specials.colorCodes.red}selected: {dirRel}{specials.colorCodes.reset}, "
                       f"{specials.colorCodes.blue}absolute: {dirAbs}{specials.colorCodes.reset}")
-
-                print(f"{specials.colorCodes.cyan}relPaths = {specials.colorCodes.reset}{relativePaths}\n"
-                      f"{specials.colorCodes.cyan}absPaths = {specials.colorCodes.reset}{absolutePaths}")
-                print(f"{specials.colorCodes.yellow}dirRel = {dirRel}{specials.colorCodes.reset} "
-                      f"{specials.colorCodes.yellow}and dirAbs = {dirAbs}{specials.colorCodes.reset}")
 
                 # sends selected path
                 # might cause planet update which leads to us needing to update our internal orientation
@@ -262,6 +257,7 @@ def run(calibrate=False):
             print(gy.value())
         except OSError:
             print("gyroSensor is broken")
+
 # PLS EDIT
 
 if __name__ == '__main__':

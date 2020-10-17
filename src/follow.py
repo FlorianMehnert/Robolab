@@ -259,12 +259,12 @@ class Follow:
 
     def gyroStraight(self, s1, s2, kp):
         self.gy.mode = 'GYRO-CAL'
-        sleep(3)
+        sleep(2)
         self.gy.mode = 'GYRO-ANG'
         print(self.gy.value())
         while True:
-
             error = self.gy.value()
+            print(error)
             output = kp * error
             self.m1.run_forever(speed_sp=s1 + output)
             self.m2.run_forever(speed_sp=s2 - output)
@@ -276,12 +276,16 @@ class Follow:
         while True:
             if mode == "NOCALIBRATE":
                 pass
+            elif mode == "dre":
+                self.m1.run_to_rel_pos(speed_sp=100, position_sp=360)
+                self.m2.run_to_rel_pos(speed_sp=100, position_sp=360)
+
             elif mode == "":
                 break
             elif mode == "wasd":
                 self.wasd()
             elif mode == "gs":
-                self.gyroStraight(100, 100, 10)
+                self.gyroStraight(800, 800, 10)
             elif mode == "follow":
                     self.follow(optimal=171.5, baseSpeed=250)
             elif mode == "battery":
