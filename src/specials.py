@@ -5,6 +5,7 @@ import ev3dev.ev3 as ev3
 
 
 def blink():
+
     for i in range(2):
         ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
         ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
@@ -53,9 +54,6 @@ def remoteControl(rc: ev3.RemoteControl, m1: ev3.LargeMotor, m2: ev3.LargeMotor)
     while True:  # replaces previous line so use Ctrl-C to exit
         rc.process()
         sleep(0.01)
-
-
-
 
 class colorCodes(str, Enum):
     """

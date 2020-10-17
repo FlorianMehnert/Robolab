@@ -1,7 +1,6 @@
 from time import sleep
-from typing import Dict, Tuple, List
+from typing import Tuple, List
 from planet import Direction
-import random
 import ev3dev.ev3 as ev3
 
 
@@ -57,6 +56,9 @@ class Follow:
         self.kd = 0.03
 
     def convStrToRGB(self, s: str):
+        """
+        used to interpret strings as rgb
+        """
         valTemp = ""
         rgbTemp = []
         rgb: Tuple[float, float, float]
@@ -106,6 +108,9 @@ class Follow:
         ev3.Leds.set_color(ev3.Leds.RIGHT, color)
 
     def rgbToRefl(self, r: int, g: int, b: int) -> float:
+        """
+        convert rgb values to reflective values
+        """
         return (r + g + b) / 3
 
     def calibrate(self) -> Tuple[tuple, tuple, tuple, tuple, float]:
@@ -154,7 +159,7 @@ class Follow:
         self.integral += error
         derivate = error - self.previousError
         output = self.kp * error + self.ki * self.integral + self.kd * derivate
-        previousError = error
+        self.previousError = error
         self.m1.run_forever(speed_sp=baseSpeed + output)
         self.m2.run_forever(speed_sp=baseSpeed - output)
 
@@ -205,11 +210,11 @@ class Follow:
                 pathArray.append(self.m1.position)
 
         for i in pathArray:
-            if (i in range(0,100) or i in range(1000,1100)) and Direction.NORTH not in dirList:
+            if (i in range(0, 100) or i in range(1000, 1100)) and Direction.NORTH not in dirList:
                 dirList.append(Direction.NORTH)
-            elif i in range(175,375) and Direction.EAST not in dirList:
+            elif i in range(175, 375) and Direction.EAST not in dirList:
                 dirList.append(Direction.EAST)
-            elif i in range(450,650) and Direction.SOUTH not in dirList:
+            elif i in range(450, 650) and Direction.SOUTH not in dirList:
                 dirList.append(Direction.SOUTH)
             elif i in range(725, 925) and Direction.WEST not in dirList:
                 dirList.append(Direction.WEST)
@@ -254,16 +259,31 @@ class Follow:
             else:
                 self.stop()
 
-    def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = ""):
+    def gyroStraight(self, baseSpeed, kp):
+        self.gy.mode = 'GYRO-CAL'
+        sleep(3)
+        self.gy.mode = 'GYRO-ANG'
+        print(self.gy.value())
+        while True:
+            error = self.gy.value()
+            output = kp * error
+            self.m1.run_forever(speed_sp=baseSpeed - output)
+            self.m2.run_forever(speed_sp=baseSpeed + output)
+            sleep(.2)
+
+    def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = "NOCALIBRATE"):
         if calibrate:
             mode = "calibrate"
         while True:
-            if mode == "":
-                continue
-            if mode == "wasd":
+            if mode == "NOCALIBRATE":
+                pass
+            elif mode == "":
+                break
+            elif mode == "gs":
+                self.gyroStraight(1000, 10)
+            elif mode == "wasd":
                 self.wasd()
             elif mode == "follow":
-                while True:
                     self.follow(optimal=171.5, baseSpeed=250)
             elif mode == "battery":
                 print(self.ps.measured_volts)
@@ -273,7 +293,6 @@ class Follow:
                         file.write(f"{i}\n")
             elif mode == "beep":
                 sound.beep()
-
             elif mode == "StarWars":
                 self.sd.tone([
                     (392, 350, 100), (392, 350, 100), (392, 350, 100), (311.1, 250, 100),

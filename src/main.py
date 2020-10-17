@@ -59,9 +59,7 @@ def run(calibrate=False):
     movement: List[Tuple[int, int]] = []
     # used to save all movement values gathered while line following for odometry calculations
 
-    gy.mode = 'GYRO-CAL'
-    gy.mode = 'GYRO-CAL'
-    gy.mode = 'GYRO-ANG'
+
     follow = Follow(m1=m1, m2=m2, cs=cs, ts=ts, gy=gy, movement=movement, ps=ps, sd=sd)
     odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
     follow.reset()
@@ -258,9 +256,11 @@ def run(calibrate=False):
                 odo.newM1 = m1.position
                 odo.newM2 = m2.position
                 movement.append((odo.newM1 - odo.oldM1, odo.newM2 - odo.oldM2))
-    except OSError:
-        print("some part is missing")
-
+    except:
+        try:
+            print(gy.value())
+        except OSError:
+            print("gyroSensor is broken")
 # PLS EDIT
 
 if __name__ == '__main__':
