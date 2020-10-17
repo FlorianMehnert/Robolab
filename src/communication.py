@@ -205,8 +205,8 @@ class Communication:
                   }
         }
         payload = json.dumps(payload)
-        self.wait = True
         topic = "explorer/" + self.group
+        self.wait = True
         self.sendMessage(payload, topic)
         while self.wait:
             continue
