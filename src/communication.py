@@ -189,7 +189,7 @@ class Communication:
                   }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planet.getName() + "/" + self.group
+        topic = "explorer/" + self.group
         self.wait = True
         self.sendMessage(payload, topic)
         while self.wait:
@@ -205,8 +205,8 @@ class Communication:
                   }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planet.getName() + "/" + self.group
         self.wait = True
+        topic = "explorer/" + self.group
         self.sendMessage(payload, topic)
         while self.wait:
             continue
