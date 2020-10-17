@@ -170,10 +170,11 @@ def run(calibrate=False):
                 # scan knots
                 relativePaths = follow.findAttachedPaths()
                 absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
+                planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
 
                 # adds current odo view-angle to dirRel
                 dirAbs: Direction = planet.getNextDirection()
-                dirRel: Direction = Direction((dirAbs.value + round(odo.gamma)) % 360)
+                dirRel: Direction = Direction((dirAbs + round(odo.gamma)) % 360)
 
                 print(f"{specials.colorCodes.red}selected: {dirRel}{specials.colorCodes.reset}, "
                       f"{specials.colorCodes.blue}absolute: {dirAbs}{specials.colorCodes.reset}")
@@ -185,7 +186,6 @@ def run(calibrate=False):
 
                 # sends selected path
                 # might cause planet update which leads to us needing to update our internal orientation
-                planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), dirAbs))
 
                 print(f"dirAbs = {dirAbs}, planetDirection = {planet.start[1]}")
@@ -209,7 +209,7 @@ def run(calibrate=False):
                 m1.position = 0
                 m2.position = 0
                 movement = []
-
+                print(planet.getPaths())
             else:
 
                 follow.follow(optimal, 250)

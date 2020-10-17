@@ -4,6 +4,7 @@
 import math
 from enum import IntEnum, unique
 from typing import List, Tuple, Dict, Union, Optional
+from specials import colorCodes
 
 Weight = int
 """
@@ -66,31 +67,41 @@ class Planet:
         # no existing path
         if weight == -3 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], -3)
-            # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
+            self.setWeightInStack(-3, start)
+            print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: no")
         # existing path but no more information
         elif weight == 0 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], 0)
-            # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: no")
+            self.setWeightInStack(0, start)
+            print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: no")
         # blocked path
         elif weight == -1:
             # target known and not stored
             self.paths[start[0]][start[1]] = (target[0], target[1], -1)
-            # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
+            self.setWeightInStack(-1, start)
+            print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: ", self.paths[target[0]][target[1]])
         elif weight > 0:
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
             self.paths[target[0]][target[1]] = (start[0], start[1], weight)
-            # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
+            self.setWeightInStack(1, start)
+            print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: ", self.paths[target[0]][target[1]])
         return
 
-    def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
-        # to backtrack unknown paths
-        self.paths[start] = ()
-        return
+    def setWeightInStack(self, weight, position: Tuple[Tuple[int,int], Direction]):
+        cnt = 0
+        for i in self.stack:
+            if i[0] == position[0] and i[1] == position[1]:
+                if weight in (0, -2):
+                    print("weight is 0 or 2,", weight)
+                    self.stack[cnt] = (i[0], i[1], weight)
+                else:
+                    print("weight is not 0 or 2,", weight)
+                    self.stack.pop(cnt)
+                print(f"{colorCodes.red}stack after deletion:{colorCodes.reset}", self.stack)
+                return
+            cnt += 1
+        self.stack.append((position[0], position[1], weight))
 
-    def removePath(self, path: Tuple[Tuple[int, int], Direction]):
-        # removes path with obstacle
-        self.paths.pop(path)
-        return
 
     def setAttachedPaths(self, node: Tuple[int, int], dirList: List[Direction]):
         if node not in self.paths:
@@ -100,6 +111,9 @@ class Planet:
                 self.addPath((node, dir), (node, dir), 0)
             else:
                 self.addPath((node, dir), (node, dir), -3)
+
+
+
 
     def addNode(self, node: Tuple[int, int]):
         """
@@ -113,6 +127,7 @@ class Planet:
         nodepaths = {}
         for dir in Direction:
             nodepaths[dir] = ((), 0, -2)
+            self.stack.append((node, dir, -2))
         self.paths[node] = nodepaths
 
     def getPaths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
@@ -151,7 +166,7 @@ class Planet:
         for node in self.paths:
             pathdict[node] = {}
             for dir in self.paths[node]:
-                if dir[2] > -1:
+                if self.paths[node][dir][2] > -1:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
@@ -164,7 +179,7 @@ class Planet:
         for node in self.paths:
             pathdict[node] = {}
             for dir in self.paths[node]:
-                if dir[2] > 0:
+                if self.paths[node][dir][2] > 0:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
@@ -177,27 +192,9 @@ class Planet:
         for node in self.paths:
             pathdict[node] = {}
             for dir in self.paths[node]:
-                if dir[2] in (0, -2):
+                if self.paths[node][dir][2] in (0, -2):
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
-
-    def getTargets(self, direction, target):  # dict in dict
-        try:
-            helpdict[direction] = (target)
-        except:
-            helpdict = {direction: target}
-        return helpdict
-
-    def getTarget(self) -> Tuple[int, int]:
-        """
-        Get target on planet.
-
-        Examples:
-            getTarget() returns: (3, 7)
-            getTarget() returns: None
-        : return: 2-Tuple[int, int]
-        """
-        return self.target
 
     def setTarget(self, node: Tuple[int, int]):
         """
@@ -339,24 +336,6 @@ class Planet:
             shortestPath.append(shortestPathReverse.pop)
         return shortestPath
 
-    def getNewPath(self, position: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
-        # finds the closest unvisited path
-        compare = 100  # might need to change value
-        newCoord = []
-        for key in self.paths:
-            (coord, direction) = key
-            if self.paths[key] == ():
-                # find the closest point
-                (a, b) = coord
-                (c, d) = position
-                if abs((a + b) - (c - d)) <= compare:
-                    newCoord = key
-                    compare = abs((a + b) - (c - d))
-        if newCoord == []:
-            return  # map explored
-        else:
-            return self.shortestPath(position, newCoord)
-
     def shortestPathTutor(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
         List[Tuple[Tuple[int, int], Direction]]]:
         """
@@ -438,17 +417,22 @@ class Planet:
         return path
 
     def DFS(self) -> Direction:
+        print("stack =", self.stack)
         for path in self.stack:
-            if path[3] != 0 or path[3] != -2:
+            if path[2] != 0 or path[2] != -2:
                 self.stack.remove(path)
 
-        paths = self.getPaths()
-        for path in paths.values():
-            for i in path.values():
-                if i not in self.stack and i[3] == 0 or i[3] == -2:
-                    self.stack.append(i)
+        # paths = self.getPathsDetectedUnknown()
+        # for path in paths.values():
+        #     for i in path.values():
+        #         if i not in self.stack and (i[2] == 0 or i[2] == -2):
+        #             self.stack.append(i)
+        if not self.stack == []:
+            print(self.stack[-1][1])
+            return self.stack[-1][1]
 
-        return self.stack[-1][3]
+        else:
+            return
 
     def getNextDirection(self) -> Direction:
         """
@@ -457,9 +441,11 @@ class Planet:
         """
         nextDir = None
         if self.target is not None:
+            print("shortest Path")
             shortestPath = self.buildShortestPath(self.target, self.start[0])
             if shortestPath is not None:
                 nextDir = shortestPath[0][1]
         if nextDir is None:
+            print("DFS")
             nextDir = self.DFS()
         return nextDir
