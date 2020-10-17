@@ -64,27 +64,25 @@ class Planet:
             self.addNode(target[0])
 
         # no existing path
-        if weight == -3:
+        if weight == -3 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], -3)
             self.setWeightInStack(-3, start)
-            # print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: no")
+            print(f"Path Not Existing: {start}: {self.paths[start[0]][start[1]]}")
         # existing path but no more information
-        elif weight == 0:
+        elif weight == 0 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], 0)
             self.setWeightInStack(0, start)
-            # print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: no")
+            print(f"Path Detected: {start}: {self.paths[start[0]][start[1]]}")
         # blocked path
-        elif weight == -1:
-            # target known and not stored
+        elif weight == -1 and self.paths[start[0]][start[1]][2] in (-2, 0):
             self.paths[start[0]][start[1]] = (target[0], target[1], -1)
             self.setWeightInStack(-1, start)
-            # print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: ", self.paths[target[0]][target[1]])
-        elif weight > 0:
+            print(f"Path Blocked: {start}: {self.paths[start[0]][start[1]]}")
+        elif weight > 0 and self.paths[start[0]][start[1]][2] in (-2, 0):
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
             self.paths[target[0]][target[1]] = (start[0], start[1], weight)
             self.setWeightInStack(1, start)
-            # print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: ", self.paths[target[0]][target[1]])
-            # print("Path Start: " + self.paths[start[0]][start[1]] + ";\tTarget: " + self.paths[target[0]][target[1]])
+            print(f"Path Free: {start}: {self.paths[start[0]][start[1]]}")
 
     def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
         # to backtrack unknown paths
