@@ -134,6 +134,10 @@ def run(calibrate=False):
 
                     # any other node discovered
                     odo.calculateNewPosition(movement)
+                    print(f"{specials.colorCodes.red}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {oldNodeX, oldNodeY}{specials.colorCodes.reset}")
+                    odo.posX += oldNodeX
+                    odo.posY += oldNodeY
+                    print(f"{specials.colorCodes.red}AFTER: odoX and odoY{odo.posX, odo.posY}{specials.colorCodes.reset}")
                     # updates odo.poX, odo.posY, odo.gamma
 
                     # prints every position data
@@ -170,8 +174,8 @@ def run(calibrate=False):
                 oldOrientation = planet.start[1]
 
                 # syncing odometry with server data
-                odo.posX = planet.start[0][0]
-                odo.posY = planet.start[0][1]
+                odo.posX = planet.start[0][0]/50
+                odo.posY = planet.start[0][1]/50
                 odo.gamma = planet.start[1]
 
                 # scan knots

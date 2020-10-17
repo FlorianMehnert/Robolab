@@ -51,30 +51,14 @@ class Odometry:
         if dist:
             dR = self.ditancePerTick(dR)
             dL = self.ditancePerTick(dL)
-            alpha: float = ((dR - dL) / self.distBtwWheels)
+            alpha: float = ((dL - dR) / self.distBtwWheels) # gesamtes coord umrechnen mit -
             beta: float = alpha / 2
             if alpha != 0:
                 straightDistance: float = ((dR + dL) / alpha) * math.sin(beta)
             else:
                 straightDistance = dR
-            dX = math.sin(self.gamma - beta) * straightDistance
-            dY = math.cos(self.gamma - beta) * straightDistance
-            if (self.gamma - alpha) % 2 * math.pi < 0:
-                self.gamma = ((2 * math.pi) + self.gamma - alpha) % (2 * math.pi)
-            else:
-                self.gamma = (self.gamma - alpha) % (2 * math.pi)
-
-            self.posX += dX
-            self.posY += dY
-        else:
-            alpha: float = ((dR - dL) / self.distBtwWheels)
-            beta: float = alpha / 2
-            if alpha != 0:
-                straightDistance: float = ((dR + dL) / alpha) * math.sin(beta)
-            else:
-                straightDistance = dR
-            dX = math.sin(self.gamma - beta) * straightDistance
-            dY = math.cos(self.gamma - beta) * straightDistance
+            dX = math.sin(self.gamma + beta) * straightDistance    # X spiegeln ohne -
+            dY = math.cos(self.gamma + beta) * straightDistance
             if (self.gamma - alpha) % 2 * math.pi < 0:
                 self.gamma = ((2 * math.pi) + self.gamma - alpha) % (2 * math.pi)
             else:
@@ -83,12 +67,11 @@ class Odometry:
             self.posX += dX
             self.posY += dY
 
-    def ditancePerTick(self, degree: int) -> int:
+    def ditancePerTick(self, degree: int) -> float:
         """
         converts motordegree to centimeters
         """
-        # 360° = 3*math.pi/360
-        return round((3 * math.pi) / 360 * degree)
+        return (3 * math.pi) / 360 * degree
 
     def calculateNewPosition(self, moves: List[Tuple[int, int]]):
         """
@@ -103,12 +86,3 @@ class Odometry:
         self.posY = round(self.posY / 50)
 
         print(f"{colorCodes.green}X = {self.posX}, Y = {self.posY}, gamma = {self.gamma}{colorCodes.reset}")
-
-        # for i in moves:
-        #     self.calculatePart(i[0] / 360 * 9.424, i[1] / 360 * 9.424)
-        # self.gamma = Direction(self.gammaToDirection(self.gamma * 180 / math.pi))
-        # print(f"not rounded X,Y = {self.posX}, {self.posY}")
-        # self.posX = round(self.posX / 50)
-        # self.posY = round(self.posY / 50)
-        #
-        # print(f"{colorCodes.green}X = {self.posX}, Y = {self.posY}, gamma = {self.gamma}{colorCodes.reset}")
