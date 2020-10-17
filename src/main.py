@@ -177,9 +177,10 @@ def run(calibrate=False):
                 odo.gamma = planet.start[1]
 
                 # scan knots
-                relativePaths = follow.findAttachedPaths()
-                absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
-                planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
+                if not planet.isKnownNode(planet.start[0]):
+                    relativePaths = follow.findAttachedPaths()
+                    absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
+                    planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
                 # update stack to remove all known weighted paths
                 discovered = planet.getPathsWithWrongWeight()
                 planet.updateStack(discovered)
