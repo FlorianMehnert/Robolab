@@ -122,7 +122,7 @@ class Planet:
         """
         nodepaths = {}
         for dir in Direction:
-            nodepaths[dir] = ((), 0, -2)
+            nodepaths[dir] = ((0, 0), 0, -2)
             self.stack.append((node, dir, -2))
         self.paths[node] = nodepaths
 
@@ -465,6 +465,12 @@ class Planet:
             return
 
     def getDirectionDjikstraList(self):
+        # current node
+        for dir in self.paths[self.start[0]]:
+            if self.paths[self.start[0]][dir][2] in [0, -2]:
+                return dir
+
+        # other nodes
         unknownNode: Dict = self.getPathsDetectedUnknown()
         if unknownNode == {}:
             return None
@@ -478,9 +484,8 @@ class Planet:
             weight = 0
             for step in pathSteps:
                 weight += self.paths[step[0]][step[1]][2]
-            if weight > 0:
-                unknownNodeDistance[node] = weight
-                unknownNodeDir[node] = pathSteps[0][1]
+            unknownNodeDistance[node] = weight
+            unknownNodeDir[node] = pathSteps[0][1]
         distance = sorted(unknownNodeDistance.values())[0]
         for node in unknownNodeDistance:
             if unknownNodeDistance[node] == distance:
