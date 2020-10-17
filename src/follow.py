@@ -241,11 +241,9 @@ class Follow:
             direction = input("")
 
             if direction == "w":
-                self.m1.run_forever(speed_sp=speed)
-                self.m2.run_forever(speed_sp=speed)
+                self.gyroStraight(s1=speed, s2=speed, kp=10)
             elif direction == "s":
-                self.m1.run_forever(speed_sp=-speed)
-                self.m2.run_forever(speed_sp=-speed)
+                self.gyroStraight(s1=-speed, s2=-speed, kp=10)
             elif direction == "a":
                 self.m1.run_forever(speed_sp=-speed / 5)
                 self.m2.run_forever(speed_sp=speed / 5)
@@ -259,16 +257,17 @@ class Follow:
             else:
                 self.stop()
 
-    def gyroStraight(self, baseSpeed, kp):
+    def gyroStraight(self, s1, s2, kp):
         self.gy.mode = 'GYRO-CAL'
         sleep(3)
         self.gy.mode = 'GYRO-ANG'
         print(self.gy.value())
         while True:
+
             error = self.gy.value()
             output = kp * error
-            self.m1.run_forever(speed_sp=baseSpeed - output)
-            self.m2.run_forever(speed_sp=baseSpeed + output)
+            self.m1.run_forever(speed_sp=s1 + output)
+            self.m2.run_forever(speed_sp=s2 - output)
             sleep(.2)
 
     def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = "NOCALIBRATE"):
@@ -279,8 +278,10 @@ class Follow:
                 pass
             elif mode == "":
                 break
+            elif mode == "recharge":
+                self.sd.speak("plug me in")
             elif mode == "gs":
-                self.gyroStraight(1000, 10)
+                self.gyroStraight(100,100, 10)
             elif mode == "wasd":
                 self.wasd()
             elif mode == "follow":

@@ -51,7 +51,7 @@ def remoteControl(rc: ev3.RemoteControl, m1: ev3.LargeMotor, m2: ev3.LargeMotor)
     rc.on_blue_up = roll(m2, 1)
     rc.on_blue_down = roll(m2, -1)
 
-    while True:  # replaces previous line so use Ctrl-C to exit
+    while True:
         rc.process()
         sleep(0.01)
 
