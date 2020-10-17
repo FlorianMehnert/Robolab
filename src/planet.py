@@ -513,8 +513,15 @@ class Planet:
         if self.target is not None:
             print("shortest Path")
             shortestPath = self.shortestPathTutor(self.start[0], self.target[0])
-            if shortestPath is not None:
-                return shortestPath[0][1]
+            if (shortestPath is not None):
+                if shortestPath is not []:
+                    print(f"shortestPath: {shortestPath}")
+                    return shortestPath[0][1]
+                else:
+                    print("shortestPath: []")
+                    return shortestPath
+            else:
+                print("shortestPath is None")
         if nextDir is None:
             #print("nextDir =",self.DFS(), "stack =", self.stack)
             #return self.DFS()
