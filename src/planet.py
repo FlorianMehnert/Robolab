@@ -516,8 +516,8 @@ class Planet:
             if shortestPath is not None:
                 return shortestPath[0][1]
         if nextDir is None:
-            print("nextDir =",self.DFS(), "stack =", self.stack)
-            return self.DFS()
-            #nextDir = self.DFS()
-            #nextDir = self.getDirectionDjikstraList()
+            #print("nextDir =",self.DFS(), "stack =", self.stack)
+            #return self.DFS()
+            nextDir = self.getDirectionDjikstraList()
+            print("nextDir =", nextDir)
         return nextDir
