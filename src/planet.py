@@ -237,6 +237,12 @@ class Planet:
         """
         self.start = (self.start[0], orientation)
 
+    def isKnownNode(self, node: Tuple[int, int]) -> bool:
+        for dir in self.paths[node]:
+            if self.paths[node][dir][2] == -2:
+                return False
+        return True
+
     def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
         None, List[Tuple[Tuple[int, int], Direction]]]:
         """

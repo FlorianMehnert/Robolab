@@ -152,7 +152,7 @@ def run(calibrate=False):
                     else:
                         # sends just discovered path
                         mqttc.sendPath(((oldNodeX, oldNodeY), oldOrientation),
-                                       ((round(odo.posX), round(odo.posY)), Direction((odo.gamma + 180) % 360)),
+                                       ((round(odo.posX), round(odo.posY)), odo.gammaToDirection(odo.gamma + 180)),
                                        status="free")
 
                 # Target reached
@@ -175,9 +175,10 @@ def run(calibrate=False):
                 odo.gamma = planet.start[1]
 
                 # scan knots
-                relativePaths = follow.findAttachedPaths()
-                absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
-                planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
+                if not planet.isKnownNode(planet.start[0]):
+                    relativePaths = follow.findAttachedPaths()
+                    absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
+                    planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
                 # update stack to remove all known weighted paths
                 discovered = planet.getPathsWithWrongWeight()
                 planet.updateStack(discovered)
@@ -193,7 +194,7 @@ def run(calibrate=False):
                     sd.beep()
                     break
 
-                dirRel: Direction = Direction((dirAbs + round(odo.gamma)) % 360)
+                dirRel: Direction = odo.gammaToDirection(dirAbs + odo.gamma)
 
                 print(f"{specials.colorCodes.red}selected: {dirRel}{specials.colorCodes.reset}, "
                       f"{specials.colorCodes.blue}absolute: {dirAbs}{specials.colorCodes.reset}")
@@ -246,7 +247,7 @@ def run(calibrate=False):
                     m2.run_forever(speed_sp=-200)
 
                     follow.turnRightXTimes(2)
-                    odo.gamma = Direction((odo.gammaToDirection(odo.gamma) + Direction.SOUTH) % 360)
+                    odo.gamma = odo.gammaToDirection(odo.gamma + Direction.SOUTH)
 
                     follow.stop()
                     follow.stop()

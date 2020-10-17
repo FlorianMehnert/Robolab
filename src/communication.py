@@ -95,6 +95,10 @@ class Communication:
                 print(payload["message"])
         elif msgFrom == "client":
             self.waitSendFinish = False
+        elif msgFrom == "debug":
+            if msgType == "error":
+                print(json.dumps(payload, indent=2))
+
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
@@ -182,6 +186,7 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.planetname + "/" + self.group
         self.sendMessage(payload, topic)
+        self.planet.start = path
         self.timeout()
 
     def sendTargetReached(self):

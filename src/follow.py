@@ -193,8 +193,8 @@ class Follow:
         """
 
         self.stop()
-        self.m1.run_to_rel_pos(speed_sp=200, position_sp=270)
-        self.m2.run_to_rel_pos(speed_sp=-200, position_sp=270)
+        self.m1.run_to_rel_pos(speed_sp=200, position_sp=280)
+        self.m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
         self.m1.wait_until_not_moving()
         self.m1.position = 0
         self.m2.position = 0
@@ -271,6 +271,7 @@ class Follow:
             sleep(.2)
 
     def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = "NOCALIBRATE"):
+    def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = "NOCALIBRATE"):
         if calibrate:
             mode = "calibrate"
         while True:
@@ -278,12 +279,10 @@ class Follow:
                 pass
             elif mode == "":
                 break
-            elif mode == "recharge":
-                self.sd.speak("plug me in")
-            elif mode == "gs":
-                self.gyroStraight(100,100, 10)
             elif mode == "wasd":
                 self.wasd()
+            elif mode == "gs":
+                self.gyroStraight(100, 100, 10)
             elif mode == "follow":
                     self.follow(optimal=171.5, baseSpeed=250)
             elif mode == "battery":
