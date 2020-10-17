@@ -185,7 +185,8 @@ def run(calibrate=False):
                 planet.updateStack(discovered)
 
                 # adds current odo view-angle to dirRel
-                dirAbs: Direction = planet.getNextDirection()
+                dirAbs = planet.getNextDirection()
+
                 # Exploration completed
                 if dirAbs is None:
                     mqttc.sendExplorationCompleted()
