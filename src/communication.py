@@ -64,9 +64,9 @@ class Communication:
         if msgFrom == "server":
             payload = payload["payload"]
             if msgType == "planet":
-                self.planet.setName(payload["planetName"])
-                self.client.subscribe("planet/" + self.planet.getName() + "/" + self.group, qos=1)
-                self.logger.debug("Planet name: " + self.planet.getName())
+                self.planet.planetname = payload["planetName"]
+                self.client.subscribe("planet/" + self.planet.planetname + "/" + self.group, qos=1)
+                self.logger.debug("Planet name: " + self.planet.planetname)
                 self.planet.setStart((payload["startX"], payload["startY"]), payload["startOrientation"])
                 startPathDir = (payload["startOrientation"] + 180) % 360
                 self.planet.addPath(((payload["startX"], payload["startY"]), startPathDir), ((payload["startX"], payload["startY"]), startPathDir), -1)
@@ -82,7 +82,7 @@ class Communication:
             elif msgType == "pathSelect":
                 self.planet.setStartDirection(payload["startDirection"])
             elif msgType == "target":
-                self.planet.setTarget((payload["targetX"], payload["targetY"]))
+                self.planet.target = (payload["targetX"], payload["targetY"])
             elif msgType == "pathUnveiled":
                 self.planet.addPath(((payload["startX"], payload["startY"]), payload["startDirection"]),
                                     ((payload["endX"], payload["endY"]), payload["endDirection"]),
@@ -158,7 +158,7 @@ class Communication:
                     }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planet.getName() + "/" + self.group
+        topic = "planet/" + self.planet.planetname + "/" + self.group
         self.wait = True
         self.sendMessage(payload, topic)
         while self.wait:
@@ -176,7 +176,7 @@ class Communication:
                   }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planet.getName() + "/" + self.group
+        topic = "planet/" + self.planet.planetname + "/" + self.group
         self.sendMessage(payload, topic)
         self.timeout()
 

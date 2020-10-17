@@ -207,48 +207,6 @@ class Planet:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
-    def getTarget(self) -> Tuple[int, int]:
-        """
-        Get target on planet.
-
-        Examples:
-            getTarget() returns: (3, 7)
-            getTarget() returns: None
-        : return: 2-Tuple[int, int]
-        """
-        return self.target
-
-    def setTarget(self, node: Tuple[int, int]):
-        """
-        Set target on planet.
-
-        Examples:
-            setTarget((31, 41))
-        : return: void
-        """
-        self.target = node
-
-    def getName(self) -> str:
-        """
-        Get name of planet.
-
-        Examples:
-            getName() returns: "Reis"
-            getName() returns: ""
-        : return: str
-        """
-        return self.planetname
-
-    def setName(self, name: str):
-        """
-        Set name of planet.
-
-        Examples:
-            setName("Reis")
-        : return: void
-        """
-        self.planetname = name
-
     def setStart(self, coord: List[int], orientation: Direction):
         """
         Set start node of planet. Tuple is new set at every node
