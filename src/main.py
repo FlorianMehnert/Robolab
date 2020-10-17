@@ -17,7 +17,7 @@ from follow import Follow
 from follow import isColor
 from odometry import Odometry
 from planet import Planet, Direction
-from specials import blink
+from specials import blink, starWarsSound
 
 client = None  # DO NOT EDIT
 
@@ -161,7 +161,7 @@ def run(calibrate=False):
                         mqttc.sendTargetReached()
                         print("Target reached")
                         pprint(planet.paths, indent=2)
-                        sd.beep()
+                        sd.tone(starWarsSound)
                         break
 
                 # updated planet data: current position + facing
@@ -191,7 +191,8 @@ def run(calibrate=False):
                     mqttc.sendExplorationCompleted()
                     print("Exploration completed")
                     pprint(planet.paths, indent=2)
-                    sd.beep()
+                    #sd.beep()
+                    sd.tone(starWarsSound)
                     break
 
                 dirRel: Direction = odo.gammaToDirection(dirAbs + round(odo.gamma))
