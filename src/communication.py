@@ -65,6 +65,7 @@ class Communication:
             payload = payload["payload"]
             if msgType == "planet":
                 self.planet.planetname = payload["planetName"]
+                print(f"Robot is on Planet {self.planet.planetname}")
                 self.client.subscribe("planet/" + self.planet.planetname + "/" + self.group, qos=1)
                 self.logger.debug("Planet name: " + self.planet.planetname)
                 self.planet.setStart((payload["startX"], payload["startY"]), payload["startOrientation"])
@@ -81,14 +82,17 @@ class Communication:
                 self.wait = False
             elif msgType == "pathSelect":
                 self.planet.setStartDirection(payload["startDirection"])
+                print("PathSelect Correction:, ", payload["startDirection"])
             elif msgType == "target":
                 self.planet.target = (payload["targetX"], payload["targetY"])
+                print(f"Target is set {self.planet.target}")
             elif msgType == "pathUnveiled":
                 self.planet.addPath(((payload["startX"], payload["startY"]), payload["startDirection"]),
                                     ((payload["endX"], payload["endY"]), payload["endDirection"]),
                                     payload["pathWeight"])
             elif msgType == "done":
                 self.wait = False
+                print(payload["message"])
         elif msgFrom == "client":
             self.waitSendFinish = False
 

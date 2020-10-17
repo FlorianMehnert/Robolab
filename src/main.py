@@ -213,6 +213,7 @@ def run(calibrate=False):
                 dirAbs = planet.start[1]
                 dirRel = (dirAbs - oldOrientation) % 360
                 oldOrientation = dirAbs
+                print("Status of path to be explored: ", planet.paths[planet.start[0]][dirAbs])
 
                 follow.turnRightXTimes(dirRel / 90)
                 odo.gamma = math.radians(dirAbs)
