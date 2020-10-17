@@ -22,7 +22,10 @@ def isColor(currentColor: tuple, matchingColor: tuple, distance: int) -> bool:
     return match
 
 
-def isBlack(rgb: (int, int, int)):
+def isBlack(rgb: (int, int, int)) -> bool:
+    """
+    returns weather any
+    """
     val = (rgb[0] + rgb[1] + rgb[2]) / 3
     if val > 100:
         return False
@@ -224,33 +227,72 @@ class Follow:
             cnt += 1
         return dList
 
-    def removeDoubles(self, dirList: List[Direction]):
-        doubles = []
-        for i in dirList:
-            if i in doubles:
-                continue
+    def wasd(self):
+        """
+        very basic implementation of a wasd-control
+        """
+        speed = 1000
+        while True:
+            direction = input("")
+
+            if direction == "w":
+                self.m1.run_forever(speed_sp=speed)
+                self.m2.run_forever(speed_sp=speed)
+            elif direction == "s":
+                self.m1.run_forever(speed_sp=-speed)
+                self.m2.run_forever(speed_sp=-speed)
+            elif direction == "a":
+                self.m1.run_forever(speed_sp=-speed / 5)
+                self.m2.run_forever(speed_sp=speed / 5)
+            elif direction == "d":
+                self.m1.run_forever(speed_sp=speed / 5)
+                self.m2.run_forever(speed_sp=-speed / 5)
+            elif direction == "exit":
+                self.stop()
+                self.stop()
+                break
             else:
-                doubles.append(i)
-        return doubles
+                self.stop()
 
-    def selectPath(self, dirList: List[Direction]) -> Direction:
-        """
-        selects one path from all discovered paths for one knot
-        """
-        dirList1 = dirList
+    def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = ""):
+        if calibrate:
+            mode = "calibrate"
+        while True:
+            if mode == "":
+                continue
+            if mode == "wasd":
+                self.wasd()
+            elif mode == "follow":
+                while True:
+                    self.follow(optimal=171.5, baseSpeed=250)
+            elif mode == "battery":
+                print(self.ps.measured_volts)
+            elif mode == "calibrate":
+                with open("/home/robot/src/values.txt", mode="w") as file:
+                    for i in self.calibrate():
+                        file.write(f"{i}\n")
+            elif mode == "beep":
+                sound.beep()
 
-        print(f"in selectPath dirList is: {dirList1}")
-        if len(dirList1) == 1 and Direction.SOUTH in dirList1:
-            path = Direction.SOUTH
-        elif len(dirList1) == 0:
-            # should never happen
-            print("some path was not detected!")
-            path = Direction.SOUTH
-        else:
-            try:
-                dirList1.remove(Direction.SOUTH)
-            except ValueError:
-                pass
-            path = random.choice(dirList1)
-        return path
-
+            elif mode == "StarWars":
+                self.sd.tone([
+                    (392, 350, 100), (392, 350, 100), (392, 350, 100), (311.1, 250, 100),
+                    (466.2, 25, 100), (392, 350, 100), (311.1, 250, 100), (466.2, 25, 100),
+                    (392, 700, 100), (587.32, 350, 100), (587.32, 350, 100),
+                    (587.32, 350, 100), (622.26, 250, 100), (466.2, 25, 100),
+                    (369.99, 350, 100), (311.1, 250, 100), (466.2, 25, 100), (392, 700, 100),
+                    (784, 350, 100), (392, 250, 100), (392, 25, 100), (784, 350, 100),
+                    (739.98, 250, 100), (698.46, 25, 100), (659.26, 25, 100),
+                    (622.26, 25, 100), (659.26, 50, 400), (415.3, 25, 200), (554.36, 350, 100),
+                    (523.25, 250, 100), (493.88, 25, 100), (466.16, 25, 100), (440, 25, 100),
+                    (466.16, 50, 400), (311.13, 25, 200), (369.99, 350, 100),
+                    (311.13, 250, 100), (392, 25, 100), (466.16, 350, 100), (392, 250, 100),
+                    (466.16, 25, 100), (587.32, 700, 100), (784, 350, 100), (392, 250, 100),
+                    (392, 25, 100), (784, 350, 100), (739.98, 250, 100), (698.46, 25, 100),
+                    (659.26, 25, 100), (622.26, 25, 100), (659.26, 50, 400), (415.3, 25, 200),
+                    (554.36, 350, 100), (523.25, 250, 100), (493.88, 25, 100),
+                    (466.16, 25, 100), (440, 25, 100), (466.16, 50, 400), (311.13, 25, 200),
+                    (392, 350, 100), (311.13, 250, 100), (466.16, 25, 100),
+                    (392.00, 300, 150), (311.13, 250, 100), (466.16, 25, 100), (392, 700)
+                ])
+            mode = input("mode?")

@@ -67,7 +67,7 @@ def run(calibrate=False):
 
     try:
 
-        specials.menu(follow, calibrate, sd)
+        follow.menu(calibrate, sd)
 
         global oldOrientation
         global oldNodeX
@@ -216,6 +216,7 @@ def run(calibrate=False):
                 follow.follow(optimal, 250)
 
                 if us.value() < 200:
+                    follow.stop()
                     sd.beep()
                     print("\u001b[31mPATH BLOCKED\u001b[0m")
                     follow.pathBlocked = True

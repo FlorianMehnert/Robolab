@@ -46,6 +46,10 @@ class Odometry:
         self.posY += dY
 
     def gammaToDirection(self, gamma):
+        """
+        converts given gamma to a Direction using round and in range
+        gamma -- angle in degree
+        """
         gamma = round(gamma)
         if gamma in range(316, 360) or gamma in range(-45, 45):
             return Direction.NORTH
@@ -62,6 +66,9 @@ class Odometry:
                 return self.gammaToDirection(gamma + 360)
 
     def calculateNewPosition(self, moves: List[Tuple[int, int]]):
+        """
+        calculates all parts of the odometry movement array together
+        """
         for i in moves:
             self.calculatePart(i[0] / 360 * 9.424, i[1] / 360 * 9.424)
         self.gamma = Direction(self.gammaToDirection(self.gamma * 180 / math.pi))

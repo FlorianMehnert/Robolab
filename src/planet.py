@@ -90,6 +90,12 @@ class Planet:
         return
 
     def setWeightInStack(self, weight, position: Tuple[Tuple[int,int], Direction]):
+        """
+        only used while DFS is exploration algorithm
+        changes the weight of certain elements in the stack
+        weight -- the weight which the elements should be set to
+        position -- the position at which the weight should be set to
+        """
         cnt = 0
         for i in self.stack:
             if i[0] == position[0] and i[1] == position[1]:
@@ -106,6 +112,9 @@ class Planet:
 
 
     def setAttachedPaths(self, node: Tuple[int, int], dirList: List[Direction]):
+        """
+        adds attached paths of the current node in paths
+        """
         if node not in self.paths:
             self.addNode(node)
         for dir in self.paths[node]:
