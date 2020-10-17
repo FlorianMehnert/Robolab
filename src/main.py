@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import uuid
+from pprint import pprint
 from time import sleep
 from typing import Tuple, List
 
@@ -176,6 +177,14 @@ def run(calibrate=False):
 
                 # adds current odo view-angle to dirRel
                 dirAbs: Direction = planet.getNextDirection()
+                # Exploration completed
+                if dirAbs is None:
+                    mqttc.sendExplorationCompleted()
+                    print("Exploration completed")
+                    pprint(planet.paths, indent=2)
+                    sd.beep()
+                    break
+
                 dirRel: Direction = Direction((dirAbs + round(odo.gamma)) % 360)
 
                 print(f"{specials.colorCodes.red}selected: {dirRel}{specials.colorCodes.reset}, "
