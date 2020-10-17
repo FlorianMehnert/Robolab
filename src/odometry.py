@@ -50,6 +50,7 @@ class Odometry:
         converts given gamma to a Direction using round and in range
         gamma -- angle in degree
         """
+        gamma = (gamma + 3600) % 360
         gamma = round(gamma)
         if gamma in range(316, 360) or gamma in range(-45, 45):
             return Direction.NORTH
@@ -60,10 +61,7 @@ class Odometry:
         elif gamma in range(226, 315):
             return Direction.WEST
         else:
-            if gamma > 0:
-                return self.gammaToDirection(gamma - 360)
-            else:
-                return self.gammaToDirection(gamma + 360)
+            return self.gammaToDirection(gamma)
 
     def calculateNewPosition(self, moves: List[Tuple[int, int]]):
         """
