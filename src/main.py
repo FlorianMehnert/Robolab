@@ -5,7 +5,7 @@ import math
 import os
 import uuid
 from pprint import pprint
-from time import sleep
+from time import sleep, time
 from typing import Tuple, List
 
 import ev3dev.ev3 as ev3
@@ -176,9 +176,15 @@ def run(calibrate=False):
 
                 # scan knots
                 if not planet.isKnownNode(planet.start[0]):
+                    print("Node unknown")
                     relativePaths = follow.findAttachedPaths()
                     absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
                     planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
+                else:
+                    m1.run_to_rel_pos(speed_sp=200, position_sp=280)
+                    m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
+                    print("Node already known")
+                    sleep(.4)
                 # update stack to remove all known weighted paths
                 discovered = planet.getPathsWithWrongWeight()
                 planet.updateStack(discovered)
