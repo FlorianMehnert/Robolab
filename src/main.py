@@ -191,6 +191,7 @@ def run(calibrate=False):
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), dirAbs))
 
                 print(f"dirAbs = {dirAbs}, planetDirection = {planet.start[1]}")
+                dirAbs = planet.start[1]
                 dirRel = (dirAbs - oldOrientation) % 360
                 oldOrientation = dirAbs
 
