@@ -186,6 +186,7 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.planetname + "/" + self.group
         self.sendMessage(payload, topic)
+        self.planet.start = path
         self.timeout()
 
     def sendTargetReached(self):
