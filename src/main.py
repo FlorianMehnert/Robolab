@@ -186,8 +186,8 @@ def run(calibrate=False):
                     print("Node already known")
                     sleep(.4)
                 # update stack to remove all known weighted paths
-                discovered = planet.getPathsWithWrongWeight()
-                planet.updateStack(discovered)
+                #discovered = planet.getPathsWithWrongWeight()
+                #planet.updateStack(discovered)
 
                 # adds current odo view-angle to dirRel
                 dirAbs = planet.getNextDirection()
