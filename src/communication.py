@@ -97,7 +97,7 @@ class Communication:
             self.waitSendFinish = False
         elif msgFrom == "debug":
             if msgType == "error":
-                print(json.dump(payload, indent=2))
+                print(json.dumps(payload, indent=2))
 
 
     # DO NOT EDIT THE METHOD SIGNATURE
