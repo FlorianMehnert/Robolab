@@ -4,7 +4,6 @@
 import math
 from enum import IntEnum, unique
 from typing import List, Tuple, Dict, Union, Optional
-from specials import colorCodes
 
 Weight = int
 """
@@ -68,23 +67,23 @@ class Planet:
         if weight == -3 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], -3)
             self.setWeightInStack(-3, start)
-            print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: no")
+            # print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: no")
         # existing path but no more information
         elif weight == 0 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], 0)
             self.setWeightInStack(0, start)
-            print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: no")
+            # print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: no")
         # blocked path
         elif weight == -1:
             # target known and not stored
             self.paths[start[0]][start[1]] = (target[0], target[1], -1)
             self.setWeightInStack(-1, start)
-            print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: ", self.paths[target[0]][target[1]])
+            # print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: ", self.paths[target[0]][target[1]])
         elif weight > 0:
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
             self.paths[target[0]][target[1]] = (start[0], start[1], weight)
             self.setWeightInStack(1, start)
-            print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: ", self.paths[target[0]][target[1]])
+            # print("Path Start: ", self.paths[start[0]][start[1]], ";\tTarget: ", self.paths[target[0]][target[1]])
         return
 
     def setWeightInStack(self, weight, position: Tuple[Tuple[int,int], Direction]):
@@ -97,7 +96,7 @@ class Planet:
                 else:
                     print("weight is not 0 or 2,", weight)
                     self.stack.pop(cnt)
-                print(f"{colorCodes.red}stack after deletion:{colorCodes.reset}", self.stack)
+                # print(f"{colorCodes.red}stack after deletion:{colorCodes.reset}", self.stack)
                 return
             cnt += 1
         self.stack.append((position[0], position[1], weight))
@@ -416,19 +415,39 @@ class Planet:
             path.append((tup, best_direction))
         return path
 
-    def DFS(self) -> Direction:
-        print("stack =", self.stack)
-        for path in self.stack:
-            if path[2] != 0 or path[2] != -2:
-                self.stack.remove(path)
+    def getPathsWithWrongWeight(self) -> List[Tuple[Tuple[int, int], Direction]]:
+        """
+        returns all paths that are either weight -3, -1 or >0
+        """
+        discovered: List[Tuple[Tuple[int, int], Direction]] = []
+        paths = self.getPaths()
+        for path in paths:
+            for dir in paths[path]:
+                weight = paths[path][dir][2]
+                if weight != 0 and weight != -2:
+                    discovered.append((path, dir))
+        return discovered
 
+    def updateStack(self, discovered: List[Tuple[Tuple[int, int], Direction]]):
+        """
+        takes a list with all known path beginnings and removes them from the stack
+        discovered -- paths that should be reomved from the stack
+        """
+        for beginning in self.stack:
+            if (beginning[0], beginning[1]) in discovered:
+                self.stack.remove(beginning)
+
+    def DFS(self) -> Direction:
+        for path in self.stack:
+            if path[2] != 0 and path[2] != -2:
+                # remove all paths that are either blocked, not there or already known
+                self.stack.remove(path)
         # paths = self.getPathsDetectedUnknown()
         # for path in paths.values():
         #     for i in path.values():
         #         if i not in self.stack and (i[2] == 0 or i[2] == -2):
         #             self.stack.append(i)
         if not self.stack == []:
-            print(self.stack[-1][1])
             return self.stack[-1][1]
 
         else:
@@ -444,8 +463,7 @@ class Planet:
             print("shortest Path")
             shortestPath = self.buildShortestPath(self.target, self.start[0])
             if shortestPath is not None:
-                nextDir = shortestPath[0][1]
+                return shortestPath[0][1]
         if nextDir is None:
-            print("DFS")
-            nextDir = self.DFS()
-        return nextDir
+            print("nextDir =",self.DFS(), "stack =", self.stack)
+            return self.DFS()

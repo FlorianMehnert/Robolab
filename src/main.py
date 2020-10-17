@@ -114,8 +114,7 @@ def run(calibrate=False):
                 nodeCount += 1
                 follow.stop()
                 follow.stop()
-                print(
-                    f"{specials.colorCodes.red}{nodeCount}.node{specials.colorCodes.reset}")
+                print(f"{specials.colorCodes.red}{nodeCount}.node{specials.colorCodes.reset}")
                 if planet.newPlanet:
                     # first node discovered
                     mqttc.sendReady()
@@ -171,6 +170,9 @@ def run(calibrate=False):
                 relativePaths = follow.findAttachedPaths()
                 absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
                 planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
+                # update stack to remove all known weighted paths
+                discovered = planet.getPathsWithWrongWeight()
+                planet.updateStack(discovered)
 
                 # adds current odo view-angle to dirRel
                 dirAbs: Direction = planet.getNextDirection()
@@ -209,7 +211,6 @@ def run(calibrate=False):
                 m1.position = 0
                 m2.position = 0
                 movement = []
-                print(planet.getPaths())
             else:
 
                 follow.follow(optimal, 250)
