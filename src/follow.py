@@ -271,7 +271,6 @@ class Follow:
             sleep(.2)
 
     def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = "NOCALIBRATE"):
-    def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = "NOCALIBRATE"):
         if calibrate:
             mode = "calibrate"
         while True:
