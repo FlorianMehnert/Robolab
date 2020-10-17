@@ -210,12 +210,13 @@ def run(calibrate=False):
                 # might cause planet update which leads to us needing to update our internal orientation
                 mqttc.sendPathSelect(((oldNodeX, oldNodeY), dirAbs))
 
-                print(f"dirAbs = {dirAbs}, planetDirection = {planet.start[1]}")
+                print(f"dirAbs = {dirAbs}, planetDirection = {planet.start[1]}, dirRel = {dirRel}")
                 dirAbs = planet.start[1]
                 dirRel = (dirAbs - oldOrientation) % 360
                 oldOrientation = dirAbs
                 print("Status of path to be explored: ", planet.paths[planet.start[0]][dirAbs])
 
+                print(f"Turn right {dirRel / 90} times")
                 follow.turnRightXTimes(dirRel / 90)
                 odo.gamma = math.radians(dirAbs)
 
