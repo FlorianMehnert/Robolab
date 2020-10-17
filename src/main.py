@@ -227,7 +227,7 @@ def run(calibrate=False):
                     m2.run_forever(speed_sp=-200)
 
                     follow.turnRightXTimes(2)
-                    odo.gamma = Direction(odo.gamma + Direction.SOUTH)
+                    odo.gamma = Direction((odo.gammaToDirection(odo.gamma) + Direction.SOUTH) % 360)
 
                     follow.stop()
                     follow.stop()
