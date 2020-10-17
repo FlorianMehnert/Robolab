@@ -503,7 +503,7 @@ class Planet:
         nextDir = None
         if self.target is not None:
             print("shortest Path")
-            shortestPath = self.buildShortestPath(self.target, self.start[0])
+            shortestPath = self.shortestPathTutor(self.start[0], self.target[0])
             if shortestPath is not None:
                 return shortestPath[0][1]
         if nextDir is None:
