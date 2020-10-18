@@ -11,6 +11,7 @@ class Robot:
         self.gy: ev3.GyroSensor = ev3.GyroSensor()
         self.us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
         self.sd: ev3.Sound = ev3.Sound()
+        self.rc: ev3.RemoteControl = ev3.RemoteControl()
         self.ps: ev3.PowerSupply = ev3.PowerSupply()
         print(f"Current battery is {self.ps.measured_volts}V")
 
