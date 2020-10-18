@@ -43,7 +43,7 @@ class Robot:
             ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
             ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
 
-    def roll(motor, direction):
+    def roll(self, motor: ev3.LargeMotor, direction):
         """
         used with remote control to relocate to robot faster during testing phase
         directly copied from https://sites.google.com/site/ev3python/learn_ev3_python/remote-control
