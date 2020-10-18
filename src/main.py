@@ -233,7 +233,7 @@ def run(calibrate=False):
                     robot.sd.beep()
                     print("\u001b[31mPATH BLOCKED\u001b[0m")
                     follow.pathBlocked = True
-                    blink()
+                    robot.blink()
                     sleep(1)
 
                     robot.m1.run_forever(speed_sp=200)
