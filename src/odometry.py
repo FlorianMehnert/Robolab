@@ -7,15 +7,15 @@ from color import ColorPrint as Color
 
 
 class Odometry:
-    def __init__(self, gamma: float, posX: float, posY: float, movement: list, distBtwWheels):
+    def __init__(self, gamma: float, pos_x: float, pos_y: float, movement: list, dist_btw_wheels):
         """
         Initializes odometry module
         """
 
-        self.dist_btw_wheels: float = distBtwWheels
+        self.dist_btw_wheels: float = dist_btw_wheels
         self.gamma: float = gamma
-        self.posX: float = posX
-        self.posY: float = posY
+        self.posX: float = pos_x
+        self.posY: float = pos_y
         self.new_m1 = 0
         self.new_m2 = 0
         self.old_m1 = 0
@@ -39,32 +39,32 @@ class Odometry:
         else:
             return self.gamma_to_direction(gamma)
 
-    def calculate_part(self, dR: int, dL: int):
+    def calculate_part(self, dist_right: int, dist_left: int):
         """
         iterates through movement array and calculates final position
-        dL -- distance travelled by left wheel
-        dR -- distance travelled by right wheel
+        dist_left -- distance travelled by left wheel
+        dist_right -- distance travelled by right wheel
         """
         dist = True
 
         if dist:
-            dR = self.ditance_per_tick(dR)
-            dL = self.ditance_per_tick(dL)
-            alpha: float = ((dL - dR) / self.dist_btw_wheels)  # gesamtes coord umrechnen mit -
+            dist_right = self.ditance_per_tick(dist_right)
+            dist_left = self.ditance_per_tick(dist_left)
+            alpha: float = ((dist_left - dist_right) / self.dist_btw_wheels)  # gesamtes coord umrechnen mit -
             beta: float = alpha / 2
             if alpha != 0:
-                straightDistance: float = ((dR + dL) / alpha) * math.sin(beta)
+                straight_distance: float = ((dist_right + dist_left) / alpha) * math.sin(beta)
             else:
-                straightDistance = dR
-            dX = math.sin(self.gamma + beta) * straightDistance  # X spiegeln ohne -
-            dY = math.cos(self.gamma + beta) * straightDistance
+                straight_distance = dist_right
+            d_x = math.sin(self.gamma + beta) * straight_distance  # X spiegeln ohne -
+            d_y = math.cos(self.gamma + beta) * straight_distance
             if (self.gamma - alpha) % 2 * math.pi < 0:
                 self.gamma = ((2 * math.pi) + self.gamma - alpha) % (2 * math.pi)
             else:
                 self.gamma = (self.gamma - alpha) % (2 * math.pi)
 
-            self.posX += dX
-            self.posY += dY
+            self.posX += d_x
+            self.posY += d_y
 
     def ditance_per_tick(self, degree: int) -> float:
         """
@@ -80,7 +80,7 @@ class Odometry:
         for i in moves:
             self.calculate_part(i[0], i[1])
         self.gamma = self.gamma_to_direction(self.gamma * 180 / math.pi)
-        # print(f"not rounded X,Y = {self.posX}, {self.posY}")
+        # print(f"not rounded X,Y = {self.pos_x}, {self.pos_y}")
         self.posX = round(self.posX / 50)
         self.posY = round(self.posY / 50)
 

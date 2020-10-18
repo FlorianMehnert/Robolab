@@ -110,7 +110,7 @@ def run(calibrate=False):
                 # print(
                 #     f"serverX = {old_nodeX}, serverY = {old_nodeY}, {Color.red}"
                 #     f"serverDirection = {Color.reset} {old_orientation}, "
-                #     f"odoX = {odo.posX}, odoY = {odo.posY}, {Color.red}"
+                #     f"odoX = {odo.posX}, odoY = {odo.pos_y}, {Color.red}"
                 #     f"odoDirection ={Color.reset} {odo.gamma}")
 
             else:
@@ -135,7 +135,7 @@ def run(calibrate=False):
                         odo.posY += old_nodeY
                         print(
                             f"{Color.reset}AFTER: odoX and odoY{odo.posX, odo.posY}{Color.reset}")
-                        # updates odo.poX, odo.posY, odo.gamma
+                        # updates odo.poX, odo.pos_y, odo.gamma
 
                         # prints every position data
                         print(
