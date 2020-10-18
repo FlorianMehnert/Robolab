@@ -201,7 +201,7 @@ class Follow:
             self.robot.m1.run_forever(speed_sp=speed)
             self.robot.m2.run_forever(speed_sp=-speed)
             target = 2
-        elif x == -1:
+        elif x == -1 or x == 3:
             self.robot.m1.run_forever(speed_sp=-speed)
             self.robot.m2.run_forever(speed_sp=speed)
             target = -1
