@@ -240,6 +240,19 @@ class Planet:
                 return False
         return True
 
+    def is_known_path(self, node: Tuple[int, int], direction: Direction) -> bool:
+        """ Returns whether a path is already known.
+        :param node: 2-Tuple
+        :param direction: Direction
+        :return: bool
+        """
+        if node not in self.paths:
+            return False
+        if self.paths[node][direction][2] > 0 or self.paths[node][direction][2] == -1:
+            return True
+        else:
+            return False
+
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
         None, List[Tuple[Tuple[int, int], Direction]]]:
         """
