@@ -16,7 +16,8 @@ from communication import Communication
 from follow import Follow
 from odometry import Odometry
 from planet import Planet, Direction
-from specials import star_wars_sound, color_codes as color
+from color import ColorPrint as Color
+from specials import star_wars_sound
 from robot import Robot
 
 client = None  # DO NOT EDIT
@@ -95,7 +96,7 @@ def run(calibrate=False):
             node_count += 1
             robot.stop_motor()
             robot.stop_motor()
-            print(f"{color.byellow}{node_count}.node{color.reset}")
+            print(f"{Color.byellow}{node_count}.node{Color.reset}")
             if planet.new_planet:
                 # first node discovered
                 mqttc.send_ready()
@@ -107,10 +108,10 @@ def run(calibrate=False):
                 robot.m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                 robot.m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                 # print(
-                #     f"serverX = {old_nodeX}, serverY = {old_nodeY}, {color.red}"
-                #     f"serverDirection = {color.reset} {old_orientation}, "
-                #     f"odoX = {odo.posX}, odoY = {odo.posY}, {color.red}"
-                #     f"odoDirection ={color.reset} {odo.gamma}")
+                #     f"serverX = {old_nodeX}, serverY = {old_nodeY}, {Color.red}"
+                #     f"serverDirection = {Color.reset} {old_orientation}, "
+                #     f"odoX = {odo.posX}, odoY = {odo.posY}, {Color.red}"
+                #     f"odoDirection ={Color.reset} {odo.gamma}")
 
             else:
                 if follow.path_blocked:
@@ -129,11 +130,11 @@ def run(calibrate=False):
                         # any other node discovered
                         odo.calculate_new_position(movement)
                         print(
-                            f"{color.reset}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {old_nodeX, old_nodeY}{color.reset}")
+                            f"{Color.reset}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {old_nodeX, old_nodeY}{Color.reset}")
                         odo.posX += old_nodeX
                         odo.posY += old_nodeY
                         print(
-                            f"{color.reset}AFTER: odoX and odoY{odo.posX, odo.posY}{color.reset}")
+                            f"{Color.reset}AFTER: odoX and odoY{odo.posX, odo.posY}{Color.reset}")
                         # updates odo.poX, odo.posY, odo.gamma
 
                         # prints every position data
@@ -141,7 +142,7 @@ def run(calibrate=False):
                             f"serverX = {old_nodeX}, serverY = {old_nodeY}"
                             f"serverDirection = {old_orientation}, "
                             f"odoX = {odo.posX}, odoY = {odo.posY}, "
-                            f"odoDirection ={color.reset} {odo.gamma}")
+                            f"odoDirection ={Color.reset} {odo.gamma}")
                         mqttc.send_path(((old_nodeX, old_nodeY), old_orientation),
                                         ((round(odo.posX), round(odo.posY)), odo.gamma_to_direction(odo.gamma + 180)),
                                         "free")
@@ -194,8 +195,8 @@ def run(calibrate=False):
 
             dir_rel: Direction = odo.gamma_to_direction(dir_abs + round(odo.gamma))
 
-            # print(f"{color.red}selected: {dir_rel}{color.reset}, "
-            #       f"{color.blue}absolute: {dir_abs}{color.reset}")
+            # print(f"{Color.red}selected: {dir_rel}{Color.reset}, "
+            #       f"{Color.blue}absolute: {dir_abs}{Color.reset}")
 
             # sends selected path
             # might cause planet update which leads to us needing to update our internal orientation
