@@ -253,6 +253,18 @@ class Planet:
         else:
             return False
 
+    def get_path_target(self, node: Tuple[int, int], direction: Direction) \
+            -> Optional[Tuple[Tuple[int, int], Direction]]:
+        """
+        Returns the target of a path.
+        :param node: 2-Tuple[int, int]: Start node
+        :param direction: Direction: Start direction
+        :return: Optional[Tuple[Tuple[int, int], Direction]]
+        """
+        if node not in self.paths:
+            return None
+        return tuple(self.paths[node][direction][0], self.paths[node][direction][1])
+
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
         None, List[Tuple[Tuple[int, int], Direction]]]:
         """
