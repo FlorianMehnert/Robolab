@@ -52,7 +52,7 @@ def run(calibrate=False):
 
     follow = Follow(robot, movement)
     odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
-    follow.reset()
+    follow.reset_motor()
 
     try:
         follow.menu(calibrate, robot.sd)
@@ -93,8 +93,8 @@ def run(calibrate=False):
         if follow.is_color(current_color, rgb_red, 25) or follow.is_color(current_color, rgb_blue, 30):
             # discovers node
             node_count += 1
-            follow.stop()
-            follow.stop()
+            robot.stop_motor()
+            robot.stop_motor()
             print(f"{color.byellow}{node_count}.node{color.reset}")
             if planet.new_planet:
                 # first node discovered
@@ -230,7 +230,7 @@ def run(calibrate=False):
             follow.follow(optimal, 200)
 
             if robot.us.value() < 200:
-                follow.stop()
+                robot.stop_motor()
                 robot.sd.beep()
                 print("\u001b[31mPATH BLOCKED\u001b[0m")
                 follow.path_blocked = True
@@ -244,8 +244,7 @@ def run(calibrate=False):
 
                 odo.gamma = odo.gamma_to_direction(odo.gamma + Direction.SOUTH)
 
-                follow.stop()
-                follow.stop()
+                robot.stop_motor()
 
             odo.old_m1 = odo.new_m1
             odo.old_m2 = odo.new_m2

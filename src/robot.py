@@ -14,6 +14,17 @@ class Robot:
         self.ps: ev3.PowerSupply = ev3.PowerSupply()
         print(f"Current battery is {self.ps.measured_volts}V")
 
+    def stop_motor(self) -> None:
+        """ stops both given Motors """
+        self.m1.stop_action = "brake"
+        self.m2.stop_action = "brake"
+        self.m1.stop()
+        self.m2.stop()
+
+    def reset_motor(self):
+        self.m1.position = 0
+        self.m2.position = 0
+
     def blink(self):
         for i in range(2):
             ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)

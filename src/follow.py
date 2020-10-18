@@ -42,19 +42,6 @@ class Follow:
         rgb = (rgb_temp[0], rgb_temp[1], rgb_temp[2])
         return rgb
 
-    def stop(self) -> None:
-        """
-        stops both given Motors
-        """
-        self.robot.m1.stop_action = "brake"
-        self.robot.m2.stop_action = "brake"
-        self.robot.m1.stop()
-        self.robot.m2.stop()
-
-    def reset(self):
-        self.robot.m1.position = 0
-        self.robot.m2.position = 0
-
     def touch_pause(self):
         """
         uses touch-sensor to simulate a pause
