@@ -214,10 +214,10 @@ def run(calibrate=False):
 
             if follow.is_color(current_color, rgb_red, 25):
                 print("\u001b[31mRED\u001b[0m")
-                follow.leds(ev3.Leds.RED)
+                robot.set_led(robot.ColorLED.RED)
             elif follow.is_color(current_color, rgb_blue, 25):
                 print("\u001b[34mBLUE\u001b[0m")
-                follow.leds(ev3.Leds.GREEN)
+                robot.set_led(robot.ColorLED.GREEN)
 
             odo.old_m1 = 0
             odo.old_m2 = 0

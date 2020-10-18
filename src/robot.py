@@ -1,3 +1,4 @@
+from enum import Enum
 from time import sleep
 
 import ev3dev.ev3 as ev3
@@ -25,6 +26,22 @@ class Robot:
     def reset_motor(self):
         self.m1.position = 0
         self.m2.position = 0
+
+    class ColorLED(str, Enum):
+        BLACK = ev3.Leds.BLACK
+        RED = ev3.Leds.RED
+        GREEN = ev3.Leds.GREEN
+        AMBER = ev3.Leds.AMBER
+        ORANGE = ev3.Leds.ORANGE
+        YELLOW = ev3.Leds.YELLOW
+
+    def set_led(self, color: ColorLED):
+        """
+        sets both LED to the given color
+        """
+
+        ev3.Leds.set_color(ev3.Leds.LEFT, color)
+        ev3.Leds.set_color(ev3.Leds.RIGHT, color)
 
     def blink(self):
         for i in range(2):

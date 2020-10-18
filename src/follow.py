@@ -52,14 +52,6 @@ class Follow:
         while self.robot.ts.is_pressed:
             sleep(0.1)
 
-    def leds(self, color: ev3.Leds):
-        """
-        sets both LED to the given color
-        """
-
-        ev3.Leds.set_color(ev3.Leds.LEFT, color)
-        ev3.Leds.set_color(ev3.Leds.RIGHT, color)
-
     def is_color(current_color: tuple, matching_color: tuple, distance: int) -> bool:
         """
         currentColor -- rgb Tuple of the current color
@@ -97,22 +89,22 @@ class Follow:
         """
         self.robot.cs.mode = "RGB-RAW"
 
-        self.leds(ev3.Leds.YELLOW)
+        self.robot.set_led(self.robot.ColorLED.YELLOW)
         self.touch_pause()
         print("white")
         rgb_white = self.robot.cs.bin_data("hhh")
 
-        self.leds(ev3.Leds.BLACK)
+        self.robot.set_led(self.robot.ColorLED.BLACK)
         self.touch_pause()
         print("black")
         rgb_black = self.robot.cs.bin_data("hhh")
 
-        self.leds(ev3.Leds.RED)
+        self.robot.set_led(self.robot.ColorLED.RED)
         self.touch_pause()
         print("red")
         rgb_red = self.robot.cs.bin_data("hhh")
 
-        self.leds(ev3.Leds.GREEN)
+        self.robot.set_led(self.robot.ColorLED.GREEN)
         self.touch_pause()
         print("blue")
         rgb_blue = self.robot.cs.bin_data("hhh")
