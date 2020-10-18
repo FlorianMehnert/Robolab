@@ -33,9 +33,9 @@ class Communication:
         self.group = self.client._client_id[0:3].decode('utf-8')
         self.planet = planet
         self.wait = False
-        self.waitSendFinish = False
-        self.timeoutComplete = True
-        self.lastConnectionTime = time.time()
+        self.wait_send_finish = False
+        self.timeout_complete = True
+        self.last_connection_time = time.time()
         self.logger.debug(self.group)
         self.client.enable_logger(logger)
         self.client.username_pw_set(self.group, 'eYa0NxbLnI')
@@ -52,51 +52,51 @@ class Communication:
         :param message: Object
         :return: void
         """
-        self.lastConnectionTime = time.time()
-        self.timeoutComplete = False
+        self.last_connection_time = time.time()
+        self.timeout_complete = False
         payload = json.loads(message.payload.decode('utf-8'))
         self.logger.debug(json.dumps(payload, indent=2))
-        msgFrom = payload["from"]
-        msgType = payload["type"]
+        msg_from = payload["from"]
+        msg_type = payload["type"]
         #print(json.dumps(payload, indent=2))
-        # print(msgFrom, msgType, "on_message")
+        # print(msg_from, msg_type, "on_message")
 
-        if msgFrom == "server":
+        if msg_from == "server":
             payload = payload["payload"]
-            if msgType == "planet":
+            if msg_type == "planet":
                 self.planet.planetname = payload["planetName"]
                 print(f"Robot is on Planet {self.planet.planetname}")
                 self.client.subscribe("planet/" + self.planet.planetname + "/" + self.group, qos=1)
                 self.logger.debug("Planet name: " + self.planet.planetname)
-                self.planet.setStart((payload["startX"], payload["startY"]), payload["startOrientation"])
-                startPathDir = (payload["startOrientation"] + 180) % 360
-                self.planet.addPath(((payload["startX"], payload["startY"]), startPathDir), ((payload["startX"], payload["startY"]), startPathDir), -1)
+                self.planet.set_start((payload["startX"], payload["startY"]), payload["startOrientation"])
+                start_path_dir = (payload["startOrientation"] + 180) % 360
+                self.planet.add_path(((payload["startX"], payload["startY"]), start_path_dir), ((payload["startX"], payload["startY"]), start_path_dir), -1)
 
                 print(f"robot starts at: {self.planet.start}")
                 self.wait = False
-            elif msgType == "path":
-                self.planet.addPath(((payload["startX"], payload["startY"]), payload["startDirection"]),
-                                    ((payload["endX"], payload["endY"]), payload["endDirection"]),
-                                    payload["pathWeight"])
-                self.planet.setStart((payload["endX"], payload["endY"]), Direction((payload["endDirection"] + 180) % 360))
+            elif msg_type == "path":
+                self.planet.add_path(((payload["startX"], payload["startY"]), payload["startDirection"]),
+                                     ((payload["endX"], payload["endY"]), payload["endDirection"]),
+                                     payload["pathWeight"])
+                self.planet.set_start((payload["endX"], payload["endY"]), Direction((payload["endDirection"] + 180) % 360))
                 self.wait = False
-            elif msgType == "pathSelect":
-                self.planet.setStartDirection(payload["startDirection"])
+            elif msg_type == "pathSelect":
+                self.planet.set_start_direction(payload["startDirection"])
                 print("PathSelect Correction:, ", payload["startDirection"])
-            elif msgType == "target":
+            elif msg_type == "target":
                 self.planet.target = (payload["targetX"], payload["targetY"])
                 print(f"Target is set {self.planet.target}")
-            elif msgType == "pathUnveiled":
-                self.planet.addPath(((payload["startX"], payload["startY"]), payload["startDirection"]),
-                                    ((payload["endX"], payload["endY"]), payload["endDirection"]),
-                                    payload["pathWeight"])
-            elif msgType == "done":
+            elif msg_type == "pathUnveiled":
+                self.planet.add_path(((payload["startX"], payload["startY"]), payload["startDirection"]),
+                                     ((payload["endX"], payload["endY"]), payload["endDirection"]),
+                                     payload["pathWeight"])
+            elif msg_type == "done":
                 self.wait = False
                 print(payload["message"])
-        elif msgFrom == "client":
-            self.waitSendFinish = False
-        elif msgFrom == "debug":
-            if msgType == "error":
+        elif msg_from == "client":
+            self.wait_send_finish = False
+        elif msg_from == "debug":
+            if msg_type == "error":
                 print(json.dumps(payload, indent=2))
 
 
@@ -111,7 +111,7 @@ class Communication:
         :param message: Object
         :return: void
         """
-        self.lastConnectionTime = time.time()
+        self.last_connection_time = time.time()
         self.logger.debug('Send to: ' + topic)
         self.logger.debug(json.dumps(message, indent=2))
 
@@ -135,18 +135,18 @@ class Communication:
             traceback.print_exc()
             raise
 
-    def sendReady(self):
+    def send_ready(self):
         payload = {"from" : "client", "type" : "ready"}
         payload = json.dumps(payload)
         print("Send Ready")
         self.wait = True
-        self.sendMessage(payload, "explorer/" + self.group)
-        self.planet.newPlanet = False
+        self.send_robot_message(payload, "explorer/" + self.group)
+        self.planet.new_planet = False
         while self.wait:
             continue
         self.timeout()
 
-    def sendPath(self,start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction], status: str):
+    def send_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction], status: str):
         """
         sends selected path to server
         start -- ((startX, startY), startDirection)
@@ -168,12 +168,12 @@ class Communication:
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.planetname + "/" + self.group
         self.wait = True
-        self.sendMessage(payload, topic)
+        self.send_robot_message(payload, topic)
         while self.wait:
             continue
         self.timeout()
 
-    def sendPathSelect(self, path: Tuple[Tuple[int, int], Direction]):
+    def send_path_select(self, path: Tuple[Tuple[int, int], Direction]):
         payload = {
                   "from": "client",
                   "type": "pathSelect",
@@ -185,11 +185,11 @@ class Communication:
         }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.planetname + "/" + self.group
-        self.sendMessage(payload, topic)
+        self.send_robot_message(payload, topic)
         self.planet.start = path
         self.timeout()
 
-    def sendTargetReached(self):
+    def send_target_reached(self):
         payload = {
                   "from": "client",
                   "type": "targetReached",
@@ -200,12 +200,12 @@ class Communication:
         payload = json.dumps(payload)
         topic = "explorer/" + self.group
         self.wait = True
-        self.sendMessage(payload, topic)
+        self.send_robot_message(payload, topic)
         while self.wait:
             continue
         self.timeout()
 
-    def sendExplorationCompleted(self):
+    def send_exploration_completed(self):
         payload = {
                   "from": "client",
                   "type": "explorationCompleted",
@@ -216,19 +216,19 @@ class Communication:
         payload = json.dumps(payload)
         topic = "explorer/" + self.group
         self.wait = True
-        self.sendMessage(payload, topic)
+        self.send_robot_message(payload, topic)
         while self.wait:
             continue
         self.timeout()
 
     def timeout(self):
-        while time.time() - self.lastConnectionTime < 3:
+        while time.time() - self.last_connection_time < 3:
             continue
-        if not self.timeoutComplete:
+        if not self.timeout_complete:
             # TODO: get Sound
-            self.timeoutComplete = True
+            self.timeout_complete = True
 
-    def sendMessage(self, payload: str, topic: str):
+    def send_robot_message(self, payload: str, topic: str):
         """
         Send message to mothership
         Example:
@@ -236,7 +236,7 @@ class Communication:
         :param payload: String: payload in JSON of MQTT message
         :param topic: String: topic of MQTT message
         """
-        self.waitSendFinish = True
+        self.wait_send_finish = True
         self.client.publish(topic, payload=payload, qos=1)
-        while self.waitSendFinish:
+        while self.wait_send_finish:
             continue

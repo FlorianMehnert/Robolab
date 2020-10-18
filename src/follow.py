@@ -1,12 +1,12 @@
 from time import sleep
 from typing import Tuple, List
 from planet import Direction
-from specials import starWarsSound
+from specials import star_wars_sound
 import random
 import ev3dev.ev3 as ev3
 
 
-def isColor(currentColor: tuple, matchingColor: tuple, distance: int) -> bool:
+def is_color(current_color: tuple, matching_color: tuple, distance: int) -> bool:
     """
     currentColor -- rgb Tuple of the current color
     matchingColor -- rgb Tuple of the given Color
@@ -16,14 +16,14 @@ def isColor(currentColor: tuple, matchingColor: tuple, distance: int) -> bool:
 
     match = True
     for i in range(3):
-        if abs(currentColor[i] - matchingColor[i]) > distance:
+        if abs(current_color[i] - matching_color[i]) > distance:
             match = False
             break
 
     return match
 
 
-def isBlack(rgb: (int, int, int)) -> bool:
+def is_black(rgb: (int, int, int)) -> bool:
     """
     returns weather any
     """
@@ -48,34 +48,34 @@ class Follow:
         self.sd = sd
         self.movement = movement
 
-        self.rgbBlack = (34, 78, 33)
-        self.pathBlocked = False
+        self.rgb_black = (34, 78, 33)
+        self.path_blocked = False
         self.integral = 0
-        self.previousError = 0
+        self.previous_error = 0
 
         self.kp = 0.8
         self.ki = 0.01
         self.kd = 0.03
 
-    def convStrToRGB(self, s: str):
+    def conv_str_to_rgb(self, s: str):
         """
         used to interpret strings as rgb
         """
-        valTemp = ""
-        rgbTemp = []
+        val_temp = ""
+        rgb_temp = []
         rgb: Tuple[float, float, float]
         s.replace("\n", "")
 
         for character in s:
             if character == "," or character == ")":
-                val = float(valTemp)
-                rgbTemp.append(val)
-                valTemp = ""
+                val = float(val_temp)
+                rgb_temp.append(val)
+                val_temp = ""
             elif character == "(" or character == " ":
                 pass
             else:
-                valTemp += character
-        rgb = (rgbTemp[0], rgbTemp[1], rgbTemp[2])
+                val_temp += character
+        rgb = (rgb_temp[0], rgb_temp[1], rgb_temp[2])
         return rgb
 
     def stop(self) -> None:
@@ -91,7 +91,7 @@ class Follow:
         self.m1.position = 0
         self.m2.position = 0
 
-    def touchPause(self):
+    def touch_pause(self):
         """
         uses touch-sensor to simulate a pause
         """
@@ -109,7 +109,7 @@ class Follow:
         ev3.Leds.set_color(ev3.Leds.LEFT, color)
         ev3.Leds.set_color(ev3.Leds.RIGHT, color)
 
-    def rgbToRefl(self, r: int, g: int, b: int) -> float:
+    def rgb_to_refl(self, r: int, g: int, b: int) -> float:
         """
         convert rgb values to reflective values
         """
@@ -118,38 +118,38 @@ class Follow:
     def calibrate(self) -> Tuple[tuple, tuple, tuple, tuple, float]:
         """
         lets the user manually calibrate the color-sensor by measuring the rgb-values from white, black, red, and blue
-        returns rgbRed, rgbBlue, rgbWhite, rgbBlack and the median of white and black
+        returns rgb_red, rgb_blue, rgb_white, rgb_black and the median of white and black
         """
         self.cs.mode = "RGB-RAW"
 
         self.leds(ev3.Leds.YELLOW)
-        self.touchPause()
+        self.touch_pause()
         print("white")
-        rgbWhite = self.cs.bin_data("hhh")
+        rgb_white = self.cs.bin_data("hhh")
 
         self.leds(ev3.Leds.BLACK)
-        self.touchPause()
+        self.touch_pause()
         print("black")
-        rgbBlack = self.cs.bin_data("hhh")
+        rgb_black = self.cs.bin_data("hhh")
 
         self.leds(ev3.Leds.RED)
-        self.touchPause()
+        self.touch_pause()
         print("red")
-        rgbRed = self.cs.bin_data("hhh")
+        rgb_red = self.cs.bin_data("hhh")
 
         self.leds(ev3.Leds.GREEN)
-        self.touchPause()
+        self.touch_pause()
         print("blue")
-        rgbBlue = self.cs.bin_data("hhh")
+        rgb_blue = self.cs.bin_data("hhh")
 
-        refWhite = self.rgbToRefl(*rgbWhite)
-        refBlack = self.rgbToRefl(*rgbBlack)
+        ref_white = self.rgb_to_refl(*rgb_white)
+        ref_black = self.rgb_to_refl(*rgb_black)
 
-        self.touchPause()
-        optimal = (refWhite + refBlack) / 2
+        self.touch_pause()
+        optimal = (ref_white + ref_black) / 2
         sleep(1)
 
-        return rgbRed, rgbBlue, rgbWhite, rgbBlack, optimal
+        return rgb_red, rgb_blue, rgb_white, rgb_black, optimal
 
     def follow(self, optimal, baseSpeed):
         """
@@ -159,13 +159,13 @@ class Follow:
         """
         error = optimal - self.cs.value()
         self.integral += error
-        derivate = error - self.previousError
+        derivate = error - self.previous_error
         output = self.kp * error + self.ki * self.integral + self.kd * derivate
-        self.previousError = error
+        self.previous_error = error
         self.m1.run_forever(speed_sp=baseSpeed + output)
         self.m2.run_forever(speed_sp=baseSpeed - output)
 
-    def turnRightXTimes(self, x=0):
+    def turn_right_x_times(self, x=0):
         """
         x -- how often should the robot rotate (default 0)
         used for turning the robot after it reaches a crossing to a path
@@ -174,7 +174,7 @@ class Follow:
         if x == 0:
             return
 
-        degreeFor90 = 280
+        degree_for90 = 280
         speed = 200
 
         if x in (1, -1):
@@ -185,11 +185,11 @@ class Follow:
             self.m2.run_forever(speed_sp=-speed)
 
         self.m1.position = 0
-        while abs(self.m1.position) < abs(x * degreeFor90):
+        while abs(self.m1.position) < abs(x * degree_for90):
             sleep(0.1)
         self.stop()
 
-    def findAttachedPaths(self) -> List[Direction]:
+    def find_attached_paths(self) -> List[Direction]:
         """
         finds attached paths to discovered knots by turning 360° and repositions the robot to the next viable path
         """
@@ -203,36 +203,36 @@ class Follow:
         self.m1.run_forever(speed_sp=270)
         self.m2.run_forever(speed_sp=-270)
 
-        dirList: List[Direction] = []
-        pathArray: List[int] = []
+        dir_list: List[Direction] = []
+        path_array: List[int] = []
 
         while self.m1.position < 1100:
-            binData = self.cs.bin_data("hhh")
-            if isBlack(binData):
-                pathArray.append(self.m1.position)
+            bin_data = self.cs.bin_data("hhh")
+            if is_black(bin_data):
+                path_array.append(self.m1.position)
 
-        for i in pathArray:
-            if (i in range(0, 100) or i in range(1000, 1100)) and Direction.NORTH not in dirList:
-                dirList.append(Direction.NORTH)
-            elif i in range(175, 375) and Direction.EAST not in dirList:
-                dirList.append(Direction.EAST)
-            elif i in range(450, 650) and Direction.SOUTH not in dirList:
-                dirList.append(Direction.SOUTH)
-            elif i in range(725, 925) and Direction.WEST not in dirList:
-                dirList.append(Direction.WEST)
+        for i in path_array:
+            if (i in range(0, 100) or i in range(1000, 1100)) and Direction.NORTH not in dir_list:
+                dir_list.append(Direction.NORTH)
+            elif i in range(175, 375) and Direction.EAST not in dir_list:
+                dir_list.append(Direction.EAST)
+            elif i in range(450, 650) and Direction.SOUTH not in dir_list:
+                dir_list.append(Direction.SOUTH)
+            elif i in range(725, 925) and Direction.WEST not in dir_list:
+                dir_list.append(Direction.WEST)
 
         self.stop()
         self.m1.wait_until_not_moving()
-        print(f"in findAttachedPaths =  {dirList}")
-        return dirList
+        print(f"in findAttachedPaths =  {dir_list}")
+        return dir_list
 
-    def gammaRelToAbs(self, dirList: List[Direction], gamma: int):
-        dList = dirList[:]
+    def gamma_rel_to_abs(self, dir_list: List[Direction], gamma: int):
+        d_list = dir_list[:]
         cnt = 0
-        for dir in dList:
-            dList[cnt] = Direction((dir + gamma)%360)
+        for dir in d_list:
+            d_list[cnt] = Direction((dir + gamma)%360)
             cnt += 1
-        return dList
+        return d_list
 
     def wasd(self):
         """
@@ -243,9 +243,9 @@ class Follow:
             direction = input("")
 
             if direction == "w":
-                self.gyroStraight(s1=speed, s2=speed, kp=10)
+                self.gyro_straight(s1=speed, s2=speed, kp=10)
             elif direction == "s":
-                self.gyroStraight(s1=-speed, s2=-speed, kp=10)
+                self.gyro_straight(s1=-speed, s2=-speed, kp=10)
             elif direction == "a":
                 self.m1.run_forever(speed_sp=-speed / 5)
                 self.m2.run_forever(speed_sp=speed / 5)
@@ -259,7 +259,7 @@ class Follow:
             else:
                 self.stop()
 
-    def gyroStraight(self, s1, s2, kp):
+    def gyro_straight(self, s1, s2, kp):
         self.gy.mode = 'GYRO-CAL'
         sleep(2)
         self.gy.mode = 'GYRO-ANG'
@@ -287,7 +287,7 @@ class Follow:
             elif mode == "wasd":
                 self.wasd()
             elif mode == "gs":
-                self.gyroStraight(800, 800, 10)
+                self.gyro_straight(800, 800, 10)
             elif mode == "follow":
                     self.follow(optimal=171.5, baseSpeed=250)
             elif mode == "battery":
@@ -299,5 +299,5 @@ class Follow:
             elif mode == "beep":
                 sound.beep()
             elif mode == "StarWars":
-                self.sd.tone(starWarsSound)
+                self.sd.tone(star_wars_sound)
             mode = input("mode?")

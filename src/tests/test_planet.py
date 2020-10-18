@@ -25,8 +25,8 @@ class ExampleTestPlanet(unittest.TestCase):
         """
         # Initialize your data structure here
         self.planet = Planet()
-        self.planet.addPath(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 1)
-        self.planet.addPath(((0, 1), Direction.WEST), ((0, 0), Direction.WEST), 1)
+        self.planet.add_path(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 1)
+        self.planet.add_path(((0, 1), Direction.WEST), ((0, 0), Direction.WEST), 1)
 
     @unittest.skip('Example test, should not count in final test results')
     def test_target_not_reachable_with_loop(self):
@@ -36,7 +36,7 @@ class ExampleTestPlanet(unittest.TestCase):
 
         Result: Target is not reachable
         """
-        self.assertIsNone(self.planet.shortestPath((0, 0), (1, 2)))
+        self.assertIsNone(self.planet.shortest_path((0, 0), (1, 2)))
 
 
 class TestRoboLabPlanet(unittest.TestCase):
@@ -49,17 +49,17 @@ class TestRoboLabPlanet(unittest.TestCase):
         # Initialize your data structure here
         self.planet = Planet()
         self.planet.paths = {}
-        self.planet.addPath(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 1)
-        self.planet.addPath(((0, 0), Direction.EAST), ((0, 0), Direction.EAST), -1)
-        self.planet.addPath(((0, 0), Direction.SOUTH), ((0, 0), Direction.SOUTH), -3)
-        self.planet.addPath(((0, 1), Direction.WEST), ((0, 0), Direction.WEST), 2)
-        self.planet.addPath(((0, 1), Direction.NORTH), ((1, 1), Direction.SOUTH), 3)
-        self.planet.addPath(((1, 1), Direction.WEST), ((0, 1), Direction.EAST), 4)
-        self.planet.addPath(((1, 1), Direction.NORTH), ((2, 1), Direction.EAST), 4)
-        self.planet.addPath(((1, 1), Direction.EAST), ((2, 1), Direction.WEST), 4)
-        self.planet.addPath(((2, 1), Direction.NORTH), ((2, 1), Direction.NORTH), -3)
-        self.planet.addPath(((2, 1), Direction.SOUTH), ((2, 1), Direction.SOUTH), 0)
-        self.planet.addPath(((3, 3), Direction.EAST), ((3, 4), Direction.WEST), 3)
+        self.planet.add_path(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 1)
+        self.planet.add_path(((0, 0), Direction.EAST), ((0, 0), Direction.EAST), -1)
+        self.planet.add_path(((0, 0), Direction.SOUTH), ((0, 0), Direction.SOUTH), -3)
+        self.planet.add_path(((0, 1), Direction.WEST), ((0, 0), Direction.WEST), 2)
+        self.planet.add_path(((0, 1), Direction.NORTH), ((1, 1), Direction.SOUTH), 3)
+        self.planet.add_path(((1, 1), Direction.WEST), ((0, 1), Direction.EAST), 4)
+        self.planet.add_path(((1, 1), Direction.NORTH), ((2, 1), Direction.EAST), 4)
+        self.planet.add_path(((1, 1), Direction.EAST), ((2, 1), Direction.WEST), 4)
+        self.planet.add_path(((2, 1), Direction.NORTH), ((2, 1), Direction.NORTH), -3)
+        self.planet.add_path(((2, 1), Direction.SOUTH), ((2, 1), Direction.SOUTH), 0)
+        self.planet.add_path(((3, 3), Direction.EAST), ((3, 4), Direction.WEST), 3)
         # self.planet.add_path(...)
 
     def test_integrity(self):
@@ -104,7 +104,7 @@ class TestRoboLabPlanet(unittest.TestCase):
                 Direction.WEST: ((3, 3), Direction.EAST, 3)
             }, "Failed integrity of Node (3, 4)")
 
-        self.assertEqual(self.planet.getPaths(), {
+        self.assertEqual(self.planet.get_paths(), {
             (0, 0): {
                 Direction.NORTH: ((0, 1), Direction.SOUTH, 1),
                 Direction.WEST: ((0, 1), Direction.WEST, 2)
@@ -139,7 +139,7 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         newPlanet = Planet()
         emptyDict = {}
-        self.assertEqual(newPlanet.getPaths(), emptyDict, "empty planet not empty")
+        self.assertEqual(newPlanet.get_paths(), emptyDict, "empty planet not empty")
 
     def test_target(self):
         """
@@ -147,13 +147,13 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Requirement: Minimum distance is three nodes (two paths in list returned)
         """
-        assert (self.planet.shortestPath([0,0],[1,1]) == [None, [((0, 0), Direction.NORTH), ((0, 1), Direction.NORTH)]]), "s.p.a. doesnt work"
+        assert (self.planet.shortest_path([0, 0], [1, 1]) == [None, [((0, 0), Direction.NORTH), ((0, 1), Direction.NORTH)]]), "s.p.a. doesnt work"
 
     def test_target_not_reachable(self):
         """
         This test should check that a target outside the map or at an unexplored node is not reachable
         """
-        self.assertIsNone(self.planet.shortestPathTutor((0, 0), (3, 3)), "target_not_reachable_test failed")
+        self.assertIsNone(self.planet.shortest_path_tutor((0, 0), (3, 3)), "target_not_reachable_test failed")
 
     def test_same_length(self):
         """
@@ -162,7 +162,7 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Requirement: Minimum of two paths with same cost exists, only one is returned by the logic implemented
         """
-        assert self.planet.shortestPath([1,1],[2,1]) == ([None, ((1, 1), Direction.NORTH)] or [None, ((1, 1), Direction.EAST)]), "same length fail"
+        assert self.planet.shortest_path([1, 1], [2, 1]) == ([None, ((1, 1), Direction.NORTH)] or [None, ((1, 1), Direction.EAST)]), "same length fail"
 
     def test_target_with_loop(self):
         """
@@ -171,7 +171,7 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is reachable
         """
-        assert self.planet.shortestPath([0,0],[0,1]) == [None, ((0, 0), Direction.NORTH)], "s.p.a. got stuck between 2 points"
+        assert self.planet.shortest_path([0, 0], [0, 1]) == [None, ((0, 0), Direction.NORTH)], "s.p.a. got stuck between 2 points"
 
     def test_target_not_reachable_with_loop(self):
         """
@@ -180,7 +180,7 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is not reachable
         """
-        assert self.planet.shortestPath([0,0], [5,5]) == 0, "s.p.a.: target is unreachable"
+        assert self.planet.shortest_path([0, 0], [5, 5]) == 0, "s.p.a.: target is unreachable"
 
 
 if __name__ == "__main__":

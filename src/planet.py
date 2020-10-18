@@ -36,11 +36,11 @@ class Planet:
         self.paths = {}
         self.planetname = ""
         self.start = None  # Tuple[Tuple[int, int], Direction]
-        self.newPlanet = True
+        self.new_planet = True
         self.stack: List[Tuple[Tuple[int, int], Direction, int]] = []
 
-    def addPath(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
-                weight: int):
+    def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
+                 weight: int):
         """
          Adds a bidirectional path defined between the start and end coordinates to the map and assigns the weight to it
 
@@ -59,37 +59,37 @@ class Planet:
         :return: void
         """
         if start[0] not in self.paths:
-            self.addNode(start[0])
+            self.add_node(start[0])
         if target[0] not in self.paths:
-            self.addNode(target[0])
+            self.add_node(target[0])
 
         # no existing path
         if weight == -3 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], -3)
-            self.setWeightInStack(-3, start)
+            self.set_weight_in_stack(-3, start)
             print(f"Path Not Existing: {start}: {self.paths[start[0]][start[1]]}")
         # existing path but no more information
         elif weight == 0 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], 0)
-            self.setWeightInStack(0, start)
+            self.set_weight_in_stack(0, start)
             print(f"Path Detected: {start}: {self.paths[start[0]][start[1]]}")
         # blocked path
         elif weight == -1 and self.paths[start[0]][start[1]][2] in (-2, 0):
             self.paths[start[0]][start[1]] = (target[0], target[1], -1)
-            self.setWeightInStack(-1, start)
+            self.set_weight_in_stack(-1, start)
             print(f"Path Blocked: {start}: {self.paths[start[0]][start[1]]}")
         elif weight > 0 and self.paths[start[0]][start[1]][2] in (-2, 0):
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
             self.paths[target[0]][target[1]] = (start[0], start[1], weight)
-            self.setWeightInStack(1, start)
+            self.set_weight_in_stack(1, start)
             print(f"Path Free: {start}: {self.paths[start[0]][start[1]]}")
 
-    def addUnknownPath(self, start: Tuple[Tuple[int, int], Direction]):
+    def add_unknown_path(self, start: Tuple[Tuple[int, int], Direction]):
         # to backtrack unknown paths
         self.paths[start] = ()
         return
 
-    def setWeightInStack(self, weight, position: Tuple[Tuple[int,int], Direction]):
+    def set_weight_in_stack(self, weight, position: Tuple[Tuple[int, int], Direction]):
         """
         only used while DFS is exploration algorithm
         changes the weight of certain elements in the stack
@@ -110,20 +110,19 @@ class Planet:
             cnt += 1
         self.stack.append((position[0], position[1], weight))
 
-
-    def setAttachedPaths(self, node: Tuple[int, int], dirList: List[Direction]):
+    def set_attached_paths(self, node: Tuple[int, int], dirList: List[Direction]):
         """
         adds attached paths of the current node in paths
         """
         if node not in self.paths:
-            self.addNode(node)
+            self.add_node(node)
         for dir in self.paths[node]:
             if dir in dirList:
-                self.addPath((node, dir), (node, dir), 0)
+                self.add_path((node, dir), (node, dir), 0)
             else:
-                self.addPath((node, dir), (node, dir), -3)
+                self.add_path((node, dir), (node, dir), -3)
 
-    def addNode(self, node: Tuple[int, int]):
+    def add_node(self, node: Tuple[int, int]):
         """
         Add new node in path dictionary with unknown path status
 
@@ -138,7 +137,7 @@ class Planet:
             self.stack.append((node, dir, -2))
         self.paths[node] = nodepaths
 
-    def getPaths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
+    def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
         Returns all paths
 
@@ -166,7 +165,7 @@ class Planet:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
-    def getPathsFreeBlockedDetected(self):
+    def get_paths_free_blocked_detected(self):
         """
         Get all free, blocked and detected path
         :return: Dict
@@ -179,7 +178,7 @@ class Planet:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
-    def getPathsFreeDetected(self):
+    def get_paths_free_detected(self):
         """
         Get all free and detected path
         :return: Dict
@@ -193,7 +192,7 @@ class Planet:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
-    def getPathsDetectedUnknown(self):
+    def get_paths_detected_unknown(self):
         """
         Get all detected and unknown path
         :return: Dict
@@ -207,7 +206,7 @@ class Planet:
                     pathdict[node][dir] = self.paths[node][dir]
         return pathdict
 
-    def setStart(self, coord: List[int], orientation: Direction):
+    def set_start(self, coord: List[int], orientation: Direction):
         """
         Set start node of planet. Tuple is new set at every node
 
@@ -217,7 +216,7 @@ class Planet:
         """
         self.start = (coord, orientation)
 
-    def setStartCoord(self, coord: Tuple[int, int]):
+    def set_start_coord(self, coord: Tuple[int, int]):
         """
         Set start coordinates of planet. Tuple is new set at every node
 
@@ -227,7 +226,7 @@ class Planet:
         """
         self.start = (coord, self.start[1])
 
-    def setStartDirection(self, orientation: Direction):
+    def set_start_direction(self, orientation: Direction):
         """
         Set start orientation of planet. Direction is new set at every node
 
@@ -237,13 +236,13 @@ class Planet:
         """
         self.start = (self.start[0], orientation)
 
-    def isKnownNode(self, node: Tuple[int, int]) -> bool:
+    def is_known_node(self, node: Tuple[int, int]) -> bool:
         for dir in self.paths[node]:
             if self.paths[node][dir][2] == -2:
                 return False
         return True
 
-    def shortestPath(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
+    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
         None, List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
@@ -255,9 +254,9 @@ class Planet:
         :param target: 2-Tuple
         :return: 2-Tuple[List, Direction]
         """
-        return self.shortestPathDijkstra(start, target)
+        return self.shortest_path_dijkstra(start, target)
 
-    def shortestPathDijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
+    def shortest_path_dijkstra(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
         None, List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes using Djikstra algorithm
@@ -271,7 +270,7 @@ class Planet:
         """
         # TODO: What happens if no connection is known between start and target.
         visitedNodes = []
-        paths = self.getPaths()
+        paths = self.get_paths()
         countNode = len(paths)
         table = {}  # Dict[node, Tuple[int, int]: 3-Tuple(weight: int, previous: int, Direction)]
         targetKnown = False
@@ -311,18 +310,18 @@ class Planet:
             visitedNodes.append(currentNode[0])
 
         # Find shortest path
-        shortestPathReverse = []
+        shortest_path_reverse = []
         nextNode = target
         while nextNode == start:
-            shortestPathReverse.append((nextNode, table[nextNode][2]))
+            shortest_path_reverse.append((nextNode, table[nextNode][2]))
             nextNode = table[nextNode][1]
-        shortestPathReverse.append((nextNode, table[nextNode][2]))
-        shortestPath = []
-        while len(shortestPathReverse) > 0:
-            shortestPath.append(shortestPathReverse.pop)
-        return shortestPath
+        shortest_path_reverse.append((nextNode, table[nextNode][2]))
+        shortest_path = []
+        while len(shortest_path_reverse) > 0:
+            shortest_path.append(shortest_path_reverse.pop)
+        return shortest_path
 
-    def shortestPathTutor(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
+    def shortest_path_tutor(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
         List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
@@ -339,13 +338,13 @@ class Planet:
 
         distance: Dict[Tuple[int, int], int] = dict()
         predecessor: Dict[Tuple[int, int], Tuple[int, int]] = dict()
-        all_paths = self.getPaths()
+        all_paths = self.get_paths()
         unchecked_verts = set(all_paths.keys())
 
         if target not in unchecked_verts:
             return None
 
-        self.initDictsTutor(start, distance, predecessor, unchecked_verts)
+        self.init_dicts_tutor(start, distance, predecessor, unchecked_verts)
         while unchecked_verts:
             cur_vertex = None
             min_dist = math.inf
@@ -358,30 +357,30 @@ class Planet:
             unchecked_verts.remove(cur_vertex)
             if cur_vertex == target:
                 break
-            for neighbor in self.getNeighborTutor(cur_vertex, all_paths):
+            for neighbor in self.get_neighbor_tutor(cur_vertex, all_paths):
                 if neighbor[0] in unchecked_verts:
-                    self.updateDistanceTutor(cur_vertex, neighbor, distance, predecessor)
-        return self.buildShortestPathTutor(target, predecessor, all_paths)
+                    self.update_distance_tutor(cur_vertex, neighbor, distance, predecessor)
+        return self.build_shortest_path_tutor(target, predecessor, all_paths)
 
-    def initDictsTutor(self, start, distance, predecessor, unchecked_verts):
+    def init_dicts_tutor(self, start, distance, predecessor, unchecked_verts):
         # *** Method from Tutor Planet ***
         for tup in unchecked_verts:
             distance[tup] = math.inf
             predecessor[tup] = None
         distance[start] = 0
 
-    def getNeighborTutor(self, cur_vertex, all_paths):
+    def get_neighbor_tutor(self, cur_vertex, all_paths):
         # *** Method from Tutor Planet ***
         return {(tup, weight) for tup, _, weight in all_paths[cur_vertex].values()}
 
-    def updateDistanceTutor(self, cur_vertex, neighbor, distance, predecessor):
+    def update_distance_tutor(self, cur_vertex, neighbor, distance, predecessor):
         # *** Method from Tutor Planet ***
         alternative_dist = distance[cur_vertex] + neighbor[1]
         if alternative_dist < distance[neighbor[0]]:
             distance[neighbor[0]] = alternative_dist
             predecessor[neighbor[0]] = cur_vertex
 
-    def buildShortestPathTutor(self, target, predecessor, all_paths):
+    def build_shortest_path_tutor(self, target, predecessor, all_paths):
         # *** Method from Tutor Planet ***
         work_path = [target]
         path: Optional[List[Tuple[Tuple[int, int], Direction]]] = []
@@ -402,12 +401,12 @@ class Planet:
             path.append((tup, best_direction))
         return path
 
-    def getPathsWithWrongWeight(self) -> List[Tuple[Tuple[int, int], Direction]]:
+    def get_paths_with_wrong_weight(self) -> List[Tuple[Tuple[int, int], Direction]]:
         """
         returns all paths that are either weight -3, -1 or >0
         """
         discovered: List[Tuple[Tuple[int, int], Direction]] = []
-        paths = self.getPaths()
+        paths = self.get_paths()
         for path in paths:
             for dir in paths[path]:
                 weight = paths[path][dir][2]
@@ -415,7 +414,7 @@ class Planet:
                     discovered.append((path, dir))
         return discovered
 
-    def updateStack(self, discovered: List[Tuple[Tuple[int, int], Direction]]):
+    def update_stack(self, discovered: List[Tuple[Tuple[int, int], Direction]]):
         """
         takes a list with all known path beginnings and removes them from the stack
         discovered -- paths that should be reomved from the stack
@@ -424,7 +423,7 @@ class Planet:
             if (beginning[0], beginning[1]) in discovered:
                 self.stack.remove(beginning)
 
-    def DFS(self) -> Direction:
+    def dfs(self) -> Direction:
         for path in self.stack:
             if path[2] != 0 and path[2] != -2:
                 # remove all paths that are either blocked, not there or already known
@@ -440,21 +439,21 @@ class Planet:
         else:
             return
 
-    def getDirectionDjikstraList(self):
+    def get_direction_djikstra_list(self):
         # current node
         for dir in self.paths[self.start[0]]:
             if self.paths[self.start[0]][dir][2] in [0, -2]:
                 return dir
 
         # other nodes
-        unknownNode: Dict = self.getPathsDetectedUnknown()
+        unknownNode: Dict = self.get_paths_detected_unknown()
         if unknownNode == {}:
             return None
         unknownNode: List = unknownNode.keys()
         unknownNodeDistance: Dict = {}
         unknownNodeDir: Dict = {}
         for node in unknownNode:
-            pathSteps: List = self.shortestPathTutor(self.start[0], node)
+            pathSteps: List = self.shortest_path_tutor(self.start[0], node)
             if pathSteps is None:
                 continue
             weight = 0
@@ -468,7 +467,7 @@ class Planet:
                 return unknownNodeDir[node]
         return None
 
-    def getNextDirection(self) -> Direction:
+    def get_next_direction(self) -> Direction:
         """
         Return next direction.
         return: Direction
@@ -476,8 +475,8 @@ class Planet:
         nextDir = None
         if self.target is not None:
             print("shortest Path")
-            shortestPath = self.shortestPathTutor(self.start[0], self.target[0])
-            if (shortestPath is not None):
+            shortestPath = self.shortest_path_tutor(self.start[0], self.target[0])
+            if shortestPath is not None:
                 if shortestPath is not []:
                     print(f"shortestPath: {shortestPath}")
                     return shortestPath[0][1]
@@ -487,8 +486,8 @@ class Planet:
             else:
                 print("shortestPath is None")
         if nextDir is None:
-            #print("nextDir =",self.DFS(), "stack =", self.stack)
-            #return self.DFS()
-            nextDir = self.getDirectionDjikstraList()
+            # print("nextDir =",self.DFS(), "stack =", self.stack)
+            # return self.DFS()
+            nextDir = self.get_direction_djikstra_list()
             print("nextDir =", nextDir)
         return nextDir

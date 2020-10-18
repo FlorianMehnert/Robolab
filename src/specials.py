@@ -41,7 +41,7 @@ def roll(motor, direction):
     return on_press
 
 
-def remoteControl(rc: ev3.RemoteControl, m1: ev3.LargeMotor, m2: ev3.LargeMotor):
+def remote_control(rc: ev3.RemoteControl, m1: ev3.LargeMotor, m2: ev3.LargeMotor):
     """
     only used with Infrared Sensor
     see roll
@@ -55,7 +55,7 @@ def remoteControl(rc: ev3.RemoteControl, m1: ev3.LargeMotor, m2: ev3.LargeMotor)
         rc.process()
         sleep(0.01)
 
-class colorCodes(str, Enum):
+class color_codes(str, Enum):
     """
     Ansi Escapesequences for better debugging experience ;)
     """
@@ -77,7 +77,7 @@ class colorCodes(str, Enum):
     bcyan = "\u001b[46m"
     bwhite = "\u001b[47m"
 
-starWarsSound = [
+star_wars_sound = [
                     (392, 350, 100), (392, 350, 100), (392, 350, 100), (311.1, 250, 100),
                     (466.2, 25, 100), (392, 350, 100), (311.1, 250, 100), (466.2, 25, 100),
                     (392, 700, 100), (587.32, 350, 100), (587.32, 350, 100),
