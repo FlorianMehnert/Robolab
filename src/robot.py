@@ -27,7 +27,7 @@ class Robot:
         self.m1.position = 0
         self.m2.position = 0
 
-    class ColorLED(str, Enum):
+    class ColorLED(tuple, Enum):
         BLACK = ev3.Leds.BLACK
         RED = ev3.Leds.RED
         GREEN = ev3.Leds.GREEN
