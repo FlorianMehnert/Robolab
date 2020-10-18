@@ -168,7 +168,7 @@ class Follow:
         if x == 0:
             return
 
-        degree_for90 = 275
+        degree_for90 = 280
         speed = 200
 
         if x in (1, -1):
