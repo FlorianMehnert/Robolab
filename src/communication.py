@@ -4,15 +4,14 @@
 import json
 import platform
 import ssl
+import time
 import uuid
+from typing import Tuple
 
 import paho.mqtt.client as mqtt
 
-import specials
-from planet import Direction
-from typing import List, Tuple, Dict, Union
-import time
 from color import ColorPrint as Color
+from planet import Direction
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
