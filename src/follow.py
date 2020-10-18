@@ -52,7 +52,7 @@ class Follow:
         while self.robot.ts.is_pressed:
             sleep(0.1)
 
-    def is_color(current_color: tuple, matching_color: tuple, distance: int) -> bool:
+    def is_color(self, current_color: tuple, matching_color: tuple, distance: int) -> bool:
         """
         currentColor -- rgb Tuple of the current color
         matchingColor -- rgb Tuple of the given Color
@@ -66,7 +66,7 @@ class Follow:
                 break
         return match
 
-    def is_black(rgb: (int, int, int)) -> bool:
+    def is_black(self, rgb: (int, int, int)) -> bool:
         """
         returns weather any
         """
