@@ -69,7 +69,7 @@ class Communication:
         self.logger.debug(json.dumps(payload, indent=2))
         msg_from = payload["from"]
         msg_type = payload["type"]
-        #print(json.dumps(payload, indent=2))
+        # print(json.dumps(payload, indent=2))
         # print(msg_from, msg_type, "on_message")
 
         if msg_from == "server":
@@ -81,7 +81,8 @@ class Communication:
                 self.logger.debug("Planet name: " + self.planet.planet_name)
                 self.planet.set_start((payload["startX"], payload["startY"]), payload["startOrientation"])
                 start_path_dir = (payload["startOrientation"] + 180) % 360
-                self.planet.add_path(((payload["startX"], payload["startY"]), start_path_dir), ((payload["startX"], payload["startY"]), start_path_dir), -1)
+                self.planet.add_path(((payload["startX"], payload["startY"]), start_path_dir),
+                                     ((payload["startX"], payload["startY"]), start_path_dir), -1)
 
                 print(f"robot starts at: {self.planet.start}")
                 self.wait = False
@@ -89,7 +90,8 @@ class Communication:
                 self.planet.add_path(((payload["startX"], payload["startY"]), payload["startDirection"]),
                                      ((payload["endX"], payload["endY"]), payload["endDirection"]),
                                      payload["pathWeight"])
-                self.planet.set_start((payload["endX"], payload["endY"]), Direction((payload["endDirection"] + 180) % 360))
+                self.planet.set_start((payload["endX"], payload["endY"]),
+                                      Direction((payload["endDirection"] + 180) % 360))
                 self.wait = False
             elif msg_type == "pathSelect":
                 self.planet.set_start_direction(payload["startDirection"])
@@ -110,7 +112,6 @@ class Communication:
             if msg_type == "error":
                 print(json.dumps(payload, indent=2))
 
-
     # DO NOT EDIT THE METHOD SIGNATURE
     #
     # In order to keep the logging working you must provide a topic string and
@@ -125,7 +126,6 @@ class Communication:
         self.last_connection_time = time.time()
         self.logger.debug('Send to: ' + topic)
         self.logger.debug(json.dumps(message, indent=2))
-
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #
@@ -147,7 +147,7 @@ class Communication:
             raise
 
     def send_ready(self):
-        payload = {"from" : "client", "type" : "ready"}
+        payload = {"from": "client", "type": "ready"}
         payload = json.dumps(payload)
         print("Send Ready")
         self.wait = True
@@ -157,25 +157,26 @@ class Communication:
             continue
         self.timeout()
 
-    def send_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction], status: str):
+    def send_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
+                  status: str):
         """
         sends selected path to server
         start -- ((startX, startY), startDirection)
         target -- ((endX, endY), endDirection)
         status -- either "free"
         """
-        payload = { "from": "client",
-                    "type": "path",
-                    "payload": {
-                        "startX": start[0][0],
-                        "startY": start[0][1],
-                        "startDirection": start[1],
-                        "endX": target[0][0],
-                        "endY": target[0][1],
-                        "endDirection": target[1],
-                        "pathStatus": status
-                    }
-        }
+        payload = {"from": "client",
+                   "type": "path",
+                   "payload": {
+                       "startX": start[0][0],
+                       "startY": start[0][1],
+                       "startDirection": start[1],
+                       "endX": target[0][0],
+                       "endY": target[0][1],
+                       "endDirection": target[1],
+                       "pathStatus": status
+                   }
+                   }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.planet_name + "/" + self.group
         self.wait = True
@@ -192,13 +193,13 @@ class Communication:
 
     def send_path_select(self, path: Tuple[Tuple[int, int], Direction]):
         payload = {
-                  "from": "client",
-                  "type": "pathSelect",
-                  "payload": {
-                      "startX": path[0][0],
-                      "startY": path[0][1],
-                      "startDirection": path[1]
-                  }
+            "from": "client",
+            "type": "pathSelect",
+            "payload": {
+                "startX": path[0][0],
+                "startY": path[0][1],
+                "startDirection": path[1]
+            }
         }
         payload = json.dumps(payload)
         topic = "planet/" + self.planet.planet_name + "/" + self.group
@@ -208,11 +209,11 @@ class Communication:
 
     def send_target_reached(self):
         payload = {
-                  "from": "client",
-                  "type": "targetReached",
-                  "payload": {
-                      "message": "Finish",
-                  }
+            "from": "client",
+            "type": "targetReached",
+            "payload": {
+                "message": "Finish",
+            }
         }
         payload = json.dumps(payload)
         topic = "explorer/" + self.group
@@ -224,11 +225,11 @@ class Communication:
 
     def send_exploration_completed(self):
         payload = {
-                  "from": "client",
-                  "type": "explorationCompleted",
-                  "payload": {
-                      "message": "Finish",
-                  }
+            "from": "client",
+            "type": "explorationCompleted",
+            "payload": {
+                "message": "Finish",
+            }
         }
         payload = json.dumps(payload)
         topic = "explorer/" + self.group
