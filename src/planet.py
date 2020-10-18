@@ -459,7 +459,8 @@ class Planet:
                 weight += self.paths[step[0]][step[1]][2]
             unknownNodeDistance[node] = weight
             unknownNodeDir[node] = pathSteps[0][1]
-        if unknownNodeDistance is []:
+        print(f"unknownNodeDistance: {unknownNodeDistance}")
+        if unknownNodeDistance == {}:
             # if only unreachable nodes are left
             return None
         distance = sorted(unknownNodeDistance.values())[0]
@@ -477,7 +478,7 @@ class Planet:
         if self.target is not None:
             shortestPath = self.shortest_path_tutor(self.start[0], self.target[0])
             if shortestPath is not None:
-                if shortestPath is not []:
+                if shortestPath != []:
                     # print(f"shortestPath: {shortestPath}")
                     return shortestPath[0][1]
                 else:
