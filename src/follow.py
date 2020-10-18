@@ -158,12 +158,16 @@ class Follow:
         baseSpeed -- how fast should the robot go
         """
         error = optimal - self.cs.value()
-        self.integral += error
+        if self.integral + error > 3000:
+            pass
+        else:
+            self.integral += error
         derivate = error - self.previous_error
         output = self.kp * error + self.ki * self.integral + self.kd * derivate
         self.previous_error = error
         self.m1.run_forever(speed_sp=baseSpeed + output)
         self.m2.run_forever(speed_sp=baseSpeed - output)
+        # print(derivate, self.previous_error, self.integral, error)
 
     def turn_right_x_times(self, x=0):
         """
@@ -243,9 +247,13 @@ class Follow:
             direction = input("")
 
             if direction == "w":
-                self.gyro_straight(s1=speed, s2=speed, kp=10)
+                #self.gyro_straight(s1=speed, s2=speed, kp=10)
+                self.m1.run_forever(speed_sp=speed)
+                self.m2.run_forever(speed_sp=speed)
             elif direction == "s":
-                self.gyro_straight(s1=-speed, s2=-speed, kp=10)
+                #self.gyro_straight(s1=-speed, s2=-speed, kp=10)
+                self.m1.run_forever(speed_sp=-speed)
+                self.m2.run_forever(speed_sp=-speed)
             elif direction == "a":
                 self.m1.run_forever(speed_sp=-speed / 5)
                 self.m2.run_forever(speed_sp=speed / 5)

@@ -107,7 +107,7 @@ def run(calibrate=False):
             cs.mode = "RGB-RAW"
             current_color = cs.bin_data("hhh")
 
-            if is_color(current_color, rgb_red, 25) or is_color(current_color, rgb_blue, 25):
+            if is_color(current_color, rgb_red, 25) or is_color(current_color, rgb_blue, 30):
                 # discovers node
                 node_count += 1
                 follow.stop()
