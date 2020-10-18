@@ -169,14 +169,14 @@ class Follow:
         self.robot.m1.position = 0
         while abs(self.robot.m1.position) < abs(x * degree_for90):
             sleep(0.1)
-        self.stop()
+        self.robot.stop_motor()
 
     def find_attached_paths(self) -> List[Direction]:
         """
         finds attached paths to discovered knots by turning 360° and repositions the robot to the next viable path
         """
 
-        self.stop()
+        self.robot.stop_motor()
         self.robot.m1.run_to_rel_pos(speed_sp=200, position_sp=300)
         self.robot.m2.run_to_rel_pos(speed_sp=-200, position_sp=300)
         self.robot.m1.wait_until_not_moving()
@@ -203,7 +203,7 @@ class Follow:
             elif i in range(725, 925) and Direction.WEST not in dir_list:
                 dir_list.append(Direction.WEST)
 
-        self.stop()
+        self.robot.stop_motor()
         self.robot.m1.wait_until_not_moving()
         print(f"in findAttachedPaths =  {dir_list}")
         return dir_list
@@ -239,11 +239,11 @@ class Follow:
                 self.robot.m1.run_forever(speed_sp=speed / 5)
                 self.robot.m2.run_forever(speed_sp=-speed / 5)
             elif direction == "exit":
-                self.stop()
-                self.stop()
+                self.robot.stop_motor()
+                self.robot.stop_motor()
                 break
             else:
-                self.stop()
+                self.robot.stop_motor()
 
     def gyro_straight(self, s1, s2, kp):
         self.robot.gy.mode = 'GYRO-CAL'

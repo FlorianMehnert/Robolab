@@ -52,7 +52,7 @@ def run(calibrate=False):
 
     follow = Follow(robot, movement)
     odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
-    follow.reset_motor()
+    robot.reset_motor()
 
     try:
         follow.menu(calibrate, robot.sd)
