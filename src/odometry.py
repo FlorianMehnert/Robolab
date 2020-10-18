@@ -7,11 +7,10 @@ from color import ColorPrint as Color
 
 
 class Odometry:
-    def __init__(self, gamma: float, pos_x: float, pos_y: float, movement: list, dist_btw_wheels):
+    def __init__(self, gamma: float, pos_x: float, pos_y: float, dist_btw_wheels):
         """
         Initializes odometry module
         """
-
         self.dist_btw_wheels: float = dist_btw_wheels
         self.gamma: float = gamma
         self.posX: float = pos_x

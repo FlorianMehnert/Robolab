@@ -52,7 +52,7 @@ def run(calibrate=False):
     # used to save all movement values gathered while line following for odometry calculations
 
     follow = Follow(robot, movement)
-    odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
+    odo = Odometry(gamma=0, pos_x=0, pos_y=0, dist_btw_wheels=9.2)
     robot.reset_motor()
 
     try:
