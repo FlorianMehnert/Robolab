@@ -141,9 +141,14 @@ def run(calibrate=False):
 
                 else:
                     # sends just discovered path
-                    mqttc.send_path(((old_nodeX, old_nodeY), old_orientation),
-                                    ((round(odo.posX), round(odo.posY)), odo.gamma_to_direction(odo.gamma + 180)),
-                                    status="free")
+                    if planet.is_known_path((old_nodeX, old_nodeY), old_orientation):
+                        mqttc.send_path(((old_nodeX, old_nodeY), old_orientation),
+                                        planet.get_path_target((old_nodeX, old_nodeY), old_orientation),
+                                        "free")
+                    else:
+                        mqttc.send_path(((old_nodeX, old_nodeY), old_orientation),
+                                        ((round(odo.posX), round(odo.posY)), odo.gamma_to_direction(odo.gamma + 180)),
+                                        "free")
 
             # Target reached
             if planet.target is not None:
