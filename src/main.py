@@ -5,7 +5,7 @@ import math
 import os
 import uuid
 from pprint import pprint
-from time import sleep
+from time import sleep, time
 from typing import Tuple, List
 
 import ev3dev.ev3 as ev3
@@ -39,7 +39,7 @@ def run(calibrate=False):
     logger = logging.getLogger('RoboLab')
 
     # THIS IS WHERE PARADISE BEGINS
-
+    start_time = time()
     robot = Robot()
     planet = Planet()
     mqttc = Communication(client, '217', logger, planet)
@@ -148,6 +148,8 @@ def run(calibrate=False):
                     mqttc.send_target_reached()
                     print("Target reached")
                     pprint(planet.paths, indent=2)
+                    driving_time = time() - start_time
+                    print(f"Robot is {int(driving_time // 60)}:{driving_time % 60}")
                     robot.sd.tone(star_wars_sound)
                     break
 
@@ -185,6 +187,8 @@ def run(calibrate=False):
                 print("Exploration completed")
                 pprint(planet.paths, indent=2)
                 # sd.beep()
+                driving_time = time() - start_time
+                print(f"Robot has driven {int(driving_time // 60)}:{driving_time % 60}.")
                 robot.sd.tone(star_wars_sound)
                 break
 
