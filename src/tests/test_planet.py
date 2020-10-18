@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
+from pprint import pprint
 from planet import Direction, Planet
 from typing import List, Tuple, Dict, Union
 
@@ -182,6 +183,18 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         assert self.planet.shortest_path([0, 0], [5, 5]) == 0, "s.p.a.: target is unreachable"
 
+    def test_exploration_completed_unreached_node(self):
+        """
+
+        """
+        self.planet.start = ((0, 0), 0)
+
+        self.planet.add_path(((0, 0), 90), ((0, 0), 90), -1)
+        self.planet.add_path(((0, 0), 180), ((0, 0), 180), -1)
+        self.planet.add_path(((2, 1), 180), ((2, 1), 180), -1)
+        self.planet.add_path(((2, 1), 180), ((2, 1), 180), -1)
+        # pprint(self.planet.paths)
+        self.assertIsNone(self.planet.get_direction_djikstra_list(), "Fail!")
 
 if __name__ == "__main__":
     unittest.main()
