@@ -56,14 +56,7 @@ def run(calibrate=False):
     follow.reset()
 
     try:
-
         follow.menu(calibrate, robot.sd)
-
-        global old_orientation
-        global old_nodeX
-        global old_nodeY
-        global new_nodeX
-        global new_nodeY
 
         old_orientation = Direction.NORTH
         old_nodeX = 0
