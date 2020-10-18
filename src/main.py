@@ -17,7 +17,7 @@ from follow import Follow
 from follow import is_color
 from odometry import Odometry
 from planet import Planet, Direction
-from specials import star_wars_sound
+from specials import star_wars_sound, color_codes as color
 from robot import Robot
 
 client = None  # DO NOT EDIT
@@ -97,7 +97,7 @@ def run(calibrate=False):
             node_count += 1
             follow.stop()
             follow.stop()
-            print(f"{specials.color_codes.byellow}{node_count}.node{specials.color_codes.reset}")
+            print(f"{color.byellow}{node_count}.node{color.reset}")
             if planet.new_planet:
                 # first node discovered
                 mqttc.send_ready()
@@ -109,29 +109,29 @@ def run(calibrate=False):
                 robot.m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                 robot.m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                 # print(
-                #     f"serverX = {old_nodeX}, serverY = {old_nodeY}, {specials.color_codes.red}"
-                #     f"serverDirection = {specials.color_codes.reset} {old_orientation}, "
-                #     f"odoX = {odo.posX}, odoY = {odo.posY}, {specials.color_codes.red}"
-                #     f"odoDirection ={specials.color_codes.reset} {odo.gamma}")
+                #     f"serverX = {old_nodeX}, serverY = {old_nodeY}, {color.red}"
+                #     f"serverDirection = {color.reset} {old_orientation}, "
+                #     f"odoX = {odo.posX}, odoY = {odo.posY}, {color.red}"
+                #     f"odoDirection ={color.reset} {odo.gamma}")
 
             else:
 
                 # any other node discovered
                 odo.calculate_new_position(movement)
                 print(
-                    f"{specials.color_codes.red}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {old_nodeX, old_nodeY}{specials.color_codes.reset}")
+                    f"{color.red}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {old_nodeX, old_nodeY}{color.reset}")
                 odo.posX += old_nodeX
                 odo.posY += old_nodeY
                 print(
-                    f"{specials.color_codes.red}AFTER: odoX and odoY{odo.posX, odo.posY}{specials.color_codes.reset}")
+                    f"{color.red}AFTER: odoX and odoY{odo.posX, odo.posY}{color.reset}")
                 # updates odo.poX, odo.posY, odo.gamma
 
                 # prints every position data
                 print(
-                    f"serverX = {old_nodeX}, serverY = {old_nodeY}, {specials.color_codes.red}"
-                    f"serverDirection = {specials.color_codes.reset} {old_orientation}, "
-                    f"odoX = {odo.posX}, odoY = {odo.posY}, {specials.color_codes.red}"
-                    f"odoDirection ={specials.color_codes.reset} {odo.gamma}")
+                    f"serverX = {old_nodeX}, serverY = {old_nodeY}"
+                    f"serverDirection = {old_orientation}, "
+                    f"odoX = {odo.posX}, odoY = {odo.posY}, "
+                    f"odoDirection ={color.reset} {odo.gamma}")
 
                 if follow.path_blocked:
                     # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
@@ -193,8 +193,8 @@ def run(calibrate=False):
 
             dir_rel: Direction = odo.gamma_to_direction(dir_abs + round(odo.gamma))
 
-            # print(f"{specials.color_codes.red}selected: {dir_rel}{specials.color_codes.reset}, "
-            #       f"{specials.color_codes.blue}absolute: {dir_abs}{specials.color_codes.reset}")
+            # print(f"{color.red}selected: {dir_rel}{color.reset}, "
+            #       f"{color.blue}absolute: {dir_abs}{color.reset}")
 
             # sends selected path
             # might cause planet update which leads to us needing to update our internal orientation
