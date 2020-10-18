@@ -7,6 +7,7 @@ import ssl
 from planet import Direction
 from typing import List, Tuple, Dict, Union
 import time
+import specials
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -171,6 +172,12 @@ class Communication:
         self.send_robot_message(payload, topic)
         while self.wait:
             continue
+        server_target = (self.planet.paths[start[0]][start[1]][0], self.planet.paths[start[0]][start[1]][1])
+        if server_target is target:
+            print(f"{specials.color_codes.green}Odometry success")
+        else:
+            print(f"{specials.color_codes.yellow}Odometry error! "
+                  f"Odometry target: {target}, server target: {server_target}")
         self.timeout()
 
     def send_path_select(self, path: Tuple[Tuple[int, int], Direction]):
