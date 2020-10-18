@@ -12,7 +12,7 @@ import specials
 from planet import Direction
 from typing import List, Tuple, Dict, Union
 import time
-from specials import color_codes as color
+from color import ColorPrint as Color
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -185,10 +185,10 @@ class Communication:
             continue
         server_target = (self.planet.paths[start[0]][start[1]][0], Direction(self.planet.paths[start[0]][start[1]][1]))
         if server_target == target:
-            print(f"{color.green}Odometry success{color.reset}")
+            print(f"{Color.green}Odometry success{Color.reset}")
         else:
-            print(f"{color.yellow}Odometry error! "
-                  f"Odometry target: {target}, server target: {server_target}{color.reset}")
+            print(f"{Color.yellow}Odometry error! "
+                  f"Odometry target: {target}, server target: {server_target}{Color.reset}")
         self.timeout()
 
     def send_path_select(self, path: Tuple[Tuple[int, int], Direction]):
