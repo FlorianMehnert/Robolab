@@ -60,6 +60,35 @@ class Robot:
             ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.AMBER)
             ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.AMBER)
 
+    def wasd(self):
+        """
+        very basic implementation of a wasd-control
+        """
+        speed = 1000
+        while True:
+            direction = input("")
+
+            if direction == "w":
+                # self.gyro_straight(s1=speed, s2=speed, kp=10)
+                self.m1.run_forever(speed_sp=speed)
+                self.m2.run_forever(speed_sp=speed)
+            elif direction == "s":
+                # self.gyro_straight(s1=-speed, s2=-speed, kp=10)
+                self.m1.run_forever(speed_sp=-speed)
+                self.m2.run_forever(speed_sp=-speed)
+            elif direction == "a":
+                self.m1.run_forever(speed_sp=-speed / 5)
+                self.m2.run_forever(speed_sp=speed / 5)
+            elif direction == "d":
+                self.m1.run_forever(speed_sp=speed / 5)
+                self.m2.run_forever(speed_sp=-speed / 5)
+            elif direction == "exit":
+                self.stop_motor()
+                self.stop_motor()
+                break
+            else:
+                self.stop_motor()
+
     def roll(self, motor: ev3.LargeMotor, direction):
         """
         used with remote control to relocate to robot faster during testing phase

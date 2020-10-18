@@ -208,35 +208,6 @@ class Follow:
             cnt += 1
         return d_list
 
-    def wasd(self):
-        """
-        very basic implementation of a wasd-control
-        """
-        speed = 1000
-        while True:
-            direction = input("")
-
-            if direction == "w":
-                #self.gyro_straight(s1=speed, s2=speed, kp=10)
-                self.robot.m1.run_forever(speed_sp=speed)
-                self.robot.m2.run_forever(speed_sp=speed)
-            elif direction == "s":
-                #self.gyro_straight(s1=-speed, s2=-speed, kp=10)
-                self.robot.m1.run_forever(speed_sp=-speed)
-                self.robot.m2.run_forever(speed_sp=-speed)
-            elif direction == "a":
-                self.robot.m1.run_forever(speed_sp=-speed / 5)
-                self.robot.m2.run_forever(speed_sp=speed / 5)
-            elif direction == "d":
-                self.robot.m1.run_forever(speed_sp=speed / 5)
-                self.robot.m2.run_forever(speed_sp=-speed / 5)
-            elif direction == "exit":
-                self.robot.stop_motor()
-                self.robot.stop_motor()
-                break
-            else:
-                self.robot.stop_motor()
-
     def gyro_straight(self, s1, s2, kp):
         self.robot.gy.mode = 'GYRO-CAL'
         sleep(2)
@@ -269,7 +240,7 @@ class Follow:
             elif mode == "":
                 break
             elif mode == "wasd":
-                self.wasd()
+                self.robot.wasd()
             elif mode == "gs":
                 self.gyro_straight(800, 800, 10)
             elif mode == "follow":
