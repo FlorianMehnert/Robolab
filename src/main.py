@@ -83,186 +83,179 @@ def run(calibrate=False):
                     except Exception:
                         color_values.append(follow.conv_str_to_rgb(line.replace("\n", "")))
 
-        try:
-            rgb_red, rgb_blue, rgb_white, rgb_black, optimal = color_values
-        except ValueError:
-            rgb_red = (160, 61, 27)
-            rgb_blue = (40, 152, 142)
-            rgb_black = (34, 78, 33)
-            rgb_white = (245, 392, 258)
-            optimal = 171.5
+        rgb_red, rgb_blue, rgb_white, rgb_black, optimal = color_values
+    except ValueError:
+        rgb_red = (160, 61, 27)
+        rgb_blue = (40, 152, 142)
+        rgb_black = (34, 78, 33)
+        rgb_white = (245, 392, 258)
+        optimal = 171.5
 
-        run = True
-        node_count = 0
-        while run:
+    run = True
+    node_count = 0
+    while run:
 
-            robot.cs.mode = "RGB-RAW"
-            current_color = robot.cs.bin_data("hhh")
+        robot.cs.mode = "RGB-RAW"
+        current_color = robot.cs.bin_data("hhh")
 
-            if is_color(current_color, rgb_red, 25) or is_color(current_color, rgb_blue, 30):
-                # discovers node
-                node_count += 1
-                follow.stop()
-                follow.stop()
-                print(f"{specials.color_codes.red}{node_count}.node{specials.color_codes.reset}")
-                if planet.new_planet:
-                    # first node discovered
-                    mqttc.send_ready()
-                    mqttc.timeout()
-                    sleep(1)
+        if is_color(current_color, rgb_red, 25) or is_color(current_color, rgb_blue, 30):
+            # discovers node
+            node_count += 1
+            follow.stop()
+            follow.stop()
+            print(f"{specials.color_codes.byellow}{node_count}.node{specials.color_codes.reset}")
+            if planet.new_planet:
+                # first node discovered
+                mqttc.send_ready()
+                mqttc.timeout()
+                sleep(1)
 
-                    # only works because while loops is very fast... the faster the while the slower the less does the robot roll
-                    # TODO: fix m1 and m2 only getting stopped by follow and wait for m1/m2 to stop
-                    robot.m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
-                    robot.m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
-                    print(
-                        f"serverX = {old_nodeX}, serverY = {old_nodeY}, {specials.color_codes.red}"
-                        f"serverDirection = {specials.color_codes.reset} {old_orientation}, "
-                        f"odoX = {odo.posX}, odoY = {odo.posY}, {specials.color_codes.red}"
-                        f"odoDirection ={specials.color_codes.reset} {odo.gamma}")
+                # only works because while loops is very fast... the faster the while the slower the less does the robot roll
+                # TODO: fix m1 and m2 only getting stopped by follow and wait for m1/m2 to stop
+                robot.m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
+                robot.m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
+                # print(
+                #     f"serverX = {old_nodeX}, serverY = {old_nodeY}, {specials.color_codes.red}"
+                #     f"serverDirection = {specials.color_codes.reset} {old_orientation}, "
+                #     f"odoX = {odo.posX}, odoY = {odo.posY}, {specials.color_codes.red}"
+                #     f"odoDirection ={specials.color_codes.reset} {odo.gamma}")
+
+            else:
+
+                # any other node discovered
+                odo.calculate_new_position(movement)
+                print(
+                    f"{specials.color_codes.red}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {old_nodeX, old_nodeY}{specials.color_codes.reset}")
+                odo.posX += old_nodeX
+                odo.posY += old_nodeY
+                print(
+                    f"{specials.color_codes.red}AFTER: odoX and odoY{odo.posX, odo.posY}{specials.color_codes.reset}")
+                # updates odo.poX, odo.posY, odo.gamma
+
+                # prints every position data
+                print(
+                    f"serverX = {old_nodeX}, serverY = {old_nodeY}, {specials.color_codes.red}"
+                    f"serverDirection = {specials.color_codes.reset} {old_orientation}, "
+                    f"odoX = {odo.posX}, odoY = {odo.posY}, {specials.color_codes.red}"
+                    f"odoDirection ={specials.color_codes.reset} {odo.gamma}")
+
+                if follow.path_blocked:
+                    # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
+                    mqttc.send_path(((old_nodeX, old_nodeY), old_orientation), ((old_nodeX, old_nodeY), old_orientation),
+                                    status="blocked")
+                    follow.path_blocked = False
 
                 else:
+                    # sends just discovered path
+                    mqttc.send_path(((old_nodeX, old_nodeY), old_orientation),
+                                    ((round(odo.posX), round(odo.posY)), odo.gamma_to_direction(odo.gamma + 180)),
+                                    status="free")
 
-                    # any other node discovered
-                    odo.calculate_new_position(movement)
-                    print(
-                        f"{specials.color_codes.red}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {old_nodeX, old_nodeY}{specials.color_codes.reset}")
-                    odo.posX += old_nodeX
-                    odo.posY += old_nodeY
-                    print(
-                        f"{specials.color_codes.red}AFTER: odoX and odoY{odo.posX, odo.posY}{specials.color_codes.reset}")
-                    # updates odo.poX, odo.posY, odo.gamma
-
-                    # prints every position data
-                    print(
-                        f"serverX = {old_nodeX}, serverY = {old_nodeY}, {specials.color_codes.red}"
-                        f"serverDirection = {specials.color_codes.reset} {old_orientation}, "
-                        f"odoX = {odo.posX}, odoY = {odo.posY}, {specials.color_codes.red}"
-                        f"odoDirection ={specials.color_codes.reset} {odo.gamma}")
-
-                    if follow.path_blocked:
-                        # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
-                        mqttc.send_path(((old_nodeX, old_nodeY), old_orientation), ((old_nodeX, old_nodeY), old_orientation),
-                                        status="blocked")
-                        follow.path_blocked = False
-
-                    else:
-                        # sends just discovered path
-                        mqttc.send_path(((old_nodeX, old_nodeY), old_orientation),
-                                        ((round(odo.posX), round(odo.posY)), odo.gamma_to_direction(odo.gamma + 180)),
-                                        status="free")
-
-                # Target reached
-                if planet.target is not None:
-                    if planet.target == planet.start[0]:
-                        mqttc.send_target_reached()
-                        print("Target reached")
-                        pprint(planet.paths, indent=2)
-                        robot.sd.tone(star_wars_sound)
-                        break
-
-                # updated planet data: current position + facing
-                old_nodeX = planet.start[0][0]
-                old_nodeY = planet.start[0][1]
-                old_orientation = planet.start[1]
-
-                # syncing odometry with server data
-                odo.posX = planet.start[0][0] / 50
-                odo.posY = planet.start[0][1] / 50
-                odo.gamma = planet.start[1]
-
-                # scan knots
-                if not planet.is_known_node(planet.start[0]):
-                    print("Node unknown")
-                    relative_paths = follow.find_attached_paths()
-                    absolute_paths = follow.gamma_rel_to_abs(relative_paths, old_orientation)
-                    planet.set_attached_paths((old_nodeX, old_nodeY), absolute_paths)
-                else:
-                    robot.m1.run_to_rel_pos(speed_sp=200, position_sp=280)
-                    robot.m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
-                    print("Node already known")
-                    sleep(.4)
-                # update stack to remove all known weighted paths
-                # discovered = planet.getPathsWithWrongWeight()
-                # planet.updateStack(discovered)
-
-                # adds current odo view-angle to dir_rel
-                dir_abs = planet.get_next_direction()
-
-                # Exploration completed
-                if dir_abs is None:
-                    mqttc.send_exploration_completed()
-                    print("Exploration completed")
+            # Target reached
+            if planet.target is not None:
+                if planet.target == planet.start[0]:
+                    mqttc.send_target_reached()
+                    print("Target reached")
                     pprint(planet.paths, indent=2)
-                    # sd.beep()
                     robot.sd.tone(star_wars_sound)
                     break
 
-                dir_rel: Direction = odo.gamma_to_direction(dir_abs + round(odo.gamma))
+            # updated planet data: current position + facing
+            old_nodeX = planet.start[0][0]
+            old_nodeY = planet.start[0][1]
+            old_orientation = planet.start[1]
 
-                print(f"{specials.color_codes.red}selected: {dir_rel}{specials.color_codes.reset}, "
-                      f"{specials.color_codes.blue}absolute: {dir_abs}{specials.color_codes.reset}")
+            # syncing odometry with server data
+            odo.posX = planet.start[0][0] / 50
+            odo.posY = planet.start[0][1] / 50
+            odo.gamma = planet.start[1]
 
-                # sends selected path
-                # might cause planet update which leads to us needing to update our internal orientation
-                mqttc.send_path_select(((old_nodeX, old_nodeY), dir_abs))
-
-                print(f"dir_abs = {dir_abs}, planetDirection = {planet.start[1]}, dir_rel = {dir_rel}")
-                dir_abs = planet.start[1]
-                dir_rel = (dir_abs - old_orientation) % 360
-                old_orientation = dir_abs
-                print("Status of path to be explored: ", planet.paths[planet.start[0]][dir_abs])
-
-                print(f"Turn right {dir_rel / 90} times")
-                follow.turn_right_x_times(dir_rel / 90)
-                odo.gamma = math.radians(dir_abs)
-
-                if is_color(current_color, rgb_red, 25):
-                    print("\u001b[31mRED\u001b[0m")
-                    follow.leds(ev3.Leds.RED)
-                elif is_color(current_color, rgb_blue, 25):
-                    print("\u001b[34mBLUE\u001b[0m")
-                    follow.leds(ev3.Leds.GREEN)
-
-                odo.old_m1 = 0
-                odo.old_m2 = 0
-                odo.new_m1 = 0
-                odo.new_m2 = 0
-                robot.m1.position = 0
-                robot.m2.position = 0
-                movement = []
+            # scan knots
+            if not planet.is_known_node(planet.start[0]):
+                # print("Node unknown")
+                relative_paths = follow.find_attached_paths()
+                absolute_paths = follow.gamma_rel_to_abs(relative_paths, old_orientation)
+                planet.set_attached_paths((old_nodeX, old_nodeY), absolute_paths)
             else:
+                robot.m1.run_to_rel_pos(speed_sp=200, position_sp=280)
+                robot.m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
+                # print("Node already known")
+                sleep(.4)
+            # update stack to remove all known weighted paths
+            # discovered = planet.getPathsWithWrongWeight()
+            # planet.updateStack(discovered)
 
-                follow.follow(optimal, 250)
+            # adds current odo view-angle to dir_rel
+            dir_abs = planet.get_next_direction()
 
-                if robot.us.value() < 200:
-                    follow.stop()
-                    robot.sd.beep()
-                    print("\u001b[31mPATH BLOCKED\u001b[0m")
-                    follow.path_blocked = True
-                    robot.blink()
-                    sleep(1)
+            # Exploration completed
+            if dir_abs is None:
+                mqttc.send_exploration_completed()
+                print("Exploration completed")
+                pprint(planet.paths, indent=2)
+                # sd.beep()
+                robot.sd.tone(star_wars_sound)
+                break
 
-                    robot.m1.run_forever(speed_sp=200)
-                    robot.m2.run_forever(speed_sp=-200)
+            dir_rel: Direction = odo.gamma_to_direction(dir_abs + round(odo.gamma))
 
-                    follow.turn_right_x_times(2)
-                    odo.gamma = odo.gamma_to_direction(odo.gamma + Direction.SOUTH)
+            # print(f"{specials.color_codes.red}selected: {dir_rel}{specials.color_codes.reset}, "
+            #       f"{specials.color_codes.blue}absolute: {dir_abs}{specials.color_codes.reset}")
 
-                    follow.stop()
-                    follow.stop()
+            # sends selected path
+            # might cause planet update which leads to us needing to update our internal orientation
+            mqttc.send_path_select(((old_nodeX, old_nodeY), dir_abs))
 
-                odo.old_m1 = odo.new_m1
-                odo.old_m2 = odo.new_m2
-                odo.new_m1 = robot.m1.position
-                odo.new_m2 = robot.m2.position
-                movement.append((odo.new_m1 - odo.old_m1, odo.new_m2 - odo.old_m2))
-    except:
-        try:
-            print(robot.gy.value())
-        except OSError:
-            print("gyro_sensor is broken")
+            print(f"dir_abs = {dir_abs}, planetDirection = {planet.start[1]}, dir_rel = {dir_rel}")
+            dir_abs = planet.start[1]
+            dir_rel = (dir_abs - old_orientation) % 360
+            old_orientation = dir_abs
+            print("Status of path to be explored: ", planet.paths[planet.start[0]][dir_abs])
 
+            # print(f"Turn right {dir_rel / 90} times")
+            follow.turn_right_x_times(dir_rel / 90)
+            odo.gamma = math.radians(dir_abs)
+
+            if is_color(current_color, rgb_red, 25):
+                print("\u001b[31mRED\u001b[0m")
+                follow.leds(ev3.Leds.RED)
+            elif is_color(current_color, rgb_blue, 25):
+                print("\u001b[34mBLUE\u001b[0m")
+                follow.leds(ev3.Leds.GREEN)
+
+            odo.old_m1 = 0
+            odo.old_m2 = 0
+            odo.new_m1 = 0
+            odo.new_m2 = 0
+            robot.m1.position = 0
+            robot.m2.position = 0
+            movement = []
+        else:
+
+            follow.follow(optimal, 250)
+
+            if robot.us.value() < 200:
+                follow.stop()
+                robot.sd.beep()
+                print("\u001b[31mPATH BLOCKED\u001b[0m")
+                follow.path_blocked = True
+                robot.blink()
+                sleep(1)
+
+                robot.m1.run_forever(speed_sp=200)
+                robot.m2.run_forever(speed_sp=-200)
+
+                follow.turn_right_x_times(2)
+                odo.gamma = odo.gamma_to_direction(odo.gamma + Direction.SOUTH)
+
+                follow.stop()
+                follow.stop()
+
+            odo.old_m1 = odo.new_m1
+            odo.old_m2 = odo.new_m2
+            odo.new_m1 = robot.m1.position
+            odo.new_m2 = robot.m2.position
+            movement.append((odo.new_m1 - odo.old_m1, odo.new_m2 - odo.old_m2))
 
 # PLS EDIT
 

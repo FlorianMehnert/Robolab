@@ -80,7 +80,7 @@ class Odometry:
         for i in moves:
             self.calculate_part(i[0], i[1])
         self.gamma = self.gamma_to_direction(self.gamma * 180 / math.pi)
-        print(f"not rounded X,Y = {self.posX}, {self.posY}")
+        # print(f"not rounded X,Y = {self.posX}, {self.posY}")
         self.posX = round(self.posX / 50)
         self.posY = round(self.posY / 50)
 

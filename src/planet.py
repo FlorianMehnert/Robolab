@@ -67,22 +67,22 @@ class Planet:
         if weight == -3 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], -3)
             self.set_weight_in_stack(-3, start)
-            print(f"Path Not Existing: {start}: {self.paths[start[0]][start[1]]}")
+            # print(f"Path Not Existing: {start}: {self.paths[start[0]][start[1]]}")
         # existing path but no more information
         elif weight == 0 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], 0)
             self.set_weight_in_stack(0, start)
-            print(f"Path Detected: {start}: {self.paths[start[0]][start[1]]}")
+            # print(f"Path Detected: {start}: {self.paths[start[0]][start[1]]}")
         # blocked path
         elif weight == -1 and self.paths[start[0]][start[1]][2] in (-2, 0):
             self.paths[start[0]][start[1]] = (target[0], target[1], -1)
             self.set_weight_in_stack(-1, start)
-            print(f"Path Blocked: {start}: {self.paths[start[0]][start[1]]}")
+            # print(f"Path Blocked: {start}: {self.paths[start[0]][start[1]]}")
         elif weight > 0 and self.paths[start[0]][start[1]][2] in (-2, 0):
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
             self.paths[target[0]][target[1]] = (start[0], start[1], weight)
             self.set_weight_in_stack(1, start)
-            print(f"Path Free: {start}: {self.paths[start[0]][start[1]]}")
+            # print(f"Path Free: {start}: {self.paths[start[0]][start[1]]}")
 
     def add_unknown_path(self, start: Tuple[Tuple[int, int], Direction]):
         # to backtrack unknown paths
@@ -100,10 +100,8 @@ class Planet:
         for i in self.stack:
             if i[0] == position[0] and i[1] == position[1]:
                 if weight in (0, -2):
-                    print("weight is 0 or 2,", weight)
                     self.stack[cnt] = (i[0], i[1], weight)
                 else:
-                    print("weight is not 0 or 2,", weight)
                     self.stack.pop(cnt)
                 # print(f"{colorCodes.red}stack after deletion:{colorCodes.reset}", self.stack)
                 return
@@ -474,20 +472,19 @@ class Planet:
         """
         nextDir = None
         if self.target is not None:
-            print("shortest Path")
             shortestPath = self.shortest_path_tutor(self.start[0], self.target[0])
             if shortestPath is not None:
                 if shortestPath is not []:
-                    print(f"shortestPath: {shortestPath}")
+                    # print(f"shortestPath: {shortestPath}")
                     return shortestPath[0][1]
                 else:
-                    print("shortestPath: []")
                     return shortestPath
             else:
-                print("shortestPath is None")
+                # print("shortestPath is None")
+                pass
         if nextDir is None:
             # print("nextDir =",self.DFS(), "stack =", self.stack)
             # return self.DFS()
             nextDir = self.get_direction_djikstra_list()
-            print("nextDir =", nextDir)
+            # print("nextDir =", nextDir)
         return nextDir

@@ -4,6 +4,8 @@
 import json
 import platform
 import ssl
+
+import specials
 from planet import Direction
 from typing import List, Tuple, Dict, Union
 import time
@@ -82,7 +84,7 @@ class Communication:
                 self.wait = False
             elif msg_type == "pathSelect":
                 self.planet.set_start_direction(payload["startDirection"])
-                print("PathSelect Correction:, ", payload["startDirection"])
+                print("PathSelect Correction:", payload["startDirection"])
             elif msg_type == "target":
                 self.planet.target = (payload["targetX"], payload["targetY"])
                 print(f"Target is set {self.planet.target}")

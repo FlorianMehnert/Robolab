@@ -3,7 +3,6 @@ from typing import Tuple, List
 from planet import Direction
 from robot import Robot
 from specials import star_wars_sound
-import random
 import ev3dev.ev3 as ev3
 
 
@@ -117,12 +116,12 @@ class Follow:
         self.leds(ev3.Leds.YELLOW)
         self.touch_pause()
         print("white")
-        rgb_white = self.cs.bin_data("hhh")
+        rgb_white = self.robot.cs.bin_data("hhh")
 
         self.leds(ev3.Leds.BLACK)
         self.touch_pause()
         print("black")
-        rgb_black = self.cs.bin_data("hhh")
+        rgb_black = self.robot.cs.bin_data("hhh")
 
         self.leds(ev3.Leds.RED)
         self.touch_pause()
@@ -149,7 +148,7 @@ class Follow:
         optimal -- medium value between calibrated white and black
         baseSpeed -- how fast should the robot go
         """
-        error = optimal - self.cs.value()
+        error = optimal - self.robot.cs.value()
         if self.integral + error > 3000:
             pass
         else:
@@ -169,7 +168,7 @@ class Follow:
         if x == 0:
             return
 
-        degree_for90 = 280
+        degree_for90 = 275
         speed = 200
 
         if x in (1, -1):
@@ -190,8 +189,8 @@ class Follow:
         """
 
         self.stop()
-        self.robot.m1.run_to_rel_pos(speed_sp=200, position_sp=280)
-        self.robot.m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
+        self.robot.m1.run_to_rel_pos(speed_sp=200, position_sp=300)
+        self.robot.m2.run_to_rel_pos(speed_sp=-200, position_sp=300)
         self.robot.m1.wait_until_not_moving()
         self.robot.m1.position = 0
         self.robot.m2.position = 0
@@ -204,7 +203,7 @@ class Follow:
         while self.robot.m1.position < 1100:
             bin_data = self.robot.cs.bin_data("hhh")
             if is_black(bin_data):
-                path_array.append(self.m1.position)
+                path_array.append(self.robot.m1.position)
 
         for i in path_array:
             if (i in range(0, 100) or i in range(1000, 1100)) and Direction.NORTH not in dir_list:
@@ -239,12 +238,12 @@ class Follow:
 
             if direction == "w":
                 #self.gyro_straight(s1=speed, s2=speed, kp=10)
-                self.m1.run_forever(speed_sp=speed)
-                self.m2.run_forever(speed_sp=speed)
+                self.robot.m1.run_forever(speed_sp=speed)
+                self.robot.m2.run_forever(speed_sp=speed)
             elif direction == "s":
                 #self.gyro_straight(s1=-speed, s2=-speed, kp=10)
-                self.m1.run_forever(speed_sp=-speed)
-                self.m2.run_forever(speed_sp=-speed)
+                self.robot.m1.run_forever(speed_sp=-speed)
+                self.robot.m2.run_forever(speed_sp=-speed)
             elif direction == "a":
                 self.robot.m1.run_forever(speed_sp=-speed / 5)
                 self.robot.m2.run_forever(speed_sp=speed / 5)
@@ -262,7 +261,7 @@ class Follow:
         self.robot.gy.mode = 'GYRO-CAL'
         sleep(2)
         self.robot.gy.mode = 'GYRO-ANG'
-        print(self.gy.value())
+        print(self.robot.gy.value())
         while True:
             error = self.robot.gy.value()
             print(error)
