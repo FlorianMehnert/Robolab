@@ -478,7 +478,7 @@ class Planet:
         if self.target is not None:
             shortestPath = self.shortest_path_tutor(self.start[0], self.target[0])
             if shortestPath is not None:
-                if shortestPath is not []:
+                if shortestPath != []:
                     # print(f"shortestPath: {shortestPath}")
                     return shortestPath[0][1]
                 else:
