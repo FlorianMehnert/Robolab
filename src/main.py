@@ -31,11 +31,6 @@ def run(calibrate=False):
     # Your script isn't able to close the client after crashing.
     global client
 
-    client_id = '217' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
-    client = mqtt.Client(client_id=client_id,  # Unique Client-ID to recognize our program
-                         clean_session=True,  # We want a clean session after disconnect or abort/crash
-                         protocol=mqtt.MQTTv311  # Define MQTT protocol version
-                         )
     log_file = os.path.realpath(__file__) + '/../../logs/project.log'
     logging.basicConfig(filename=log_file,  # Define log file
                         level=logging.INFO,  # Define default mode
@@ -47,7 +42,7 @@ def run(calibrate=False):
 
     robot = Robot()
     planet = Planet()
-    mqttc = Communication(client, logger, planet)
+    mqttc = Communication(client, '217', logger, planet)
     movement: List[Tuple[int, int]] = []
     # used to save all movement values gathered while line following for odometry calculations
 

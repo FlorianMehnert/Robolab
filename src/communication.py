@@ -4,6 +4,9 @@
 import json
 import platform
 import ssl
+import uuid
+
+import paho.mqtt.client as mqtt
 
 import specials
 from planet import Direction
@@ -15,36 +18,42 @@ from specials import color_codes as color
 if all(platform.mac_ver()):
     from OpenSSL import SSL
 
+
 class Communication:
     """
     Class to hold the MQTT client communication
     """
 
-    def __init__(self, mqtt_client, logger, planet):
+    def __init__(self, mqtt_client, group, logger, planet):
         """
         Initializes communication module, connect to server, subscribe, etc.
         :param mqtt_client: paho.mqtt.client.Client
         :param logger: logging.Logger
         :param planet: Planet
         """
-        # DO NOT CHANGE THE SETUP HERE
-        self.client = mqtt_client
-        self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
-        self.client.on_message = self.safe_on_message_handler
-        # Add your client setup here
-        self.logger = logger
-        self.group = self.client._client_id[0:3].decode('utf-8')
+        self.group = group
         self.planet = planet
         self.wait = False
         self.wait_send_finish = False
         self.timeout_complete = True
         self.last_connection_time = time.time()
-        self.logger.debug(self.group)
+
+        self.logger = logger
+        self.logger.debug(f"Group-ID: {self.group}")
+
+        # MQTT client setup
+        self.client = mqtt_client
+        self.client = mqtt.Client(client_id=self.group + str(uuid.uuid4()),  # Unique Client-ID to recognize our program
+                                  clean_session=True,  # We want a clean session after disconnect or abort/crash
+                                  protocol=mqtt.MQTTv311  # Define MQTT protocol version
+                                  )
+        self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
+        self.client.on_message = self.safe_on_message_handler
         self.client.enable_logger(logger)
         self.client.username_pw_set(self.group, 'eYa0NxbLnI')
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
         self.client.subscribe("explorer/" + self.group, qos=1)
-        self.client.loop_start() # Start listening to incoming messages
+        self.client.loop_start()  # Start listening to incoming messages
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def on_message(self, client, data, message):
