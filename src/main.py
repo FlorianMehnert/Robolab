@@ -213,7 +213,7 @@ def run(calibrate=False):
             print("Status of path to be explored: ", planet.paths[planet.start[0]][dir_abs])
 
             # print(f"Turn right {dir_rel / 90} times")
-            follow.turn_right_x_times(dir_rel / 90)
+            follow.turn(dir_rel / 90)
             odo.gamma = math.radians(dir_abs)
 
             if is_color(current_color, rgb_red, 25):
@@ -245,7 +245,7 @@ def run(calibrate=False):
                 robot.m1.run_forever(speed_sp=200)
                 robot.m2.run_forever(speed_sp=-200)
 
-                follow.turn_right_x_times(2)
+                follow.turn(2)
                 odo.gamma = odo.gamma_to_direction(odo.gamma + Direction.SOUTH)
 
                 follow.stop()

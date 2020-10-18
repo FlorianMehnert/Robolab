@@ -47,6 +47,7 @@ class Follow:
         self.kp = 0.8
         self.ki = 0.01
         self.kd = 0.03
+        self.ke = 0
 
     def conv_str_to_rgb(self, s: str):
         """
@@ -148,6 +149,10 @@ class Follow:
         optimal -- medium value between calibrated white and black
         baseSpeed -- how fast should the robot go
         """
+        if self.integral < 100:
+            self.ke += 2
+        else:
+            self.ke -= 10
         error = optimal - self.robot.cs.value()
         if self.integral + error > 3000:
             pass
@@ -155,11 +160,19 @@ class Follow:
             self.integral += error
         derivate = error - self.previous_error
         output = self.kp * error + self.ki * self.integral + self.kd * derivate
+        if self.ke > 200:
+            self.ke = 200
         self.previous_error = error
-        self.robot.m1.run_forever(speed_sp=baseSpeed + output)
-        self.robot.m2.run_forever(speed_sp=baseSpeed - output)
+        s1 = baseSpeed + self.ke + output
+        s2 = baseSpeed + self.ke - output
+        if s1 > 1000:
+            s1 = 800
+        if s2 > 1000:
+            s2 = 800
+        self.robot.m1.run_forever(speed_sp=s1)
+        self.robot.m2.run_forever(speed_sp=s2)
 
-    def turn_right_x_times(self, x=0):
+    def turn(self, x=0):
         """
         x -- how often should the robot rotate (default 0)
         used for turning the robot after it reaches a crossing to a path
@@ -168,19 +181,21 @@ class Follow:
         if x == 0:
             return
 
-        degree_for90 = 275
-        speed = 200
-
-        if x in (1, -1):
-            self.robot.m1.run_forever(speed_sp=speed * x)
-            self.robot.m2.run_forever(speed_sp=-speed * x)
-        else:
+        degree_for90 = 280
+        speed = 400
+        self.robot.m1.position = 0
+        if x == 1:
             self.robot.m1.run_forever(speed_sp=speed)
             self.robot.m2.run_forever(speed_sp=-speed)
+        elif x == 2:
+            self.robot.m1.run_forever(speed_sp=speed)
+            self.robot.m2.run_forever(speed_sp=-speed)
+        elif x == 3:
+            self.robot.m1.run_forever(speed_sp=-speed)
+            self.robot.m2.run_forever(speed_sp=speed)
 
-        self.robot.m1.position = 0
         while abs(self.robot.m1.position) < abs(x * degree_for90):
-            sleep(0.1)
+            continue
         self.stop()
 
     def find_attached_paths(self) -> List[Direction]:
