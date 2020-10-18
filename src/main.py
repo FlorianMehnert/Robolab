@@ -14,7 +14,6 @@ import paho.mqtt.client as mqtt
 import specials
 from communication import Communication
 from follow import Follow
-from follow import is_color
 from odometry import Odometry
 from planet import Planet, Direction
 from specials import star_wars_sound, color_codes as color
@@ -91,7 +90,7 @@ def run(calibrate=False):
         robot.cs.mode = "RGB-RAW"
         current_color = robot.cs.bin_data("hhh")
 
-        if is_color(current_color, rgb_red, 25) or is_color(current_color, rgb_blue, 30):
+        if follow.is_color(current_color, rgb_red, 25) or follow.is_color(current_color, rgb_blue, 30):
             # discovers node
             node_count += 1
             follow.stop()
@@ -212,10 +211,10 @@ def run(calibrate=False):
             follow.turn(dir_rel / 90)
             odo.gamma = math.radians(dir_abs)
 
-            if is_color(current_color, rgb_red, 25):
+            if follow.is_color(current_color, rgb_red, 25):
                 print("\u001b[31mRED\u001b[0m")
                 follow.leds(ev3.Leds.RED)
-            elif is_color(current_color, rgb_blue, 25):
+            elif follow.is_color(current_color, rgb_blue, 25):
                 print("\u001b[34mBLUE\u001b[0m")
                 follow.leds(ev3.Leds.GREEN)
 

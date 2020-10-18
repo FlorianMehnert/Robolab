@@ -6,34 +6,6 @@ from specials import star_wars_sound
 import ev3dev.ev3 as ev3
 
 
-def is_color(current_color: tuple, matching_color: tuple, distance: int) -> bool:
-    """
-    currentColor -- rgb Tuple of the current color
-    matchingColor -- rgb Tuple of the given Color
-    distance -- maximum value difference between both colors the return true
-    compares the color the color-sensor detects at the moment with another given color and returns whether the current color matches the given color
-    """
-
-    match = True
-    for i in range(3):
-        if abs(current_color[i] - matching_color[i]) > distance:
-            match = False
-            break
-
-    return match
-
-
-def is_black(rgb: (int, int, int)) -> bool:
-    """
-    returns weather any
-    """
-    val = (rgb[0] + rgb[1] + rgb[2]) / 3
-    if val > 100:
-        return False
-    else:
-        return True
-
-
 class Follow:
     def __init__(self, robot: Robot, movement: list) -> None:
         self.robot = robot
@@ -100,6 +72,30 @@ class Follow:
 
         ev3.Leds.set_color(ev3.Leds.LEFT, color)
         ev3.Leds.set_color(ev3.Leds.RIGHT, color)
+
+    def is_color(current_color: tuple, matching_color: tuple, distance: int) -> bool:
+        """
+        currentColor -- rgb Tuple of the current color
+        matchingColor -- rgb Tuple of the given Color
+        distance -- maximum value difference between both colors the return true
+        compares the color the color-sensor detects at the moment with another given color and returns whether the current color matches the given color
+        """
+        match = True
+        for i in range(3):
+            if abs(current_color[i] - matching_color[i]) > distance:
+                match = False
+                break
+        return match
+
+    def is_black(rgb: (int, int, int)) -> bool:
+        """
+        returns weather any
+        """
+        val = (rgb[0] + rgb[1] + rgb[2]) / 3
+        if val > 100:
+            return False
+        else:
+            return True
 
     def rgb_to_refl(self, r: int, g: int, b: int) -> float:
         """
@@ -207,7 +203,7 @@ class Follow:
 
         while self.robot.m1.position < 1100:
             bin_data = self.robot.cs.bin_data("hhh")
-            if is_black(bin_data):
+            if self.is_black(bin_data):
                 path_array.append(self.robot.m1.position)
 
         for i in path_array:
