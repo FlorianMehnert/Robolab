@@ -75,10 +75,10 @@ class Communication:
         if msg_from == "server":
             payload = payload["payload"]
             if msg_type == "planet":
-                self.planet.planetname = payload["planetName"]
-                print(f"Robot is on Planet {self.planet.planetname}")
-                self.client.subscribe("planet/" + self.planet.planetname + "/" + self.group, qos=1)
-                self.logger.debug("Planet name: " + self.planet.planetname)
+                self.planet.planet_name = payload["planetName"]
+                print(f"Robot is on Planet {self.planet.planet_name}")
+                self.client.subscribe("planet/" + self.planet.planet_name + "/" + self.group, qos=1)
+                self.logger.debug("Planet name: " + self.planet.planet_name)
                 self.planet.set_start((payload["startX"], payload["startY"]), payload["startOrientation"])
                 start_path_dir = (payload["startOrientation"] + 180) % 360
                 self.planet.add_path(((payload["startX"], payload["startY"]), start_path_dir), ((payload["startX"], payload["startY"]), start_path_dir), -1)
@@ -177,7 +177,7 @@ class Communication:
                     }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planet.planetname + "/" + self.group
+        topic = "planet/" + self.planet.planet_name + "/" + self.group
         self.wait = True
         self.send_robot_message(payload, topic)
         while self.wait:
@@ -201,7 +201,7 @@ class Communication:
                   }
         }
         payload = json.dumps(payload)
-        topic = "planet/" + self.planet.planetname + "/" + self.group
+        topic = "planet/" + self.planet.planet_name + "/" + self.group
         self.send_robot_message(payload, topic)
         self.planet.start = path
         self.timeout()

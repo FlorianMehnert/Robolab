@@ -34,7 +34,7 @@ class Planet:
         """ Initializes the data structure """
         self.target = None
         self.paths = {}
-        self.planetname = ""
+        self.planet_name = ""
         self.start = None  # Tuple[Tuple[int, int], Direction]
         self.new_planet = True
         self.stack: List[Tuple[Tuple[int, int], Direction, int]] = []
