@@ -9,7 +9,7 @@ import specials
 from planet import Direction
 from typing import List, Tuple, Dict, Union
 import time
-import specials
+from specials import color_codes as color
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -174,12 +174,12 @@ class Communication:
         self.send_robot_message(payload, topic)
         while self.wait:
             continue
-        server_target = (self.planet.paths[start[0]][start[1]][0], self.planet.paths[start[0]][start[1]][1])
-        if server_target is target:
-            print(f"{specials.color_codes.green}Odometry success")
+        server_target = (self.planet.paths[start[0]][start[1]][0], Direction(self.planet.paths[start[0]][start[1]][1]))
+        if server_target == target:
+            print(f"{color.green}Odometry success{color.reset}")
         else:
-            print(f"{specials.color_codes.yellow}Odometry error! "
-                  f"Odometry target: {target}, server target: {server_target}")
+            print(f"{color.yellow}Odometry error! "
+                  f"Odometry target: {target}, server target: {server_target}{color.reset}")
         self.timeout()
 
     def send_path_select(self, path: Tuple[Tuple[int, int], Direction]):
