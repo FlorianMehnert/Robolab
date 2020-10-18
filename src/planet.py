@@ -263,7 +263,7 @@ class Planet:
         """
         if node not in self.paths:
             return None
-        return tuple(self.paths[node][direction][0], self.paths[node][direction][1])
+        return self.paths[node][direction][0], self.paths[node][direction][1]
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[
         None, List[Tuple[Tuple[int, int], Direction]]]:
