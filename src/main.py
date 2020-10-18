@@ -229,7 +229,8 @@ def run(calibrate=False):
 
             follow.follow(optimal, 200)
 
-            if robot.us.value() < 200:
+            if robot.us.value() < 150:
+                # if path blocked
                 robot.stop_motor()
                 robot.sd.beep()
                 print("\u001b[31mPATH BLOCKED\u001b[0m")
