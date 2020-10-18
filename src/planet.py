@@ -463,7 +463,11 @@ class Planet:
         if unknownNodeDistance == {}:
             # if only unreachable nodes are left
             return None
-        distance = sorted(unknownNodeDistance.values())[0]
+        # distance = sorted(unknownNodeDistance.values())[0]
+
+        result_node = min(unknownNodeDistance, key=unknownNodeDistance.get)
+        distance = unknownNodeDistance[result_node]
+        print(f"Target node to explored: {result_node} (Distance: {distance})")
         for node in unknownNodeDistance:
             if unknownNodeDistance[node] == distance:
                 return unknownNodeDir[node]
