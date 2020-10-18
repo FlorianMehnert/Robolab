@@ -44,10 +44,10 @@ class Follow:
         self.integral = 0
         self.previous_error = 0
 
-        self.kp = 0.8
+        self.kp = 1
         self.ki = 0.01
         self.kd = 0.03
-        self.ke = 0
+        self.increase = 0
 
     def conv_str_to_rgb(self, s: str):
         """
@@ -149,35 +149,23 @@ class Follow:
         optimal -- medium value between calibrated white and black
         baseSpeed -- how fast should the robot go
         """
-        fast = False
-        if fast:
-            if self.integral < 100:
-                self.ke += 1
-            else:
-                self.ke -= 3
+
         error = optimal - self.robot.cs.value()
-        if self.integral + error > 3000:
+        # if self.integral != 0:
+        #     baseSpeed += abs(5000 / self.integral)
+        #     if baseSpeed > 500:
+        #         baseSpeed = 500
+        #     print(baseSpeed, self.integral)
+        if self.integral + error > 6000:
             pass
         else:
             self.integral += error
         derivate = error - self.previous_error
         output = self.kp * error + self.ki * self.integral + self.kd * derivate
-        if self.ke > 100:
-            self.ke = 10
         self.previous_error = error
-        s1 = baseSpeed + self.ke + output
-        s2 = baseSpeed + self.ke - output
-        if abs(s1) > 800:
-            self.ke = -100
-        elif abs(s1) < 100:
-            self.ke = 0
-        if abs(s2) > 800:
-            self.ke = -100
-        elif abs(s2) < 100:
-            self.ke = 0
 
-        self.robot.m1.run_forever(speed_sp=s1)
-        self.robot.m2.run_forever(speed_sp=s2)
+        self.robot.m1.run_forever(speed_sp=output + baseSpeed)
+        self.robot.m2.run_forever(speed_sp=-output + baseSpeed)
 
     def turn(self, x=0):
         """
@@ -185,31 +173,19 @@ class Follow:
         used for turning the robot after it reaches a crossing to a path
         """
 
-        if x == 0:
-            return
+        degree_for90 = 280
+        speed = 200
 
-        degree_for90 = 282
-        speed = 400
+        if x in (1, -1):
+            self.robot.m1.run_forever(speed_sp=speed * x)
+            self.robot.m2.run_forever(speed_sp=-speed * x)
+        else:
+            self.robot.m1.run_forever(speed_sp=speed)
+            self.robot.m2.run_forever(speed_sp=-speed)
+
         self.robot.m1.position = 0
-
-        target = 0
-        if x == 1:
-            self.robot.m1.run_forever(speed_sp=speed)
-            self.robot.m2.run_forever(speed_sp=-speed)
-            target = 1
-        elif x == 2:
-            self.robot.m1.run_forever(speed_sp=speed)
-            self.robot.m2.run_forever(speed_sp=-speed)
-            target = 2
-        elif x == -1 or x == 3:
-            self.robot.m1.run_forever(speed_sp=-speed)
-            self.robot.m2.run_forever(speed_sp=speed)
-            target = -1
-
-
-        print(x, target, self.robot.m1.position, target * degree_for90)
-        while abs(self.robot.m1.position) < abs(target * degree_for90):
-            continue
+        while abs(self.robot.m1.position) < abs(x * degree_for90):
+            sleep(0.1)
         self.stop()
 
     def find_attached_paths(self) -> List[Direction]:
@@ -322,7 +298,7 @@ class Follow:
             elif mode == "gs":
                 self.gyro_straight(800, 800, 10)
             elif mode == "follow":
-                    self.follow(optimal=171.5, baseSpeed=250)
+                    self.follow(optimal=171.5, baseSpeed=350)
             elif mode == "battery":
                 print(self.robot.ps.measured_volts)
             elif mode == "calibrate":
