@@ -149,10 +149,12 @@ class Follow:
         optimal -- medium value between calibrated white and black
         baseSpeed -- how fast should the robot go
         """
-        if self.integral < 100:
-            self.ke += 2
-        else:
-            self.ke -= 10
+        fast = False
+        if fast:
+            if self.integral < 100:
+                self.ke += 1
+            else:
+                self.ke -= 3
         error = optimal - self.robot.cs.value()
         if self.integral + error > 3000:
             pass
@@ -160,15 +162,20 @@ class Follow:
             self.integral += error
         derivate = error - self.previous_error
         output = self.kp * error + self.ki * self.integral + self.kd * derivate
-        if self.ke > 200:
-            self.ke = 200
+        if self.ke > 100:
+            self.ke = 10
         self.previous_error = error
         s1 = baseSpeed + self.ke + output
         s2 = baseSpeed + self.ke - output
-        if s1 > 1000:
-            s1 = 800
-        if s2 > 1000:
-            s2 = 800
+        if abs(s1) > 800:
+            self.ke = -100
+        elif abs(s1) < 100:
+            self.ke = 0
+        if abs(s2) > 800:
+            self.ke = -100
+        elif abs(s2) < 100:
+            self.ke = 0
+
         self.robot.m1.run_forever(speed_sp=s1)
         self.robot.m2.run_forever(speed_sp=s2)
 
@@ -181,20 +188,27 @@ class Follow:
         if x == 0:
             return
 
-        degree_for90 = 280
+        degree_for90 = 282
         speed = 400
         self.robot.m1.position = 0
+
+        target = 0
         if x == 1:
             self.robot.m1.run_forever(speed_sp=speed)
             self.robot.m2.run_forever(speed_sp=-speed)
+            target = 1
         elif x == 2:
             self.robot.m1.run_forever(speed_sp=speed)
             self.robot.m2.run_forever(speed_sp=-speed)
-        elif x == 3:
+            target = 2
+        elif x == -1:
             self.robot.m1.run_forever(speed_sp=-speed)
             self.robot.m2.run_forever(speed_sp=speed)
+            target = -1
 
-        while abs(self.robot.m1.position) < abs(x * degree_for90):
+
+        print(x, target, self.robot.m1.position, target * degree_for90)
+        while abs(self.robot.m1.position) < abs(target * degree_for90):
             continue
         self.stop()
 
@@ -294,7 +308,13 @@ class Follow:
             elif mode == "dre":
                 self.robot.m1.run_to_rel_pos(speed_sp=100, position_sp=360)
                 self.robot.m2.run_to_rel_pos(speed_sp=100, position_sp=360)
-
+            elif mode == "turn":
+                self.turn(1)
+                self.turn(-1)
+                self.turn(-1)
+                self.turn(2)
+                while True:
+                    self.follow(baseSpeed=200, optimal=175.2)
             elif mode == "":
                 break
             elif mode == "wasd":

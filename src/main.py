@@ -100,6 +100,7 @@ def run(calibrate=False):
 
         if is_color(current_color, rgb_red, 25) or is_color(current_color, rgb_blue, 30):
             # discovers node
+            follow.ke = 0
             node_count += 1
             follow.stop()
             follow.stop()
@@ -214,6 +215,7 @@ def run(calibrate=False):
 
             # print(f"Turn right {dir_rel / 90} times")
             follow.turn(dir_rel / 90)
+            follow.ke = 0
             odo.gamma = math.radians(dir_abs)
 
             if is_color(current_color, rgb_red, 25):
@@ -236,6 +238,8 @@ def run(calibrate=False):
 
             if robot.us.value() < 200:
                 follow.stop()
+                print(follow.ke)
+                follow.ke = 0
                 robot.sd.beep()
                 print("\u001b[31mPATH BLOCKED\u001b[0m")
                 follow.path_blocked = True
@@ -246,6 +250,7 @@ def run(calibrate=False):
                 robot.m2.run_forever(speed_sp=-200)
 
                 follow.turn(2)
+
                 odo.gamma = odo.gamma_to_direction(odo.gamma + Direction.SOUTH)
 
                 follow.stop()
