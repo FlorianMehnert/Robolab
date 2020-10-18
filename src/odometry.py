@@ -3,7 +3,7 @@ import math
 from typing import List, Tuple
 
 from planet import Direction
-from specials import color_codes
+from color import ColorPrint as Color
 
 
 class Odometry:
@@ -84,4 +84,4 @@ class Odometry:
         self.posX = round(self.posX / 50)
         self.posY = round(self.posY / 50)
 
-        print(f"{color_codes.green}X = {self.posX}, Y = {self.posY}, gamma = {self.gamma}{color_codes.reset}")
+        print(f"{Color.green}X = {self.posX}, Y = {self.posY}, gamma = {self.gamma}{Color.reset}")
