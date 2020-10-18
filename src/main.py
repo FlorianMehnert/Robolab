@@ -18,19 +18,10 @@ from follow import isColor
 from odometry import Odometry
 from planet import Planet, Direction
 from specials import blink, starWarsSound
+from robot import Robot
 
 client = None  # DO NOT EDIT
 
-m1: ev3.LargeMotor = ev3.LargeMotor('outB')
-m2: ev3.LargeMotor = ev3.LargeMotor('outC')
-cs: ev3.ColorSensor = ev3.ColorSensor()
-ts: ev3.TouchSensor = ev3.TouchSensor()
-gy: ev3.GyroSensor = ev3.GyroSensor()
-us: ev3.UltrasonicSensor = ev3.UltrasonicSensor()
-sd: ev3.Sound = ev3.Sound()
-ps: ev3.PowerSupply = ev3.PowerSupply()
-
-print(f"current battery is {ps.measured_volts}")
 
 
 def run(calibrate=False):
@@ -54,19 +45,18 @@ def run(calibrate=False):
 
     # THIS IS WHERE PARADISE BEGINS
 
+    robot = Robot()
     planet = Planet()
     mqttc = Communication(client, logger, planet)
     movement: List[Tuple[int, int]] = []
     # used to save all movement values gathered while line following for odometry calculations
-
-
-    follow = Follow(m1=m1, m2=m2, cs=cs, ts=ts, gy=gy, movement=movement, ps=ps, sd=sd)
+    follow = Follow(robot, movement)
     odo = Odometry(gamma=0, posX=0, posY=0, movement=movement, distBtwWheels=9.2)
     follow.reset()
 
     try:
 
-        follow.menu(calibrate, sd)
+        follow.menu(calibrate, robot.sd)
 
         global oldOrientation
         global oldNodeX
@@ -105,8 +95,8 @@ def run(calibrate=False):
         nodeCount = 0
         while run:
 
-            cs.mode = "RGB-RAW"
-            currentColor = cs.bin_data("hhh")
+            robot.cs.mode = "RGB-RAW"
+            currentColor = robot.cs.bin_data("hhh")
 
             if isColor(currentColor, rgbRed, 25) or isColor(currentColor, rgbBlue, 25):
                 # discovers node
@@ -122,8 +112,8 @@ def run(calibrate=False):
 
                     # only works because while loops is very fast... the faster the while the slower the less does the robot roll
                     # TODO: fix m1 and m2 only getting stopped by follow and wait for m1/m2 to stop
-                    m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
-                    m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
+                    robot.m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
+                    robot.m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                     print(
                         f"serverX = {oldNodeX}, serverY = {oldNodeY}, {specials.colorCodes.red}"
                         f"serverDirection = {specials.colorCodes.reset} {oldOrientation}, "
@@ -161,7 +151,7 @@ def run(calibrate=False):
                         mqttc.sendTargetReached()
                         print("Target reached")
                         pprint(planet.paths, indent=2)
-                        sd.tone(starWarsSound)
+                        robot.sd.tone(starWarsSound)
                         break
 
                 # updated planet data: current position + facing
@@ -181,8 +171,8 @@ def run(calibrate=False):
                     absolutePaths = follow.gammaRelToAbs(relativePaths, oldOrientation)
                     planet.setAttachedPaths((oldNodeX, oldNodeY), absolutePaths)
                 else:
-                    m1.run_to_rel_pos(speed_sp=200, position_sp=280)
-                    m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
+                    robot.m1.run_to_rel_pos(speed_sp=200, position_sp=280)
+                    robot.m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
                     print("Node already known")
                     sleep(.4)
                 # update stack to remove all known weighted paths
@@ -198,7 +188,7 @@ def run(calibrate=False):
                     print("Exploration completed")
                     pprint(planet.paths, indent=2)
                     #sd.beep()
-                    sd.tone(starWarsSound)
+                    robot.sd.tone(starWarsSound)
                     break
 
                 dirRel: Direction = odo.gammaToDirection(dirAbs + round(odo.gamma))
@@ -231,23 +221,23 @@ def run(calibrate=False):
                 odo.oldM2 = 0
                 odo.newM1 = 0
                 odo.newM2 = 0
-                m1.position = 0
-                m2.position = 0
+                robot.m1.position = 0
+                robot.m2.position = 0
                 movement = []
             else:
 
                 follow.follow(optimal, 250)
 
-                if us.value() < 200:
+                if robot.us.value() < 200:
                     follow.stop()
-                    sd.beep()
+                    robot.sd.beep()
                     print("\u001b[31mPATH BLOCKED\u001b[0m")
                     follow.pathBlocked = True
                     blink()
                     sleep(1)
 
-                    m1.run_forever(speed_sp=200)
-                    m2.run_forever(speed_sp=-200)
+                    robot.m1.run_forever(speed_sp=200)
+                    robot.m2.run_forever(speed_sp=-200)
 
                     follow.turnRightXTimes(2)
                     odo.gamma = odo.gammaToDirection(odo.gamma + Direction.SOUTH)
@@ -257,12 +247,12 @@ def run(calibrate=False):
 
                 odo.oldM1 = odo.newM1
                 odo.oldM2 = odo.newM2
-                odo.newM1 = m1.position
-                odo.newM2 = m2.position
+                odo.newM1 = robot.m1.position
+                odo.newM2 = robot.m2.position
                 movement.append((odo.newM1 - odo.oldM1, odo.newM2 - odo.oldM2))
     except:
         try:
-            print(gy.value())
+            print(robot.gy.value())
         except OSError:
             print("gyroSensor is broken")
 
