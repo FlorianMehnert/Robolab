@@ -114,24 +114,6 @@ def run(calibrate=False):
                 #     f"odoDirection ={color.reset} {odo.gamma}")
 
             else:
-
-                # any other node discovered
-                odo.calculate_new_position(movement)
-                print(
-                    f"{color.reset}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {old_nodeX, old_nodeY}{color.reset}")
-                odo.posX += old_nodeX
-                odo.posY += old_nodeY
-                print(
-                    f"{color.reset}AFTER: odoX and odoY{odo.posX, odo.posY}{color.reset}")
-                # updates odo.poX, odo.posY, odo.gamma
-
-                # prints every position data
-                print(
-                    f"serverX = {old_nodeX}, serverY = {old_nodeY}"
-                    f"serverDirection = {old_orientation}, "
-                    f"odoX = {odo.posX}, odoY = {odo.posY}, "
-                    f"odoDirection ={color.reset} {odo.gamma}")
-
                 if follow.path_blocked:
                     # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
                     mqttc.send_path(((old_nodeX, old_nodeY), old_orientation), ((old_nodeX, old_nodeY), old_orientation),
@@ -145,6 +127,22 @@ def run(calibrate=False):
                                         planet.get_path_target((old_nodeX, old_nodeY), old_orientation),
                                         "free")
                     else:
+                        # any other node discovered
+                        odo.calculate_new_position(movement)
+                        print(
+                            f"{color.reset}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {old_nodeX, old_nodeY}{color.reset}")
+                        odo.posX += old_nodeX
+                        odo.posY += old_nodeY
+                        print(
+                            f"{color.reset}AFTER: odoX and odoY{odo.posX, odo.posY}{color.reset}")
+                        # updates odo.poX, odo.posY, odo.gamma
+
+                        # prints every position data
+                        print(
+                            f"serverX = {old_nodeX}, serverY = {old_nodeY}"
+                            f"serverDirection = {old_orientation}, "
+                            f"odoX = {odo.posX}, odoY = {odo.posY}, "
+                            f"odoDirection ={color.reset} {odo.gamma}")
                         mqttc.send_path(((old_nodeX, old_nodeY), old_orientation),
                                         ((round(odo.posX), round(odo.posY)), odo.gamma_to_direction(odo.gamma + 180)),
                                         "free")
