@@ -1,6 +1,7 @@
 from time import sleep
 from typing import Tuple, List
 from planet import Direction
+from robot import Robot
 from specials import star_wars_sound
 import random
 import ev3dev.ev3 as ev3
@@ -35,17 +36,8 @@ def is_black(rgb: (int, int, int)) -> bool:
 
 
 class Follow:
-    def __init__(self, m1: ev3.LargeMotor, m2: ev3.LargeMotor, cs: ev3.ColorSensor, ts: ev3.TouchSensor,
-                 gy: ev3.GyroSensor, movement: list, ps: ev3.PowerSupply, sd: ev3.Sound,
-                 rc: ev3.RemoteControl = None) -> None:
-        self.m1 = m1
-        self.m2 = m2
-        self.cs = cs
-        self.ts = ts
-        self.gy = gy
-        self.rc = rc
-        self.ps = ps
-        self.sd = sd
+    def __init__(self, robot: Robot, movement: list) -> None:
+        self.robot = robot
         self.movement = movement
 
         self.rgb_black = (34, 78, 33)
@@ -82,23 +74,23 @@ class Follow:
         """
         stops both given Motors
         """
-        self.m1.stop_action = "brake"
-        self.m2.stop_action = "brake"
-        self.m1.stop()
-        self.m2.stop()
+        self.robot.m1.stop_action = "brake"
+        self.robot.m2.stop_action = "brake"
+        self.robot.m1.stop()
+        self.robot.m2.stop()
 
     def reset(self):
-        self.m1.position = 0
-        self.m2.position = 0
+        self.robot.m1.position = 0
+        self.robot.m2.position = 0
 
     def touch_pause(self):
         """
         uses touch-sensor to simulate a pause
         """
-        while not self.ts.is_pressed:
+        while not self.robot.ts.is_pressed:
             sleep(0.1)
 
-        while self.ts.is_pressed:
+        while self.robot.ts.is_pressed:
             sleep(0.1)
 
     def leds(self, color: ev3.Leds):
@@ -120,7 +112,7 @@ class Follow:
         lets the user manually calibrate the color-sensor by measuring the rgb-values from white, black, red, and blue
         returns rgb_red, rgb_blue, rgb_white, rgb_black and the median of white and black
         """
-        self.cs.mode = "RGB-RAW"
+        self.robot.cs.mode = "RGB-RAW"
 
         self.leds(ev3.Leds.YELLOW)
         self.touch_pause()
@@ -135,12 +127,12 @@ class Follow:
         self.leds(ev3.Leds.RED)
         self.touch_pause()
         print("red")
-        rgb_red = self.cs.bin_data("hhh")
+        rgb_red = self.robot.cs.bin_data("hhh")
 
         self.leds(ev3.Leds.GREEN)
         self.touch_pause()
         print("blue")
-        rgb_blue = self.cs.bin_data("hhh")
+        rgb_blue = self.robot.cs.bin_data("hhh")
 
         ref_white = self.rgb_to_refl(*rgb_white)
         ref_black = self.rgb_to_refl(*rgb_black)
@@ -165,9 +157,8 @@ class Follow:
         derivate = error - self.previous_error
         output = self.kp * error + self.ki * self.integral + self.kd * derivate
         self.previous_error = error
-        self.m1.run_forever(speed_sp=baseSpeed + output)
-        self.m2.run_forever(speed_sp=baseSpeed - output)
-        # print(derivate, self.previous_error, self.integral, error)
+        self.robot.m1.run_forever(speed_sp=baseSpeed + output)
+        self.robot.m2.run_forever(speed_sp=baseSpeed - output)
 
     def turn_right_x_times(self, x=0):
         """
@@ -182,14 +173,14 @@ class Follow:
         speed = 200
 
         if x in (1, -1):
-            self.m1.run_forever(speed_sp=speed * x)
-            self.m2.run_forever(speed_sp=-speed * x)
+            self.robot.m1.run_forever(speed_sp=speed * x)
+            self.robot.m2.run_forever(speed_sp=-speed * x)
         else:
-            self.m1.run_forever(speed_sp=speed)
-            self.m2.run_forever(speed_sp=-speed)
+            self.robot.m1.run_forever(speed_sp=speed)
+            self.robot.m2.run_forever(speed_sp=-speed)
 
-        self.m1.position = 0
-        while abs(self.m1.position) < abs(x * degree_for90):
+        self.robot.m1.position = 0
+        while abs(self.robot.m1.position) < abs(x * degree_for90):
             sleep(0.1)
         self.stop()
 
@@ -199,19 +190,19 @@ class Follow:
         """
 
         self.stop()
-        self.m1.run_to_rel_pos(speed_sp=200, position_sp=280)
-        self.m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
-        self.m1.wait_until_not_moving()
-        self.m1.position = 0
-        self.m2.position = 0
-        self.m1.run_forever(speed_sp=270)
-        self.m2.run_forever(speed_sp=-270)
+        self.robot.m1.run_to_rel_pos(speed_sp=200, position_sp=280)
+        self.robot.m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
+        self.robot.m1.wait_until_not_moving()
+        self.robot.m1.position = 0
+        self.robot.m2.position = 0
+        self.robot.m1.run_forever(speed_sp=270)
+        self.robot.m2.run_forever(speed_sp=-270)
 
         dir_list: List[Direction] = []
         path_array: List[int] = []
 
-        while self.m1.position < 1100:
-            bin_data = self.cs.bin_data("hhh")
+        while self.robot.m1.position < 1100:
+            bin_data = self.robot.cs.bin_data("hhh")
             if is_black(bin_data):
                 path_array.append(self.m1.position)
 
@@ -226,7 +217,7 @@ class Follow:
                 dir_list.append(Direction.WEST)
 
         self.stop()
-        self.m1.wait_until_not_moving()
+        self.robot.m1.wait_until_not_moving()
         print(f"in findAttachedPaths =  {dir_list}")
         return dir_list
 
@@ -255,11 +246,11 @@ class Follow:
                 self.m1.run_forever(speed_sp=-speed)
                 self.m2.run_forever(speed_sp=-speed)
             elif direction == "a":
-                self.m1.run_forever(speed_sp=-speed / 5)
-                self.m2.run_forever(speed_sp=speed / 5)
+                self.robot.m1.run_forever(speed_sp=-speed / 5)
+                self.robot.m2.run_forever(speed_sp=speed / 5)
             elif direction == "d":
-                self.m1.run_forever(speed_sp=speed / 5)
-                self.m2.run_forever(speed_sp=-speed / 5)
+                self.robot.m1.run_forever(speed_sp=speed / 5)
+                self.robot.m2.run_forever(speed_sp=-speed / 5)
             elif direction == "exit":
                 self.stop()
                 self.stop()
@@ -268,16 +259,16 @@ class Follow:
                 self.stop()
 
     def gyro_straight(self, s1, s2, kp):
-        self.gy.mode = 'GYRO-CAL'
+        self.robot.gy.mode = 'GYRO-CAL'
         sleep(2)
-        self.gy.mode = 'GYRO-ANG'
+        self.robot.gy.mode = 'GYRO-ANG'
         print(self.gy.value())
         while True:
-            error = self.gy.value()
+            error = self.robot.gy.value()
             print(error)
             output = kp * error
-            self.m1.run_forever(speed_sp=s1 + output)
-            self.m2.run_forever(speed_sp=s2 - output)
+            self.robot.m1.run_forever(speed_sp=s1 + output)
+            self.robot.m2.run_forever(speed_sp=s2 - output)
             sleep(.2)
 
     def menu(self, calibrate: bool, sound: ev3.Sound, mode: str = "NOCALIBRATE"):
@@ -287,8 +278,8 @@ class Follow:
             if mode == "NOCALIBRATE":
                 pass
             elif mode == "dre":
-                self.m1.run_to_rel_pos(speed_sp=100, position_sp=360)
-                self.m2.run_to_rel_pos(speed_sp=100, position_sp=360)
+                self.robot.m1.run_to_rel_pos(speed_sp=100, position_sp=360)
+                self.robot.m2.run_to_rel_pos(speed_sp=100, position_sp=360)
 
             elif mode == "":
                 break
@@ -299,7 +290,7 @@ class Follow:
             elif mode == "follow":
                     self.follow(optimal=171.5, baseSpeed=250)
             elif mode == "battery":
-                print(self.ps.measured_volts)
+                print(self.robot.ps.measured_volts)
             elif mode == "calibrate":
                 with open("/home/robot/src/values.txt", mode="w") as file:
                     for i in self.calibrate():
@@ -307,5 +298,5 @@ class Follow:
             elif mode == "beep":
                 sound.beep()
             elif mode == "StarWars":
-                self.sd.tone(star_wars_sound)
+                self.robot.sd.tone(star_wars_sound)
             mode = input("mode?")
