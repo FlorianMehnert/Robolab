@@ -459,7 +459,8 @@ class Planet:
                 weight += self.paths[step[0]][step[1]][2]
             unknownNodeDistance[node] = weight
             unknownNodeDir[node] = pathSteps[0][1]
-        if unknownNodeDistance is []:
+        print(f"unknownNodeDistance: {unknownNodeDistance}")
+        if unknownNodeDistance == {}:
             # if only unreachable nodes are left
             return None
         distance = sorted(unknownNodeDistance.values())[0]
