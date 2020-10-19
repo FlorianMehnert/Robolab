@@ -3,6 +3,8 @@ import argparse
 import logging
 import math
 import os
+import uuid
+import debug as dg
 from pprint import pprint
 from time import sleep, time
 from typing import Tuple, List
@@ -38,6 +40,7 @@ def run(calibrate=False):
     planet = Planet()
     mqttc = Communication(client, '217', logger, planet)
     movement: List[Tuple[int, int]] = []
+    debug = dg.Debug(3)
     # used to save all movement values gathered while line following for odometry calculations
 
     follow = Follow(robot, movement)
@@ -85,7 +88,7 @@ def run(calibrate=False):
             node_count += 1
             robot.stop_motor()
             robot.stop_motor()
-            print(f"{Color.byellow}{node_count}.node{Color.reset}")
+            debug.bprint(f"{Color.byellow}{node_count}.node{Color.reset}")
             if planet.new_planet:
                 # first node discovered
                 mqttc.send_ready()
@@ -96,7 +99,7 @@ def run(calibrate=False):
                 # TODO: fix m1 and m2 only getting stopped by follow and wait for m1/m2 to stop
                 robot.m1.run_to_rel_pos(speed_sp=1000, position_sp=1000)
                 robot.m2.run_to_rel_pos(speed_sp=1000, position_sp=1000)
-                # print(
+                # debug.bprint(
                 #     f"serverX = {old_nodeX}, serverY = {old_nodeY}, {Color.red}"
                 #     f"serverDirection = {Color.reset} {old_orientation}, "
                 #     f"odoX = {odo.posX}, odoY = {odo.pos_y}, {Color.red}"
@@ -119,16 +122,16 @@ def run(calibrate=False):
                     else:
                         # any other node discovered
                         odo.calculate_new_position(movement)
-                        print(
+                        debug.bprint(
                             f"{Color.reset}BEFORE: odoX and odoY{odo.posX, odo.posY} aswell as oldNodeX and oldNodeY {old_nodeX, old_nodeY}{Color.reset}")
                         odo.posX += old_nodeX
                         odo.posY += old_nodeY
-                        print(
+                        debug.bprint(
                             f"{Color.reset}AFTER: odoX and odoY{odo.posX, odo.posY}{Color.reset}")
                         # updates odo.poX, odo.pos_y, odo.gamma
 
                         # prints every position data
-                        print(
+                        debug.bprint(
                             f"serverX = {old_nodeX}, serverY = {old_nodeY}"
                             f"serverDirection = {old_orientation}, "
                             f"odoX = {odo.posX}, odoY = {odo.posY}, "
@@ -141,7 +144,7 @@ def run(calibrate=False):
             if planet.target is not None:
                 if planet.target == planet.start[0]:
                     mqttc.send_target_reached()
-                    print("Target reached")
+                    debug.bprint("Target reached")
                     pprint(planet.paths, indent=2)
                     driving_time = time() - start_time
                     print(f"Robot is {int(driving_time // 60)}:{driving_time % 60}")
@@ -160,14 +163,14 @@ def run(calibrate=False):
 
             # scan knots
             if not planet.is_known_node(planet.start[0]):
-                # print("Node unknown")
+                # debug.bprint("Node unknown")
                 relative_paths = follow.find_attached_paths()
                 absolute_paths = follow.gamma_rel_to_abs(relative_paths, old_orientation)
                 planet.set_attached_paths((old_nodeX, old_nodeY), absolute_paths)
             else:
                 robot.m1.run_to_rel_pos(speed_sp=200, position_sp=280)
                 robot.m2.run_to_rel_pos(speed_sp=-200, position_sp=280)
-                # print("Node already known")
+                # debug.bprint("Node already known")
                 sleep(.4)
             # update stack to remove all known weighted paths
             # discovered = planet.getPathsWithWrongWeight()
@@ -179,7 +182,7 @@ def run(calibrate=False):
             # Exploration completed
             if dir_abs is None:
                 mqttc.send_exploration_completed()
-                print("Exploration completed")
+                debug.bprint("Exploration completed")
                 pprint(planet.paths, indent=2)
                 # sd.beep()
                 driving_time = time() - start_time
@@ -198,13 +201,13 @@ def run(calibrate=False):
 
             if mqttc.error_msg_received:
                 mqttc.send_exploration_completed()
-                print("Error message received")
+                debug.bprint("Error message received")
                 pprint(planet.paths, indent=2)
                 for i in range(3):
                     robot.sd.beep()
                     sleep(.5)
                 driving_time = time() - start_time
-                print(f"Robot has driven {int(driving_time // 60)}:{driving_time % 60}.")
+                debug.bprint(f"Robot has driven {int(driving_time // 60)}:{driving_time % 60}.")
                 break
 
             print(f"dir_abs = {dir_abs}, planetDirection = {planet.start[1]}, dir_rel = {dir_rel}")
@@ -213,15 +216,15 @@ def run(calibrate=False):
             old_orientation = dir_abs
             print("Status of path to be explored: ", planet.paths[planet.start[0]][dir_abs])
 
-            # print(f"Turn right {dir_rel / 90} times")
+            # debug.bprint(f"Turn right {dir_rel / 90} times")
             follow.turn(dir_rel / 90)
             odo.gamma = math.radians(dir_abs)
 
             if follow.is_color(current_color, rgb_red, 25):
-                print("\u001b[31mRED\u001b[0m")
+                debug.bprint("\u001b[31mRED\u001b[0m")
                 robot.set_led(robot.ColorLED.RED)
             elif follow.is_color(current_color, rgb_blue, 25):
-                print("\u001b[34mBLUE\u001b[0m")
+                debug.bprint("\u001b[34mBLUE\u001b[0m")
                 robot.set_led(robot.ColorLED.GREEN)
 
             odo.old_m1 = 0
@@ -233,13 +236,13 @@ def run(calibrate=False):
             movement = []
         else:
             # if not node detected
-            follow.follow(optimal, 200)
+            follow.follow(optimal, 250)
 
             if robot.us.value() < 150:
                 # if path blocked
                 robot.stop_motor()
                 robot.sd.beep()
-                print("\u001b[31mPATH BLOCKED\u001b[0m")
+                debug.bprint("\u001b[31mPATH BLOCKED\u001b[0m")
                 follow.path_blocked = True
                 robot.blink()
                 sleep(1)

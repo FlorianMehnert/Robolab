@@ -4,12 +4,14 @@ from planet import Direction
 from robot import Robot
 from specials import star_wars_sound
 import ev3dev.ev3 as ev3
+import debug
 
 
 class Follow:
     def __init__(self, robot: Robot, movement: list) -> None:
         self.robot = robot
         self.movement = movement
+        self.debug = debug.Debug(3)
 
         self.rgb_black = (34, 78, 33)
         self.path_blocked = False
@@ -91,22 +93,23 @@ class Follow:
 
         self.robot.set_led(self.robot.ColorLED.YELLOW)
         self.touch_pause()
-        print("white")
+
+        self.debug.bprint("white")
         rgb_white = self.robot.cs.bin_data("hhh")
 
         self.robot.set_led(self.robot.ColorLED.BLACK)
         self.touch_pause()
-        print("black")
+        self.debug.bprint("black")
         rgb_black = self.robot.cs.bin_data("hhh")
 
         self.robot.set_led(self.robot.ColorLED.RED)
         self.touch_pause()
-        print("red")
+        self.debug.bprint("red")
         rgb_red = self.robot.cs.bin_data("hhh")
 
         self.robot.set_led(self.robot.ColorLED.GREEN)
         self.touch_pause()
-        print("blue")
+        self.debug.bprint("blue")
         rgb_blue = self.robot.cs.bin_data("hhh")
 
         ref_white = self.rgb_to_refl(*rgb_white)
@@ -120,17 +123,12 @@ class Follow:
 
     def follow(self, optimal, baseSpeed):
         """
-        currently p-Controller
+        pid-Controller
         optimal -- medium value between calibrated white and black
         baseSpeed -- how fast should the robot go
         """
 
         error = optimal - self.robot.cs.value()
-        # if self.integral != 0:
-        #     baseSpeed += abs(5000 / self.integral)
-        #     if baseSpeed > 500:
-        #         baseSpeed = 500
-        #     print(baseSpeed, self.integral)
         if self.integral + error > 6000:
             pass
         else:
@@ -147,7 +145,7 @@ class Follow:
         x -- how often should the robot rotate (default 0)
         used for turning the robot after it reaches a crossing to a path
         """
-
+        self.debug.bprint(f"I turn for {x}")
         degree_for90 = 280
         speed = 200
 
@@ -197,7 +195,7 @@ class Follow:
 
         self.robot.stop_motor()
         self.robot.m1.wait_until_not_moving()
-        print(f"in findAttachedPaths =  {dir_list}")
+        self.debug.bprint(f"in findAttachedPaths =  {dir_list}")
         return dir_list
 
     def gamma_rel_to_abs(self, dir_list: List[Direction], gamma: int):
@@ -212,10 +210,10 @@ class Follow:
         self.robot.gy.mode = 'GYRO-CAL'
         sleep(2)
         self.robot.gy.mode = 'GYRO-ANG'
-        print(self.robot.gy.value())
+        self.debug.bprint(self.robot.gy.value())
         while True:
             error = self.robot.gy.value()
-            print(error)
+            self.debug.bprint(error)
             output = kp * error
             self.robot.m1.run_forever(speed_sp=s1 + output)
             self.robot.m2.run_forever(speed_sp=s2 - output)
@@ -232,9 +230,6 @@ class Follow:
                 self.robot.m2.run_to_rel_pos(speed_sp=100, position_sp=360)
             elif mode == "turn":
                 self.turn(1)
-                self.turn(-1)
-                self.turn(-1)
-                self.turn(2)
                 while True:
                     self.follow(baseSpeed=200, optimal=175.2)
             elif mode == "":
@@ -246,7 +241,7 @@ class Follow:
             elif mode == "follow":
                     self.follow(optimal=171.5, baseSpeed=350)
             elif mode == "battery":
-                print(self.robot.ps.measured_volts)
+                self.debug.bprint(self.robot.ps.measured_volts)
             elif mode == "calibrate":
                 with open("/home/robot/src/values.txt", mode="w") as file:
                     for i in self.calibrate():

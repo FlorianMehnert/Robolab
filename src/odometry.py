@@ -2,6 +2,7 @@
 import math
 from typing import List, Tuple
 
+import debug
 from planet import Direction
 from color import ColorPrint as Color
 
@@ -12,6 +13,7 @@ class Odometry:
         Initializes odometry module
         """
         self.dist_btw_wheels: float = dist_btw_wheels
+        self.debug = debug.Debug()
         self.gamma: float = gamma
         self.posX: float = pos_x
         self.posY: float = pos_y
@@ -83,4 +85,4 @@ class Odometry:
         self.posX = round(self.posX / 50)
         self.posY = round(self.posY / 50)
 
-        print(f"{Color.green}X = {self.posX}, Y = {self.posY}, gamma = {self.gamma}{Color.reset}")
+        self.debug.bprint(f"{Color.green}X = {self.posX}, Y = {self.posY}, gamma = {self.gamma}{Color.reset}")

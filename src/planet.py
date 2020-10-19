@@ -4,6 +4,7 @@
 import math
 from enum import IntEnum, unique
 from typing import List, Tuple, Dict, Union, Optional
+import debug
 
 Weight = int
 """
@@ -32,6 +33,7 @@ class Planet:
 
     def __init__(self):
         """ Initializes the data structure """
+        self.debug = debug.Debug(3)
         self.target = None
         self.paths = {}
         self.planet_name = ""
@@ -67,22 +69,22 @@ class Planet:
         if weight == -3 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], -3)
             self.set_weight_in_stack(-3, start)
-            # print(f"Path Not Existing: {start}: {self.paths[start[0]][start[1]]}")
+            # self.debug.bprint(f"Path Not Existing: {start}: {self.paths[start[0]][start[1]]}")
         # existing path but no more information
         elif weight == 0 and self.paths[start[0]][start[1]][2] == -2:
             self.paths[start[0]][start[1]] = (start[0], start[1], 0)
             self.set_weight_in_stack(0, start)
-            # print(f"Path Detected: {start}: {self.paths[start[0]][start[1]]}")
+            # self.debug.bprint(f"Path Detected: {start}: {self.paths[start[0]][start[1]]}")
         # blocked path
         elif weight == -1 and self.paths[start[0]][start[1]][2] in (-2, 0):
             self.paths[start[0]][start[1]] = (target[0], target[1], -1)
             self.set_weight_in_stack(-1, start)
-            # print(f"Path Blocked: {start}: {self.paths[start[0]][start[1]]}")
+            # self.debug.bprint(f"Path Blocked: {start}: {self.paths[start[0]][start[1]]}")
         elif weight > 0 and self.paths[start[0]][start[1]][2] in (-2, 0):
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
             self.paths[target[0]][target[1]] = (start[0], start[1], weight)
             self.set_weight_in_stack(1, start)
-            # print(f"Path Free: {start}: {self.paths[start[0]][start[1]]}")
+            # self.debug.bprint(f"Path Free: {start}: {self.paths[start[0]][start[1]]}")
 
     def add_unknown_path(self, start: Tuple[Tuple[int, int], Direction]):
         # to backtrack unknown paths
@@ -103,7 +105,7 @@ class Planet:
                     self.stack[cnt] = (i[0], i[1], weight)
                 else:
                     self.stack.pop(cnt)
-                # print(f"{colorCodes.red}stack after deletion:{colorCodes.reset}", self.stack)
+                # self.debug.bprint(f"{colorCodes.red}stack after deletion:{colorCodes.reset}", self.stack)
                 return
             cnt += 1
         self.stack.append((position[0], position[1], weight))
@@ -484,7 +486,7 @@ class Planet:
                 weight += self.paths[step[0]][step[1]][2]
             unknownNodeDistance[node] = weight
             unknownNodeDir[node] = pathSteps[0][1]
-        print(f"unknownNodeDistance: {unknownNodeDistance}")
+        self.debug.bprint(f"unknownNodeDistance: {unknownNodeDistance}")
         if unknownNodeDistance == {}:
             # if only unreachable nodes are left
             return None
@@ -492,7 +494,7 @@ class Planet:
 
         result_node = min(unknownNodeDistance, key=unknownNodeDistance.get)
         distance = unknownNodeDistance[result_node]
-        print(f"Target node to explored: {result_node} (Distance: {distance})")
+        self.debug.bprint(f"Target node to explored: {result_node} (Distance: {distance})")
         for node in unknownNodeDistance:
             if unknownNodeDistance[node] == distance:
                 return unknownNodeDir[node]
@@ -508,16 +510,16 @@ class Planet:
             shortestPath = self.shortest_path_tutor(self.start[0], self.target[0])
             if shortestPath is not None:
                 if shortestPath != []:
-                    # print(f"shortestPath: {shortestPath}")
+                    # self.debug.bprint(f"shortestPath: {shortestPath}")
                     return shortestPath[0][1]
                 else:
                     return shortestPath
             else:
-                # print("shortestPath is None")
+                # self.debug.bprint("shortestPath is None")
                 pass
         if nextDir is None:
-            # print("nextDir =",self.DFS(), "stack =", self.stack)
+            # self.debug.bprint("nextDir =",self.DFS(), "stack =", self.stack)
             # return self.DFS()
             nextDir = self.get_direction_djikstra_list()
-            # print("nextDir =", nextDir)
+            # self.debug.bprint("nextDir =", nextDir)
         return nextDir

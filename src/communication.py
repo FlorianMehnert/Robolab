@@ -4,6 +4,11 @@
 import json
 import platform
 import ssl
+
+import debug
+import specials
+from planet import Direction
+from typing import List, Tuple, Dict, Union
 import time
 import uuid
 from typing import Tuple
@@ -31,6 +36,15 @@ class Communication:
         :param planet: Planet
         """
         self.group = group
+        self.debug = debug.Debug()
+
+        # DO NOT CHANGE THE SETUP HERE
+        self.client = mqtt_client
+        self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
+        self.client.on_message = self.safe_on_message_handler
+        # Add your client setup here
+        self.logger = logger
+        self.group = self.client._client_id[0:3].decode('utf-8')
         self.planet = planet
         self.wait = False
         self.wait_send_finish = False
@@ -70,14 +84,14 @@ class Communication:
         self.logger.debug(json.dumps(payload, indent=2))
         msg_from = payload["from"]
         msg_type = payload["type"]
-        # print(json.dumps(payload, indent=2))
-        # print(msg_from, msg_type, "on_message")
+        # self.debug.bprint(json.dumps(payload, indent=2))
+        # self.debug.bprint(msg_from, msg_type, "on_message")
 
         if msg_from == "server":
             payload = payload["payload"]
             if msg_type == "planet":
                 self.planet.planet_name = payload["planetName"]
-                print(f"Robot is on Planet {self.planet.planet_name}")
+                self.debug.bprint(f"Robot is on Planet {self.planet.planet_name}")
                 self.client.subscribe("planet/" + self.planet.planet_name + "/" + self.group, qos=1)
                 self.logger.debug("Planet name: " + self.planet.planet_name)
                 self.planet.set_start((payload["startX"], payload["startY"]), payload["startOrientation"])
@@ -85,7 +99,7 @@ class Communication:
                 self.planet.add_path(((payload["startX"], payload["startY"]), start_path_dir),
                                      ((payload["startX"], payload["startY"]), start_path_dir), -1)
 
-                print(f"robot starts at: {self.planet.start}")
+                self.debug.bprint(f"robot starts at: {self.planet.start}")
                 self.wait = False
             elif msg_type == "path":
                 self.planet.add_path(((payload["startX"], payload["startY"]), payload["startDirection"]),
@@ -96,22 +110,22 @@ class Communication:
                 self.wait = False
             elif msg_type == "pathSelect":
                 self.planet.set_start_direction(payload["startDirection"])
-                print("PathSelect Correction:", payload["startDirection"])
+                self.debug.bprint("PathSelect Correction:", payload["startDirection"])
             elif msg_type == "target":
                 self.planet.target = (payload["targetX"], payload["targetY"])
-                print(f"Target is set {self.planet.target}")
+                self.debug.bprint(f"Target is set {self.planet.target}")
             elif msg_type == "pathUnveiled":
                 self.planet.add_path(((payload["startX"], payload["startY"]), payload["startDirection"]),
                                      ((payload["endX"], payload["endY"]), payload["endDirection"]),
                                      payload["pathWeight"])
             elif msg_type == "done":
                 self.wait = False
-                print(payload["message"])
+                self.debug.bprint(payload["message"])
         elif msg_from == "client":
             self.wait_send_finish = False
         elif msg_from == "debug":
             if msg_type == "error":
-                print(json.dumps(payload, indent=2))
+                self.debug.bprint(json.dumps(payload, indent=2))
                 self.error_msg_received = True
 
     # DO NOT EDIT THE METHOD SIGNATURE
@@ -151,7 +165,7 @@ class Communication:
     def send_ready(self):
         payload = {"from": "client", "type": "ready"}
         payload = json.dumps(payload)
-        print("Send Ready")
+        self.debug.bprint("Send Ready")
         self.wait = True
         self.send_robot_message(payload, "explorer/" + self.group)
         self.planet.new_planet = False
@@ -187,9 +201,9 @@ class Communication:
             continue
         server_target = (self.planet.paths[start[0]][start[1]][0], Direction(self.planet.paths[start[0]][start[1]][1]))
         if server_target == target:
-            print(f"{Color.green}Odometry success{Color.reset}")
+            self.debug.bprint(f"{Color.green}Odometry success{Color.reset}")
         else:
-            print(f"{Color.yellow}Odometry error! "
+            self.debug.bprint(f"{Color.yellow}Odometry error! "
                   f"Odometry target: {target}, server target: {server_target}{Color.reset}")
         self.timeout()
 
