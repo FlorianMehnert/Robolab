@@ -3,25 +3,19 @@ import argparse
 import logging
 import math
 import os
-import uuid
 from pprint import pprint
 from time import sleep, time
 from typing import Tuple, List
 
-import ev3dev.ev3 as ev3
-import paho.mqtt.client as mqtt
-
-import specials
+from color import ColorPrint as Color
 from communication import Communication
 from follow import Follow
 from odometry import Odometry
 from planet import Planet, Direction
-from color import ColorPrint as Color
-from specials import star_wars_sound
 from robot import Robot
+from specials import star_wars_sound
 
 client = None  # DO NOT EDIT
-
 
 
 def run(calibrate=False):
@@ -111,7 +105,8 @@ def run(calibrate=False):
             else:
                 if follow.path_blocked:
                     # sends blocked path when ultrasonic sensor detected an obstacle (uses old values for target)
-                    mqttc.send_path(((old_nodeX, old_nodeY), old_orientation), ((old_nodeX, old_nodeY), old_orientation),
+                    mqttc.send_path(((old_nodeX, old_nodeY), old_orientation),
+                                    ((old_nodeX, old_nodeY), old_orientation),
                                     status="blocked")
                     follow.path_blocked = False
 
@@ -237,7 +232,7 @@ def run(calibrate=False):
             robot.m2.position = 0
             movement = []
         else:
-
+            # if not node detected
             follow.follow(optimal, 200)
 
             if robot.us.value() < 150:
@@ -263,6 +258,7 @@ def run(calibrate=False):
             odo.new_m1 = robot.m1.position
             odo.new_m2 = robot.m2.position
             movement.append((odo.new_m1 - odo.old_m1, odo.new_m2 - odo.old_m2))
+
 
 # PLS EDIT
 
