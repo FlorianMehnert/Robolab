@@ -149,17 +149,21 @@ class Follow:
         degree_for90 = 280
         speed = 200
 
-        if x in (1, -1):
-            self.robot.m1.run_forever(speed_sp=speed * x)
-            self.robot.m2.run_forever(speed_sp=-speed * x)
-        else:
-            self.robot.m1.run_forever(speed_sp=speed)
-            self.robot.m2.run_forever(speed_sp=-speed)
+        self.robot.m1.run_forever(speed_sp=speed)
+        self.robot.m2.run_forever(speed_sp=-speed)
 
         self.robot.m1.position = 0
         while abs(self.robot.m1.position) < abs(x * degree_for90):
             sleep(0.1)
         self.robot.stop_motor()
+        if x in (-1, 3):
+            cs = self.robot.cs.value()
+            self.robot.m1.run_forever(speed_sp=speed)
+            self.robot.m2.run_forever(speed_sp=-speed)
+            while not self.is_black(cs):
+                cs = self.robot.cs.value()
+                sleep(.05)
+            self.robot.stop_motor()
 
     def find_attached_paths(self) -> List[Direction]:
         """
@@ -202,7 +206,7 @@ class Follow:
         d_list = dir_list[:]
         cnt = 0
         for dir in d_list:
-            d_list[cnt] = Direction((dir + gamma)%360)
+            d_list[cnt] = Direction((dir + gamma) % 360)
             cnt += 1
         return d_list
 
@@ -239,7 +243,7 @@ class Follow:
             elif mode == "gs":
                 self.gyro_straight(800, 800, 10)
             elif mode == "follow":
-                    self.follow(optimal=171.5, baseSpeed=350)
+                self.follow(optimal=171.5, baseSpeed=350)
             elif mode == "battery":
                 self.debug.bprint(self.robot.ps.measured_volts)
             elif mode == "calibrate":
