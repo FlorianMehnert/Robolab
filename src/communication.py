@@ -99,7 +99,8 @@ class Communication:
                 self.wait = False
             elif msg_type == "pathSelect":
                 self.planet.set_start_direction(payload["startDirection"])
-                self.debug.bprint("PathSelect Correction:", payload["startDirection"])
+                msg = "PathSelect Correction:" + str(payload["startDirection"])
+                self.debug.bprint(msg)
             elif msg_type == "target":
                 self.planet.target = (payload["targetX"], payload["targetY"])
                 self.debug.bprint(f"Target is set {self.planet.target}")
