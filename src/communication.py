@@ -6,7 +6,6 @@ import platform
 import ssl
 
 import debug
-from typing import List, Tuple, Dict, Union
 import time
 import uuid
 from typing import Tuple
@@ -34,15 +33,6 @@ class Communication:
         :param planet: Planet
         """
         self.group = group
-        self.debug = debug.Debug()
-
-        # DO NOT CHANGE THE SETUP HERE
-        self.client = mqtt_client
-        self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
-        self.client.on_message = self.safe_on_message_handler
-        # Add your client setup here
-        self.logger = logger
-        self.group = self.client._client_id[0:3].decode('utf-8')
         self.planet = planet
         self.wait = False
         self.wait_send_finish = False
@@ -50,6 +40,7 @@ class Communication:
         self.last_connection_time = time.time()
         self.error_msg_received = False
 
+        self.debug = debug.Debug()
         self.logger = logger
         self.logger.debug(f"Group-ID: {self.group}")
 

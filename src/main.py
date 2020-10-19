@@ -3,7 +3,6 @@ import argparse
 import logging
 import math
 import os
-import uuid
 import debug as dg
 from pprint import pprint
 from time import sleep, time
