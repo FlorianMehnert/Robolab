@@ -15,6 +15,8 @@ class Robot:
         self.sd: ev3.Sound = ev3.Sound()
         self.rc: ev3.RemoteControl = ev3.RemoteControl()
         self.ps: ev3.PowerSupply = ev3.PowerSupply()
+        self.batteryStart = self.ps.measured_volts
+        self.batteryEnd = self.ps.measured_volts
         print(f"Current battery is {self.ps.measured_volts}V")
 
     def stop_motor(self) -> None:
