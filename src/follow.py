@@ -158,11 +158,23 @@ class Follow:
         self.robot.stop_motor()
         if x in (-1, 3):
             cs = self.robot.cs.bin_data("hhh")
-            self.robot.m1.run_forever(speed_sp=speed)
-            self.robot.m2.run_forever(speed_sp=-speed)
-            while not self.is_black(cs):
-                cs = self.robot.cs.bin_data("hhh")
-                sleep(.05)
+            if not self.is_black(cs):
+                self.robot.m1.run_forever(speed_sp=speed)
+                self.robot.m2.run_forever(speed_sp=-speed)
+                cnt = 0
+                while not self.is_black(cs) and cnt < 20:
+                    cnt += 1
+                    cs = self.robot.cs.bin_data("hhh")
+                    sleep(.02)
+
+                if not self.is_black(self.robot.cs.bin_data("hhh")):
+                    # robot turned right for 0.5 seconds and did not found a black line
+                    # turn back until a line is found
+                    self.robot.m1.run_forever(speed_sp=-speed)
+                    self.robot.m2.run_forever(speed_sp=speed)
+                    while not self.is_black(cs):
+                        cs = self.robot.cs.bin_data("hhh")
+                        sleep(.02)
             self.robot.stop_motor()
 
     def find_attached_paths(self) -> List[Direction]:
