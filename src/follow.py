@@ -157,11 +157,11 @@ class Follow:
             sleep(0.1)
         self.robot.stop_motor()
         if x in (-1, 3):
-            cs = self.robot.cs.value()
+            cs = self.robot.cs.bin_data("hhh")
             self.robot.m1.run_forever(speed_sp=speed)
             self.robot.m2.run_forever(speed_sp=-speed)
             while not self.is_black(cs):
-                cs = self.robot.cs.value()
+                cs = self.robot.cs.bin_data("hhh")
                 sleep(.05)
             self.robot.stop_motor()
 
@@ -233,9 +233,9 @@ class Follow:
                 self.robot.m1.run_to_rel_pos(speed_sp=100, position_sp=360)
                 self.robot.m2.run_to_rel_pos(speed_sp=100, position_sp=360)
             elif mode == "turn":
-                self.turn(1)
-                while True:
-                    self.follow(baseSpeed=200, optimal=175.2)
+                self.turn(3)
+                # while True:
+                #   self.follow(baseSpeed=200, optimal=175.2)
             elif mode == "":
                 break
             elif mode == "wasd":
