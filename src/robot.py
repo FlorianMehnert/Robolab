@@ -3,6 +3,7 @@ from time import sleep
 
 import ev3dev.ev3 as ev3
 
+
 class Robot:
     def __init__(self):
         self.m1: ev3.LargeMotor = ev3.LargeMotor('outB')
@@ -119,4 +120,3 @@ class Robot:
         while True:
             self.rc.process()
             sleep(0.01)
-

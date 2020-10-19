@@ -1,5 +1,5 @@
 from enum import Enum
-import ev3dev.ev3 as ev3
+
 
 class ColorPrint(str, Enum):
     """
@@ -22,4 +22,3 @@ class ColorPrint(str, Enum):
     bmagenta = "\u001b[45m"
     bcyan = "\u001b[46m"
     bwhite = "\u001b[47m"
-

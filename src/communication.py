@@ -6,8 +6,6 @@ import platform
 import ssl
 
 import debug
-import specials
-from planet import Direction
 from typing import List, Tuple, Dict, Union
 import time
 import uuid
