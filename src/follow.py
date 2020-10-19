@@ -1,5 +1,7 @@
 from time import sleep
 from typing import Tuple, List
+
+from color import ColorPrint
 from planet import Direction
 from robot import Robot
 from specials import star_wars_sound
@@ -156,7 +158,9 @@ class Follow:
         while abs(self.robot.m1.position) < abs(x * degree_for90):
             sleep(0.1)
         self.robot.stop_motor()
+
         if x in (-1, 3):
+            # only when turning to the
             cs = self.robot.cs.bin_data("hhh")
             if not self.is_black(cs):
                 self.robot.m1.run_forever(speed_sp=speed)
@@ -224,12 +228,14 @@ class Follow:
 
     def gyro_straight(self, s1, s2, kp):
         self.robot.gy.mode = 'GYRO-CAL'
+        self.robot.gy.mode = 'GYRO-CAL'
         sleep(2)
         self.robot.gy.mode = 'GYRO-ANG'
         self.debug.bprint(self.robot.gy.value())
+        sleep(0.5)
         while True:
             error = self.robot.gy.value()
-            self.debug.bprint(error)
+            self.debug.cprint(error, color=ColorPrint.red)
             output = kp * error
             self.robot.m1.run_forever(speed_sp=s1 + output)
             self.robot.m2.run_forever(speed_sp=s2 - output)
