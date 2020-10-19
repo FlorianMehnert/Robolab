@@ -180,8 +180,10 @@ def run(calibrate=False):
 
             # Exploration completed
             if dir_abs is None:
+                robot.batteryEnd = robot.ps.measured_volts
                 mqttc.send_exploration_completed()
                 debug.bprint("Exploration completed")
+                debug.bprint(f"our robot soaked up {robot.batteryStart-robot.batteryEnd} volts")
                 pprint(planet.paths, indent=2)
                 # sd.beep()
                 driving_time = time() - start_time
