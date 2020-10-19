@@ -201,6 +201,17 @@ def run(calibrate=False):
             # might cause planet update which leads to us needing to update our internal orientation
             mqttc.send_path_select(((old_nodeX, old_nodeY), dir_abs))
 
+            if mqttc.error_msg_received:
+                mqttc.send_exploration_completed()
+                print("Error message received")
+                pprint(planet.paths, indent=2)
+                for i in range(3):
+                    robot.sd.beep()
+                    sleep(.5)
+                driving_time = time() - start_time
+                print(f"Robot has driven {int(driving_time // 60)}:{driving_time % 60}.")
+                break
+
             print(f"dir_abs = {dir_abs}, planetDirection = {planet.start[1]}, dir_rel = {dir_rel}")
             dir_abs = planet.start[1]
             dir_rel = (dir_abs - old_orientation) % 360

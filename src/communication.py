@@ -36,6 +36,7 @@ class Communication:
         self.wait_send_finish = False
         self.timeout_complete = True
         self.last_connection_time = time.time()
+        self.error_msg_received = False
 
         self.logger = logger
         self.logger.debug(f"Group-ID: {self.group}")
@@ -111,6 +112,7 @@ class Communication:
         elif msg_from == "debug":
             if msg_type == "error":
                 print(json.dumps(payload, indent=2))
+                self.error_msg_received = True
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
