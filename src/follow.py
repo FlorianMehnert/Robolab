@@ -264,6 +264,9 @@ class Follow:
                 self.follow(optimal=171.5, baseSpeed=350)
             elif mode == "battery":
                 self.debug.bprint(self.robot.ps.measured_volts)
+            elif mode == "sbat":
+                mv = str(self.robot.ps.measured_volts)
+                self.robot.sd.speak(f"battery level is {mv[0]}{mv[1]}{mv[2]}")
             elif mode == "calibrate":
                 with open("/home/robot/src/values.txt", mode="w") as file:
                     for i in self.calibrate():
