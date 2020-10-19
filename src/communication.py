@@ -117,6 +117,8 @@ class Communication:
             if msg_type == "error":
                 self.debug.bprint(json.dumps(payload, indent=2))
                 self.error_msg_received = True
+                self.wait = False
+                self.wait_send_finish = False
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
