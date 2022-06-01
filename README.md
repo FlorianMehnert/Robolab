@@ -1,13 +1,16 @@
-# RoboLab Spring Template
+# Robolab
 
-Template for the RoboLab course in spring which is conducted by the Systems Engineering Group at the Department of Computer Science, TU Dresden.
+The idea of Robolab is to program a LEGO MINDSTORMS EV3 robot that is able to follow high contrast lines on a plain map. The main job is to explore the whole map. To reduce errors a server is able to send correction mesages to the robot which the robot should be able to process. Furthermore the robot should send its position to the server at each intersection of lines.
 
-* Acts as a base repository that groups clone and then set the upstream to their assigned repo afterwards.
-* Provides scripts to speed up and automate the process of deploying as well as executing Python code on LEGO MINDSTORMS EV3 robots running the customized, Debian based operating system.
-* Includes the programming interface which is used to check parts of the students solutions in the final exam.
+## important files
 
+communication.py: Contains the communcation between server and robot. The communication consists of json messages.
 
-## Help
+follow.py: Contains the PID-Line Follower to enable safe driving of the robot.
 
-Please consult the [RoboLab Docs](https://robolab.inf.tu-dresden.de/inf).
-We provide extensive sections about this template, the deploy script and the interfaces.
+main.py: Coordinates all procedures.
+
+odometrie.py: calculates momentary position using wheel rotationary sensors in the wheels of the robot.
+
+planet.py: Saves data about the current map. Adds new paths between knots. Contains djikstra algorithm to calculate the shortest path to a given location
+
